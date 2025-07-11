@@ -6,6 +6,8 @@ import {
   deleteEmployee,
   createEmployee,
 } from "../api/ApiEmployee";
+import { fetchCompanies } from "../api/apiCompany";
+import type { CompanyDTO } from "../types";
 
 const Employees: React.FC = () => {
   const [employees, setEmployees] = useState<EmployeeDTO[]>([]);
@@ -97,6 +99,22 @@ const Employees: React.FC = () => {
     });
   };
 
+  const [companies, setCompanies] = useState<CompanyDTO[]>([]);
+
+  useEffect(() => {
+    loadEmployees();
+    loadCompanies();
+  }, []);
+
+  const loadCompanies = async () => {
+    try {
+      const data = await fetchCompanies();
+      setCompanies(data);
+    } catch (error) {
+      console.error("Error fetching companies:", error);
+    }
+  };
+
   return (
     <div>
       <h2 className="mb-4">Employees</h2>
@@ -113,8 +131,8 @@ const Employees: React.FC = () => {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>Company ID</th>
-                <th>Badge ID</th>
+                <th>Company</th>
+                <th>Badge</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -129,7 +147,11 @@ const Employees: React.FC = () => {
                   </td>
                   <td>{emp.email}</td>
                   <td>{emp.phone}</td>
-                  <td>{emp.companyId}</td>
+                  <td>
+                    {companies.find((c) => c.id === emp.companyId)?.name ||
+                      emp.companyId}
+                  </td>
+
                   <td>{emp.badgeId}</td>
                   <td>
                     <span className={`badge ${getStatusClass(emp.status)}`}>
@@ -154,6 +176,13 @@ const Employees: React.FC = () => {
                       </button>
                       <button
                         className="btn btn-sm btn-danger"
+                        onClick={() => handleStatusChange(emp, "BLOCKED")}
+                        disabled={emp.status === "BLOCKED"}
+                      >
+                        Block
+                      </button>
+                      <button
+                        className="btn btn-sm btn-danger"
                         onClick={() => handleDelete(emp.id)}
                       >
                         Delete
@@ -164,6 +193,7 @@ const Employees: React.FC = () => {
               ))}
             </tbody>
           </table>
+          <br />
           <h3 className="mt-5 mb-3">Add New Employee</h3>
           <form onSubmit={handleCreateEmployee} className="row g-3">
             <div className="col-md-6">
@@ -225,10 +255,8 @@ const Employees: React.FC = () => {
               />
             </div>
             <div className="col-md-3">
-              <input
-                type="number"
+              <select
                 className="form-control"
-                placeholder="Company ID"
                 value={newEmployee.companyId || ""}
                 onChange={(e) =>
                   setNewEmployee({
@@ -236,8 +264,17 @@ const Employees: React.FC = () => {
                     companyId: Number(e.target.value),
                   })
                 }
-              />
+                required
+              >
+                <option value="">Select Company</option>
+                {companies.map((company) => (
+                  <option key={company.id} value={company.id}>
+                    {company.name}
+                  </option>
+                ))}
+              </select>
             </div>
+
             <div className="col-md-3">
               <input
                 type="number"
@@ -270,7 +307,7 @@ const getStatusClass = (status: string) => {
       return "bg-success";
     case "INACTIVE":
       return "bg-secondary";
-    case "BANNED":
+    case "BLOCKED":
       return "bg-danger";
     default:
       return "bg-warning";

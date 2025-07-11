@@ -10,10 +10,9 @@ export interface Request {
     reqType: ReqType;
 }
 
-export type Status = 'ACTIVE' | 'INACTIVE' | 'BANNED'; // adapte selon ton enum
+export type Status = 'ACTIVE' | 'INACTIVE' | 'BLOCKED'; 
 export type Role = 'EMPLOYEE' | 'ADMIN'; // si besoin plus tard
 
-// ✅ User de base
 export interface UserDTO {
     id: number;
     email: string;
@@ -22,7 +21,6 @@ export interface UserDTO {
     userType: string;
 }
 
-// ✅ Employee = User + infos spécifiques
 export interface EmployeeDTO extends UserDTO {
     matricule: string;
     firstName: string;
@@ -31,3 +29,33 @@ export interface EmployeeDTO extends UserDTO {
     companyId: number;
     badgeId: number;
 }
+
+export interface CompanyDTO {
+    id?: number;
+    name: string;
+    address: string;
+    phone: string;
+    description: string;
+}
+
+export interface AirportDTO {
+  id?: number;
+  iata: string;
+  name: string;
+  city: string;
+  country: string;
+}
+
+export interface BadgeDTO {
+    id?: number;
+  code: string;
+  issuedDate: string;   // Dates as ISO strings
+  expiryDate: string;
+  companyId: number;
+  employeeId: number;
+  accessListIds: number[];
+}
+
+
+
+

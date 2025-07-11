@@ -71,6 +71,17 @@ const AdminSidebar: React.FC = () => {
                         Companies
                     </NavLink>
                 </li>
+                <li>
+                    <NavLink
+                        to="/admin/badges"
+                        className={({ isActive }) =>
+                            `nav-link d-flex align-items-center ${isActive ? 'active bg-primary text-white' : 'text-white'}`
+                        }
+                    >
+                        <i className="bi bi-building me-2"></i>
+                        Badges 
+                    </NavLink>
+                </li>
             </ul>
         </div>
     );
