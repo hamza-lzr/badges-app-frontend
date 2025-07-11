@@ -1,20 +1,23 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './components/AdminSideBar';
-import Home from './pages/Home';
-import Dashboard from './pages/Dashboard';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+} from "react-router-dom";
+import AdminLayout from "./components/AdminLayout";
+import Dashboard from "./pages/Dashboard";
+import Requests from "./pages/Requests";
+import Employees from "./pages/Employees";
 
 const App = () => {
   return (
     <Router>
-      <div className="app-container">
-        <Navbar />
-        <div className="content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-          </Routes>
-        </div>
-      </div>
+      <Routes>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="requests" element={<Requests />} />
+          <Route path="employees" element={<Employees />} />
+        </Route>
+      </Routes>
     </Router>
   );
 };
