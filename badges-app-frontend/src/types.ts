@@ -51,7 +51,7 @@ export interface BadgeDTO {
   issuedDate: string;   // Dates as ISO strings
   expiryDate: string;
   companyId: number;
-  employeeId: number;
+  userId: number;
   accessListIds: number[];
 }
 
