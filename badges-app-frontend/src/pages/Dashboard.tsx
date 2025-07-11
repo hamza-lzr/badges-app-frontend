@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/index.css'; // Ensure Tailwind CSS is imported
+
 const stats = [
     { title: 'Employees (All Companies)', value: 1240 },
     { title: 'Badges Registered', value: 1175 },
@@ -17,55 +17,70 @@ const recentRequests = [
 
 const Dashboard: React.FC = () => {
     return (
-        <div className="min-h-screen bg-gray-50 p-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-8">Admin Dashboard</h1>
+        <div className="container py-4">
+            <h1 className="mb-4">Admin Dashboard</h1>
 
-            {/* Statistics Cards */}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-10">
+            {/* Statistics */}
+            <div className="row g-4 mb-5">
                 {stats.map((stat, idx) => (
-                    <div key={idx} className="rounded-2xl bg-white p-6 shadow hover:shadow-md transition-all">
-                        <h2 className="text-gray-500 text-sm">{stat.title}</h2>
-                        <p className="text-3xl font-semibold text-blue-600 mt-2">{stat.value}</p>
+                    <div key={idx} className="col-sm-6 col-lg-4">
+                        <div className="card shadow-sm">
+                            <div className="card-body">
+                                <h6 className="text-muted">{stat.title}</h6>
+                                <h3 className="fw-bold text-primary">{stat.value}</h3>
+                            </div>
+                        </div>
                     </div>
                 ))}
             </div>
 
             {/* Recent Requests */}
-            <div className="bg-white rounded-2xl shadow p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Recent Requests</h2>
-                <table className="min-w-full text-sm">
-                    <thead>
-                        <tr className="text-gray-600 text-left">
-                            <th className="py-2">Employee</th>
-                            <th className="py-2">Request Type</th>
-                            <th className="py-2">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {recentRequests.map((req) => (
-                            <tr key={req.id} className="border-t">
-                                <td className="py-2">{req.employee}</td>
-                                <td className="py-2">{req.type}</td>
-                                <td className="py-2">
-                                    <span
-                                        className={`px-2 py-1 rounded text-xs font-medium ${
-                                            req.status === 'Pending'
-                                                ? 'bg-yellow-100 text-yellow-600'
-                                                : req.status === 'Approved'
-                                                ? 'bg-green-100 text-green-600'
-                                                : 'bg-red-100 text-red-600'
-                                        }`}
-                                    >
-                                        {req.status}
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+            <div className="card shadow-sm">
+                <div className="card-body">
+                    <h5 className="card-title mb-4">Recent Requests</h5>
+                    <div className="table-responsive">
+                        <table className="table table-bordered table-hover">
+                            <thead className="table-light">
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Request Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {recentRequests.map((req) => (
+                                    <tr key={req.id}>
+                                        <td>{req.employee}</td>
+                                        <td>{req.type}</td>
+                                        <td>
+                                            <span className={`badge ${getStatusClass(req.status)}`}>
+                                                {req.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     );
 };
 
+// Bootstrap badge color logic
+const getStatusClass = (status: string) => {
+    switch (status) {
+        case 'Pending':
+            return 'bg-warning text-dark';
+        case 'Approved':
+            return 'bg-success';
+        case 'Rejected':
+            return 'bg-danger';
+        default:
+            return 'bg-secondary';
+    }
+};
+
 export default Dashboard;
+
