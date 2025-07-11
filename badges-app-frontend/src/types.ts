@@ -19,16 +19,15 @@ export interface UserDTO {
     role: string;
     status: Status;
     userType: string;
-}
-
-export interface EmployeeDTO extends UserDTO {
     matricule: string;
     firstName: string;
     lastName: string;
     phone: string;
     companyId: number;
-    badgeId: number;
+    badgesIds: number[];
 }
+
+
 
 export interface CompanyDTO {
     id?: number;
