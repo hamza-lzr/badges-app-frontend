@@ -10,6 +10,7 @@ import Employees from "./pages/Employees";
 import Airports from "./pages/Airports";
 import Companies from "./pages/Companies";
 import Badges from "./pages/Badges";
+import LocationManagement from "./pages/LocationManagement";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
           <Route path="airports" element={<Airports />} />
           <Route path="companies" element={<Companies />} />
           <Route path="badges" element={<Badges />} />
+          <Route path="locations" element={<LocationManagement />} />
         </Route>
       </Routes>
     </Router>

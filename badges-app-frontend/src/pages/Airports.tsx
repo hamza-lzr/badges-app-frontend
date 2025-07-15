@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
-import type { AirportDTO } from "../types";
-import {
-  fetchAirports,
-  createAirport,
-  deleteAirport,
-} from "../api/apiAirport";
+import type { AirportDTO, CityDTO } from "../types";
+import { fetchAirports, createAirport, deleteAirport } from "../api/apiAirport";
+import { fetchCities } from "../api/apiCity";
 
 const Airports: React.FC = () => {
   const [airports, setAirports] = useState<AirportDTO[]>([]);
@@ -12,9 +9,32 @@ const Airports: React.FC = () => {
   const [newAirport, setNewAirport] = useState<AirportDTO>({
     iata: "",
     name: "",
-    city: "",
-    country: "",
+    cityId: 0,
   });
+
+  const [cities, setCities] = useState<CityDTO[]>([]);
+
+  useEffect(() => {
+    const loadAll = async () => {
+      await loadCities();
+      await loadAirports();
+    };
+    loadAll();
+  }, []);
+
+  const loadCities = async () => {
+    try {
+      const data = await fetchCities();
+      setCities(data);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+    }
+  };
+
+  const getCityName = (cityId: number) => {
+    const city = cities.find((c) => c.id === cityId);
+    return city ? city.name : "Unknown";
+  };
 
   useEffect(() => {
     loadAirports();
@@ -36,7 +56,7 @@ const Airports: React.FC = () => {
     e.preventDefault();
     try {
       await createAirport(newAirport);
-      setNewAirport({ iata: "", name: "", city: "", country: "" });
+      setNewAirport({ iata: "", name: "", cityId: 0 });
       loadAirports();
     } catch (error) {
       console.error("Error creating airport:", error);
@@ -63,22 +83,18 @@ const Airports: React.FC = () => {
         <table className="table table-bordered">
           <thead className="table-light">
             <tr>
-              <th>ID</th>
               <th>IATA</th>
               <th>Name</th>
               <th>City</th>
-              <th>Country</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {airports.map((airport) => (
               <tr key={airport.id}>
-                <td>{airport.id}</td>
                 <td>{airport.iata}</td>
                 <td>{airport.name}</td>
-                <td>{airport.city}</td>
-                <td>{airport.country}</td>
+                <td>{getCityName(airport.cityId)}</td>
                 <td>
                   <button
                     className="btn btn-sm btn-danger"
@@ -101,7 +117,9 @@ const Airports: React.FC = () => {
             className="form-control"
             placeholder="IATA"
             value={newAirport.iata}
-            onChange={(e) => setNewAirport({ ...newAirport, iata: e.target.value })}
+            onChange={(e) =>
+              setNewAirport({ ...newAirport, iata: e.target.value })
+            }
             required
           />
         </div>
@@ -111,30 +129,30 @@ const Airports: React.FC = () => {
             className="form-control"
             placeholder="Name"
             value={newAirport.name}
-            onChange={(e) => setNewAirport({ ...newAirport, name: e.target.value })}
+            onChange={(e) =>
+              setNewAirport({ ...newAirport, name: e.target.value })
+            }
             required
           />
         </div>
         <div className="col-md-3">
-          <input
-            type="text"
+          <select
             className="form-control"
-            placeholder="City"
-            value={newAirport.city}
-            onChange={(e) => setNewAirport({ ...newAirport, city: e.target.value })}
+            value={newAirport.cityId || ""}
+            onChange={(e) =>
+              setNewAirport({ ...newAirport, cityId: Number(e.target.value) })
+            }
             required
-          />
+          >
+            <option value="">Select City</option>
+            {cities.map((city) => (
+              <option key={city.id} value={city.id}>
+                {city.name}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="col-md-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Country"
-            value={newAirport.country}
-            onChange={(e) => setNewAirport({ ...newAirport, country: e.target.value })}
-            required
-          />
-        </div>
+
         <div className="col-12">
           <button type="submit" className="btn btn-primary">
             Add Airport

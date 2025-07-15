@@ -41,8 +41,7 @@ export interface AirportDTO {
   id?: number;
   iata: string;
   name: string;
-  city: string;
-  country: string;
+  cityId: number;
 }
 
 export interface BadgeDTO {
@@ -55,6 +54,30 @@ export interface BadgeDTO {
   accessListIds: number[];
 }
 
+export interface CityDTO {
+  id?: number;
+  name: string;
+  countryId: string;
+}
 
+export interface CountryDTO {
+  id?: number;
+  name: string;
+}
 
+export interface AccessDTO {
+  id?: number;
+  startDate: string; // Dates as ISO strings
+  endDate: string;
+  description: string;
+  airportId: number;
+  badgeId: number;
+} 
 
+export interface NotificationDTO {
+  id?: number;
+  message: string;
+  userId: number;
+  read: boolean;
+  createdAt: string; 
+}
