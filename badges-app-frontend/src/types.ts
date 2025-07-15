@@ -69,7 +69,6 @@ export interface AccessDTO {
   id?: number;
   startDate: string; // Dates as ISO strings
   endDate: string;
-  description: string;
   airportId: number;
   badgeId: number;
 } 

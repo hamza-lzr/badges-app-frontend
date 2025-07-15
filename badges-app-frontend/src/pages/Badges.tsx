@@ -1,53 +1,46 @@
 import React, { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Typography,
-  Box,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+import { Modal, Button, Spinner, Form, Row, Col } from "react-bootstrap";
 import { fetchEmployees } from "../api/ApiEmployee";
-import { createBadge, fetchBadgeById } from "../api/apiBadge";
+import { createBadge, fetchBadgeById, fetchBadges } from "../api/apiBadge";
 import { fetchCompanies } from "../api/apiCompany";
-import { fetchBadges } from "../api/apiBadge";
-
 import type { UserDTO, BadgeDTO } from "../types";
 
 const Badges: React.FC = () => {
   const [employees, setEmployees] = useState<UserDTO[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [openDialog, setOpenDialog] = useState(false);
-  const [badgeData, setBadgeData] = useState<Partial<BadgeDTO>>({});
-
-  const [badgeDialogOpen, setBadgeDialogOpen] = useState(false);
-  const [badgeDetails, setBadgeDetails] = useState<BadgeDTO | null>(null);
-
-  const [selectedBadgeId, setSelectedBadgeId] = useState<number | null>(null);
-
   const [companies, setCompanies] = useState<Record<number, string>>({});
   const [badges, setBadges] = useState<Record<number, string>>({});
+  const [loading, setLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Modal states
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+
+  // Selected badge / employee
+  const [selectedEmployee, setSelectedEmployee] = useState<UserDTO | null>(null);
+  const [selectedBadgeId, setSelectedBadgeId] = useState<number | null>(null);
+
+  // Badge data for creation
+  const [badgeData, setBadgeData] = useState<Partial<BadgeDTO>>({});
+  const [badgeDetails, setBadgeDetails] = useState<BadgeDTO | null>(null);
+
+  const [submitting, setSubmitting] = useState(false);
+
   useEffect(() => {
-    loadEmployees();
-    loadCompanies();
-    loadBadges();
+    const loadAll = async () => {
+      await loadCompanies();
+      await loadBadges();
+      await loadEmployees();
+    };
+    loadAll();
   }, []);
 
   const loadCompanies = async () => {
     try {
       const data = await fetchCompanies();
       const companyMap = Object.fromEntries(
-        data.map((comp) => [comp.id, comp.name])
+        data.map((c) => [c.id!, c.name])
       );
       setCompanies(companyMap);
     } catch (err) {
@@ -59,7 +52,7 @@ const Badges: React.FC = () => {
     try {
       const data = await fetchBadges();
       const badgeMap = Object.fromEntries(
-        data.map((badge) => [badge.id, badge.code])
+        data.map((b) => [b.id!, b.code])
       );
       setBadges(badgeMap);
     } catch (err) {
@@ -72,45 +65,44 @@ const Badges: React.FC = () => {
       setLoading(true);
       const data = await fetchEmployees();
       setEmployees(data);
-    } catch (error) {
-      console.error("Error fetching employees:", error);
+    } catch (err) {
+      console.error("Error fetching employees:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const openGenerateDialog = (user: UserDTO) => {
+  /** Open Generate Badge Modal */
+  const openGenerateBadgeModal = (employee: UserDTO) => {
     const now = new Date();
     const expiry = new Date();
     expiry.setFullYear(now.getFullYear() + 1);
 
+    setSelectedEmployee(employee);
     setBadgeData({
       issuedDate: now.toISOString().split("T")[0],
       expiryDate: expiry.toISOString().split("T")[0],
-      userId: user.id,
-      companyId: user.companyId,
+      userId: employee.id,
+      companyId: employee.companyId,
     });
-
-    setOpenDialog(true);
+    setShowGenerateModal(true);
   };
 
-  const closeDialog = () => {
-    setOpenDialog(false);
+  const closeGenerateModal = () => {
+    setShowGenerateModal(false);
+    setSelectedEmployee(null);
     setBadgeData({});
   };
 
-  const handleBadgeSubmit = async () => {
-    if (
-      !badgeData.code ||
-      !badgeData.issuedDate ||
-      !badgeData.expiryDate ||
-      !badgeData.companyId ||
-      !badgeData.userId
-    ) {
-      console.error("Badge data incomplete");
+  /** Handle Badge Creation */
+  const handleBadgeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!badgeData.code || !badgeData.issuedDate || !badgeData.expiryDate || !badgeData.userId || !badgeData.companyId) {
+      console.error("Incomplete badge data");
       return;
     }
 
+    setSubmitting(true);
     try {
       await createBadge({
         code: badgeData.code,
@@ -120,218 +112,216 @@ const Badges: React.FC = () => {
         userId: badgeData.userId,
         accessListIds: [],
       });
+
       await loadEmployees();
-      closeDialog();
-    } catch (error) {
-      console.error("Error creating badge:", error);
-    }
-  };
-
-  const openCheckBadgeDialog = async () => {
-    if (!selectedBadgeId) return;
-    try {
-      const badge = await fetchBadgeById(selectedBadgeId);
-      setBadgeDetails(badge);
-      setBadgeDialogOpen(true);
+      setShowGenerateModal(false);
     } catch (err) {
-      console.error("Error fetching badge:", err);
+      console.error("Error creating badge:", err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const closeCheckBadgeDialog = () => {
-    setBadgeDialogOpen(false);
+  /** Badge Details Modal */
+  const openBadgeDetails = async (badgeId: number) => {
+    try {
+      const badge = await fetchBadgeById(badgeId);
+      setBadgeDetails(badge);
+      setShowDetailsModal(true);
+    } catch (err) {
+      console.error("Error fetching badge details:", err);
+    }
+  };
+
+  const closeBadgeDetailsModal = () => {
+    setShowDetailsModal(false);
     setBadgeDetails(null);
     setSelectedBadgeId(null);
   };
 
+  /** Filter Employees by Search */
+  const filteredEmployees = employees.filter((emp) => {
+    const companyName = companies[emp.companyId]?.toLowerCase() || "";
+    const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+    const matricule = emp.matricule?.toLowerCase() || "";
+    const badgeCodes = emp.badgesIds.map((id) => badges[id]?.toLowerCase() || "").join(" ");
+    const query = searchQuery.toLowerCase();
+
+    return (
+      fullName.includes(query) ||
+      matricule.includes(query) ||
+      companyName.includes(query) ||
+      badgeCodes.includes(query)
+    );
+  });
+
   return (
-    <div>
-      <h2 className="mb-4">Badges Management</h2>
+    <div className="container py-4">
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="fw-semibold">Badges Management</h2>
+        <Form.Control
+          type="text"
+          placeholder="Search employees, companies, badges..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ maxWidth: "300px" }}
+        />
+      </div>
 
+      {/* Table Section */}
       {loading ? (
-        <div className="text-center my-5">Loading employees...</div>
+        <div className="text-center my-5">
+          <Spinner animation="border" />
+          <p className="mt-2 text-muted">Loading employees...</p>
+        </div>
+      ) : filteredEmployees.length === 0 ? (
+        <div className="alert alert-light text-center border">
+          No employees found matching your search.
+        </div>
       ) : (
-        <div className="table-responsive">
-          <Box mb={3}>
-            <TextField
-              label="Search badges, employees, companies..."
-              variant="outlined"
-              size="small"
-              fullWidth
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </Box>
-
-          <table className="table table-bordered table-hover">
+        <div className="table-responsive shadow-sm rounded">
+          <table className="table table-hover align-middle">
             <thead className="table-light">
               <tr>
-                <th>ID</th>
+                <th>#</th>
                 <th>Matricule</th>
-                <th>Name</th>
+                <th>Employee</th>
                 <th>Email</th>
                 <th>Company</th>
                 <th>Badges</th>
-                <th>Actions</th>
+                <th style={{ width: "22%" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {employees
-                .filter((emp) => {
-                  const companyName =
-                    companies[emp.companyId]?.toLowerCase() || "";
-                  const fullName =
-                    `${emp.firstName} ${emp.lastName}`.toLowerCase();
-                  const matricule = emp.matricule?.toLowerCase() || "";
-                  const badgeCodes = emp.badgesIds
-                    .map((id) => badges[id]?.toLowerCase() || "")
-                    .join(" ");
+              {filteredEmployees.map((emp, index) => (
+                <tr key={emp.id}>
+                  <td><span className="badge bg-secondary">{index + 1}</span></td>
+                  <td>{emp.matricule}</td>
+                  <td><strong>{emp.firstName} {emp.lastName}</strong></td>
+                  <td>{emp.email}</td>
+                  <td>{companies[emp.companyId] || "Unknown"}</td>
+                  <td>
+                    {emp.badgesIds.length} badge{emp.badgesIds.length !== 1 ? "s" : ""}
+                  </td>
+                  <td className="d-flex gap-2">
+                    {/* Show available badges */}
+                    {emp.badgesIds.length > 0 && (
+                      <Form.Select
+                        size="sm"
+                        value={selectedBadgeId || ""}
+                        onChange={(e) => setSelectedBadgeId(Number(e.target.value))}
+                        style={{ width: "150px" }}
+                      >
+                        <option value="">Select Badge</option>
+                        {emp.badgesIds.map((id) => (
+                          <option key={id} value={id}>
+                            {badges[id] || `Badge ${id}`}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    )}
 
-                  const query = searchQuery.toLowerCase();
+                    <Button
+                      variant="outline-secondary"
+                      size="sm"
+                      onClick={() => openBadgeDetails(selectedBadgeId!)}
+                      disabled={!selectedBadgeId}
+                    >
+                      View
+                    </Button>
 
-                  return (
-                    companyName.includes(query) ||
-                    fullName.includes(query) ||
-                    matricule.includes(query) ||
-                    badgeCodes.includes(query)
-                  );
-                })
-                .map((emp) => (
-                  <tr key={emp.id}>
-                    <td>{emp.id}</td>
-                    <td>{emp.matricule}</td>
-                    <td>
-                      {emp.firstName} {emp.lastName}
-                    </td>
-                    <td>{emp.email}</td>
-                    <td>{companies[emp.companyId] || emp.companyId}</td>
-
-                    <td>{`${emp.badgesIds.length} badge${
-                      emp.badgesIds.length !== 1 ? "s" : ""
-                    }`}</td>
-                    <td>
-  <FormControl size="small">
-    <InputLabel>Select Badge</InputLabel>
-    <Select
-      value={selectedBadgeId || ""}
-      onChange={(e) => setSelectedBadgeId(Number(e.target.value))}
-      displayEmpty
-      sx={{ minWidth: 120, marginRight: 1 }}
-    >
-      {emp.badgesIds.map((id) => (
-        <MenuItem key={id} value={id}>
-          {badges[id] ? badges[id] : `Badge ${id}`}
-        </MenuItem>
-      ))}
-    </Select>
-
-    <Box mt={1} display="flex" gap={1}>
-      <Button
-        size="small"
-        variant="outlined"
-        onClick={openCheckBadgeDialog}
-        disabled={!selectedBadgeId}
-      >
-        Check Badge
-      </Button>
-
-      <Button
-        size="small"
-        variant="contained"
-        onClick={() => openGenerateDialog(emp)}
-      >
-        Add Badge
-      </Button>
-    </Box>
-  </FormControl>
-</td>
-
-                  </tr>
-                ))}
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => openGenerateBadgeModal(emp)}
+                    >
+                      Add Badge
+                    </Button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       )}
 
-      {/* Generate Badge Dialog */}
-      <Dialog open={openDialog} onClose={closeDialog}>
-        <DialogTitle>Generate Badge</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-            <TextField
-              label="Badge Code"
-              value={badgeData.code || ""}
-              onChange={(e) =>
-                setBadgeData({ ...badgeData, code: e.target.value })
-              }
-              required
-            />
-            <TextField
-              label="Issued Date"
-              value={badgeData.issuedDate ?? ""}
-              InputProps={{ readOnly: true }}
-            />
-            <TextField
-              label="Expiry Date"
-              value={badgeData.expiryDate ?? ""}
-              InputProps={{ readOnly: true }}
-            />
-            <TextField
-              label="User ID"
-              value={badgeData.userId ?? ""}
-              InputProps={{ readOnly: true }}
-            />
-            <TextField
-              label="Company ID"
-              value={badgeData.companyId ?? ""}
-              InputProps={{ readOnly: true }}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeDialog}>Cancel</Button>
-          <Button onClick={handleBadgeSubmit} variant="contained">
-            Generate
+      {/* Generate Badge Modal */}
+      <Modal show={showGenerateModal} onHide={closeGenerateModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Generate New Badge</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form id="generate-badge-form" onSubmit={handleBadgeSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>Badge Code</Form.Label>
+              <Form.Control
+                type="text"
+                value={badgeData.code || ""}
+                onChange={(e) => setBadgeData({ ...badgeData, code: e.target.value })}
+                required
+              />
+            </Form.Group>
+            <Row>
+              <Col>
+                <Form.Group className="mb-3">
+                  <Form.Label>Issued Date</Form.Label>
+                  <Form.Control type="text" readOnly value={badgeData.issuedDate || ""} />
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group className="mb-3">
+                  <Form.Label>Expiry Date</Form.Label>
+                  <Form.Control type="text" readOnly value={badgeData.expiryDate || ""} />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <Form.Group>
+                  <Form.Label>User</Form.Label>
+                  <Form.Control readOnly value={selectedEmployee?.id || ""} />
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group>
+                  <Form.Label>Company</Form.Label>
+                  <Form.Control readOnly value={selectedEmployee ? companies[selectedEmployee.companyId] : ""} />
+                </Form.Group>
+              </Col>
+            </Row>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeGenerateModal}>Cancel</Button>
+          <Button type="submit" form="generate-badge-form" disabled={submitting}>
+            {submitting ? "Generating..." : "Generate"}
           </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal.Footer>
+      </Modal>
 
-      {/* Badge Details Dialog */}
-      <Dialog open={badgeDialogOpen} onClose={closeCheckBadgeDialog}>
-        <DialogTitle>Badge Details</DialogTitle>
-        <DialogContent>
-          {badgeDetails && (
-            <Box
-              sx={{
-                border: "1px solid #ccc",
-                borderRadius: 4,
-                p: 2,
-                bgcolor: "#f7f7f7",
-                minWidth: 250,
-              }}
-            >
-              <Typography variant="h5" gutterBottom>
-                {badgeDetails.code}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Issued Date:</strong> {badgeDetails.issuedDate}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Expiry Date:</strong> {badgeDetails.expiryDate}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Company :</strong> {badgeDetails.companyId}
-              </Typography>
-              <Typography variant="body2">
-                <strong>User ID:</strong> {badgeDetails.userId}
-              </Typography>
-            </Box>
+      {/* Badge Details Modal */}
+      <Modal show={showDetailsModal} onHide={closeBadgeDetailsModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Badge Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {badgeDetails ? (
+            <div className="p-3 border rounded bg-light">
+              <h5 className="fw-bold">{badgeDetails.code}</h5>
+              <p className="mb-1"><strong>Issued:</strong> {badgeDetails.issuedDate}</p>
+              <p className="mb-1"><strong>Expiry:</strong> {badgeDetails.expiryDate}</p>
+              <p className="mb-1"><strong>Company:</strong> {badgeDetails.companyId}</p>
+              <p><strong>User ID:</strong> {badgeDetails.userId}</p>
+            </div>
+          ) : (
+            <p className="text-muted">No badge selected.</p>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeCheckBadgeDialog}>Close</Button>
-        </DialogActions>
-      </Dialog>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeBadgeDetailsModal}>Close</Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

@@ -11,7 +11,7 @@ const api = axios.create({
 
 // ✔️ Get all requests
 export const fetchRequests = async (): Promise<Request[]> => {
-    const response = await api.get<Request[]>('/');
+    const response = await api.get<Request[]>('');
     return response.data;
 };
 
@@ -23,7 +23,7 @@ export const fetchRequestById = async (id: number): Promise<Request> => {
 
 // ✔️ Create a new request
 export const addRequest = async (request: Request): Promise<Request> => {
-    const response = await api.post<Request>('/', request);
+    const response = await api.post<Request>('', request);
     return response.data;
 };
 

@@ -11,6 +11,8 @@ import Airports from "./pages/Airports";
 import Companies from "./pages/Companies";
 import Badges from "./pages/Badges";
 import LocationManagement from "./pages/LocationManagement";
+import CitiesPage from "./pages/CitiesPage";
+import Accesses from "./pages/Accesses";
 
 const App = () => {
   return (
@@ -24,6 +26,8 @@ const App = () => {
           <Route path="companies" element={<Companies />} />
           <Route path="badges" element={<Badges />} />
           <Route path="locations" element={<LocationManagement />} />
+          <Route path="cities/:countryId" element={<CitiesPage />} />
+          <Route path="accesses" element={<Accesses />} />
         </Route>
       </Routes>
     </Router>

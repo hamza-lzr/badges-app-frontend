@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import type { EmployeeDTO, Status } from "../types";
+import type { UserDTO, Status, CompanyDTO } from "../types";
 import {
   fetchEmployees,
   updateEmployeeStatus,
@@ -7,14 +7,39 @@ import {
   createEmployee,
 } from "../api/ApiEmployee";
 import { fetchCompanies } from "../api/apiCompany";
-import type { CompanyDTO } from "../types";
+import { Modal, Button } from "react-bootstrap";
 
 const Employees: React.FC = () => {
-  const [employees, setEmployees] = useState<EmployeeDTO[]>([]);
+  const [employees, setEmployees] = useState<UserDTO[]>([]);
+  const [companies, setCompanies] = useState<CompanyDTO[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortKey, setSortKey] = useState<keyof UserDTO>("firstName");
+  const [sortAsc, setSortAsc] = useState(true);
+
+  // Modals
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<UserDTO | null>(null);
+
+  const [newEmployee, setNewEmployee] = useState<UserDTO>({
+    id: 0,
+    email: "",
+    role: "EMPLOYEE",
+    status: "ACTIVE",
+    userType: "EMPLOYEE",
+    matricule: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    companyId: 0,
+    badgesIds: [],
+  });
 
   useEffect(() => {
     loadEmployees();
+    loadCompanies();
   }, []);
 
   const loadEmployees = async () => {
@@ -29,27 +54,26 @@ const Employees: React.FC = () => {
     }
   };
 
-  const handleStatusChange = async (
-    employee: EmployeeDTO,
-    newStatus: Status
-  ) => {
+  const loadCompanies = async () => {
     try {
-      await updateEmployeeStatus(employee.id, {
-        ...employee,
-        status: newStatus,
-      });
+      const data = await fetchCompanies();
+      setCompanies(data);
+    } catch (error) {
+      console.error("Error fetching companies:", error);
+    }
+  };
+
+  const handleStatusChange = async (employee: UserDTO, newStatus: Status) => {
+    try {
+      await updateEmployeeStatus(employee.id, { ...employee, status: newStatus });
       loadEmployees();
     } catch (error) {
-      console.error(
-        `Error updating status for employee ${employee.id}:`,
-        error
-      );
+      console.error(`Error updating status for employee ${employee.id}:`, error);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this employee?"))
-      return;
+    if (!window.confirm("Are you sure you want to delete this employee?")) return;
     try {
       await deleteEmployee(id);
       loadEmployees();
@@ -58,26 +82,13 @@ const Employees: React.FC = () => {
     }
   };
 
-  const [newEmployee, setNewEmployee] = useState<EmployeeDTO>({
-    id: 0,
-    email: "",
-    role: "EMPLOYEE",
-    status: "ACTIVE",
-    userType: "EMPLOYEE",
-    matricule: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
-    companyId: 0,
-    badgeId: 0,
-  });
-
   const handleCreateEmployee = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await createEmployee(newEmployee);
       loadEmployees();
       resetForm();
+      setShowAddModal(false);
     } catch (error) {
       console.error("Error creating employee:", error);
     }
@@ -95,71 +106,143 @@ const Employees: React.FC = () => {
       lastName: "",
       phone: "",
       companyId: 0,
-      badgeId: 0,
+      badgesIds: [],
     });
   };
 
-  const [companies, setCompanies] = useState<CompanyDTO[]>([]);
+  const getCompanyName = (id: number) =>
+    companies.find((c) => c.id === id)?.name || "Unknown";
 
-  useEffect(() => {
-    loadEmployees();
-    loadCompanies();
-  }, []);
+  const handleSort = (key: keyof UserDTO) => {
+    if (key === sortKey) {
+      setSortAsc(!sortAsc);
+    } else {
+      setSortKey(key);
+      setSortAsc(true);
+    }
+  };
 
-  const loadCompanies = async () => {
+  const sortedEmployees = [...employees].sort((a, b) => {
+    const aVal = (a[sortKey] ?? "").toString().toLowerCase();
+    const bVal = (b[sortKey] ?? "").toString().toLowerCase();
+    return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+  });
+
+  const filteredEmployees = sortedEmployees.filter((emp) => {
+    const query = searchQuery.toLowerCase();
+    const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+    const companyName = getCompanyName(emp.companyId).toLowerCase();
+    return (
+      fullName.includes(query) ||
+      emp.matricule?.toLowerCase().includes(query) ||
+      emp.email.toLowerCase().includes(query) ||
+      companyName.includes(query)
+    );
+  });
+
+  const openEditModal = (employee: UserDTO) => {
+    setEditingEmployee(employee);
+    setShowEditModal(true);
+  };
+
+  const handleEditSave = async () => {
+    if (!editingEmployee) return;
     try {
-      const data = await fetchCompanies();
-      setCompanies(data);
+      await updateEmployeeStatus(editingEmployee.id, editingEmployee);
+      loadEmployees();
+      setShowEditModal(false);
     } catch (error) {
-      console.error("Error fetching companies:", error);
+      console.error("Error updating employee:", error);
     }
   };
 
   return (
-    <div>
-      <h2 className="mb-4">Employees</h2>
+    <div className="container py-4">
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="mb-0">Employees</h2>
+        <Button variant="primary" onClick={() => setShowAddModal(true)}>
+          Add Employee
+        </Button>
+      </div>
 
+      {/* Search */}
+      <div className="mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search by name, email, or company..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      {/* Table */}
       {loading ? (
-        <div className="text-center my-5">Loading employees...</div>
+        <div className="text-center my-5">
+          <div className="spinner-border text-primary" role="status" />
+          <p className="mt-2">Loading employees...</p>
+        </div>
+      ) : filteredEmployees.length === 0 ? (
+        <div className="alert alert-info text-center">
+          No employees found. Try another search.
+        </div>
       ) : (
-        <div className="table-responsive">
-          <table className="table table-bordered table-hover">
+        <div className="table-responsive shadow-sm rounded">
+          <table className="table table-hover align-middle">
             <thead className="table-light">
               <tr>
-                <th>ID</th>
-                <th>Matricule</th>
-                <th>Name</th>
+                <th>#</th>
+                <th style={{ cursor: "pointer" }} onClick={() => handleSort("matricule")}>
+                  Matricule {sortKey === "matricule" && (sortAsc ? "▲" : "▼")}
+                </th>
+                <th style={{ cursor: "pointer" }} onClick={() => handleSort("firstName")}>
+                  Name {sortKey === "firstName" && (sortAsc ? "▲" : "▼")}
+                </th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>Company</th>
-                <th>Badge</th>
+                <th style={{ cursor: "pointer" }} onClick={() => handleSort("companyId")}>
+                  Company {sortKey === "companyId" && (sortAsc ? "▲" : "▼")}
+                </th>
+                <th>Badges</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th style={{ width: "300px" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {employees.map((emp) => (
+              {filteredEmployees.map((emp, index) => (
                 <tr key={emp.id}>
-                  <td>{emp.id}</td>
-                  <td>{emp.matricule}</td>
                   <td>
-                    {emp.firstName} {emp.lastName}
+                    <span className="badge bg-secondary">{index + 1}</span>
+                  </td>
+                  <td>{emp.matricule || "—"}</td>
+                  <td>
+                    <strong>
+                      {emp.firstName} {emp.lastName}
+                    </strong>
                   </td>
                   <td>{emp.email}</td>
-                  <td>{emp.phone}</td>
+                  <td>{emp.phone || "—"}</td>
+                  <td>{getCompanyName(emp.companyId)}</td>
                   <td>
-                    {companies.find((c) => c.id === emp.companyId)?.name ||
-                      emp.companyId}
+                    <span className="badge bg-info">
+                      {emp.badgesIds.length} Badge
+                      {emp.badgesIds.length !== 1 ? "s" : ""}
+                    </span>
                   </td>
-
-                  <td>{emp.badgeId}</td>
                   <td>
                     <span className={`badge ${getStatusClass(emp.status)}`}>
                       {emp.status}
                     </span>
                   </td>
                   <td>
-                    <div className="d-flex gap-2">
+                    <div className="d-flex flex-wrap gap-2">
+                      <button
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={() => openEditModal(emp)}
+                      >
+                        Edit
+                      </button>
                       <button
                         className="btn btn-sm btn-success"
                         onClick={() => handleStatusChange(emp, "ACTIVE")}
@@ -175,7 +258,7 @@ const Employees: React.FC = () => {
                         Deactivate
                       </button>
                       <button
-                        className="btn btn-sm btn-danger"
+                        className="btn btn-sm btn-warning text-dark"
                         onClick={() => handleStatusChange(emp, "BLOCKED")}
                         disabled={emp.status === "BLOCKED"}
                       >
@@ -193,14 +276,21 @@ const Employees: React.FC = () => {
               ))}
             </tbody>
           </table>
-          <br />
-          <h3 className="mt-5 mb-3">Add New Employee</h3>
-          <form onSubmit={handleCreateEmployee} className="row g-3">
-            <div className="col-md-6">
+        </div>
+      )}
+
+      {/* ✅ Add Employee Modal */}
+      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Add Employee</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form id="add-employee-form" onSubmit={handleCreateEmployee}>
+            <div className="mb-3">
+              <label className="form-label">First Name</label>
               <input
                 type="text"
                 className="form-control"
-                placeholder="First Name"
                 value={newEmployee.firstName}
                 onChange={(e) =>
                   setNewEmployee({ ...newEmployee, firstName: e.target.value })
@@ -208,11 +298,11 @@ const Employees: React.FC = () => {
                 required
               />
             </div>
-            <div className="col-md-6">
+            <div className="mb-3">
+              <label className="form-label">Last Name</label>
               <input
                 type="text"
                 className="form-control"
-                placeholder="Last Name"
                 value={newEmployee.lastName}
                 onChange={(e) =>
                   setNewEmployee({ ...newEmployee, lastName: e.target.value })
@@ -220,11 +310,11 @@ const Employees: React.FC = () => {
                 required
               />
             </div>
-            <div className="col-md-6">
+            <div className="mb-3">
+              <label>Email</label>
               <input
                 type="email"
                 className="form-control"
-                placeholder="Email"
                 value={newEmployee.email}
                 onChange={(e) =>
                   setNewEmployee({ ...newEmployee, email: e.target.value })
@@ -232,29 +322,30 @@ const Employees: React.FC = () => {
                 required
               />
             </div>
-            <div className="col-md-6">
+            <div className="mb-3">
+              <label>Phone</label>
               <input
                 type="text"
                 className="form-control"
-                placeholder="Phone"
                 value={newEmployee.phone}
                 onChange={(e) =>
                   setNewEmployee({ ...newEmployee, phone: e.target.value })
                 }
               />
             </div>
-            <div className="col-md-6">
+            <div className="mb-3">
+              <label>Matricule</label>
               <input
                 type="text"
                 className="form-control"
-                placeholder="Matricule"
                 value={newEmployee.matricule}
                 onChange={(e) =>
                   setNewEmployee({ ...newEmployee, matricule: e.target.value })
                 }
               />
             </div>
-            <div className="col-md-3">
+            <div className="mb-3">
+              <label>Company</label>
               <select
                 className="form-control"
                 value={newEmployee.companyId || ""}
@@ -274,29 +365,82 @@ const Employees: React.FC = () => {
                 ))}
               </select>
             </div>
-
-            <div className="col-md-3">
-              <input
-                type="number"
-                className="form-control"
-                placeholder="Badge ID"
-                value={newEmployee.badgeId || ""}
-                onChange={(e) =>
-                  setNewEmployee({
-                    ...newEmployee,
-                    badgeId: Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-            <div className="col-12">
-              <button type="submit" className="btn btn-primary">
-                Create Employee
-              </button>
-            </div>
           </form>
-        </div>
-      )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit" form="add-employee-form">
+            Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* ✅ Edit Employee Modal */}
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Employee</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {editingEmployee && (
+            <>
+              <div className="mb-3">
+                <label>First Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={editingEmployee.firstName}
+                  onChange={(e) =>
+                    setEditingEmployee({ ...editingEmployee, firstName: e.target.value })
+                  }
+                />
+              </div>
+              <div className="mb-3">
+                <label>Last Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={editingEmployee.lastName}
+                  onChange={(e) =>
+                    setEditingEmployee({ ...editingEmployee, lastName: e.target.value })
+                  }
+                />
+              </div>
+              <div className="mb-3">
+                <label>Email</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  value={editingEmployee.email}
+                  onChange={(e) =>
+                    setEditingEmployee({ ...editingEmployee, email: e.target.value })
+                  }
+                />
+              </div>
+              <div className="mb-3">
+                <label>Phone</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={editingEmployee.phone || ""}
+                  onChange={(e) =>
+                    setEditingEmployee({ ...editingEmployee, phone: e.target.value })
+                  }
+                />
+              </div>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleEditSave}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
