@@ -65,15 +65,22 @@ const Employees: React.FC = () => {
 
   const handleStatusChange = async (employee: UserDTO, newStatus: Status) => {
     try {
-      await updateEmployeeStatus(employee.id, { ...employee, status: newStatus });
+      await updateEmployeeStatus(employee.id, {
+        ...employee,
+        status: newStatus,
+      });
       loadEmployees();
     } catch (error) {
-      console.error(`Error updating status for employee ${employee.id}:`, error);
+      console.error(
+        `Error updating status for employee ${employee.id}:`,
+        error
+      );
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this employee?")) return;
+    if (!window.confirm("Are you sure you want to delete this employee?"))
+      return;
     try {
       await deleteEmployee(id);
       loadEmployees();
@@ -193,15 +200,24 @@ const Employees: React.FC = () => {
             <thead className="table-light">
               <tr>
                 <th>#</th>
-                <th style={{ cursor: "pointer" }} onClick={() => handleSort("matricule")}>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("matricule")}
+                >
                   Matricule {sortKey === "matricule" && (sortAsc ? "▲" : "▼")}
                 </th>
-                <th style={{ cursor: "pointer" }} onClick={() => handleSort("firstName")}>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("firstName")}
+                >
                   Name {sortKey === "firstName" && (sortAsc ? "▲" : "▼")}
                 </th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th style={{ cursor: "pointer" }} onClick={() => handleSort("companyId")}>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("companyId")}
+                >
                   Company {sortKey === "companyId" && (sortAsc ? "▲" : "▼")}
                 </th>
                 <th>Badges</th>
@@ -236,42 +252,48 @@ const Employees: React.FC = () => {
                     </span>
                   </td>
                   <td>
-                    <div className="d-flex flex-wrap gap-2">
-                      <button
-                        className="btn btn-sm btn-outline-primary"
-                        onClick={() => openEditModal(emp)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="btn btn-sm btn-success"
-                        onClick={() => handleStatusChange(emp, "ACTIVE")}
-                        disabled={emp.status === "ACTIVE"}
-                      >
-                        Activate
-                      </button>
-                      <button
-                        className="btn btn-sm btn-secondary"
-                        onClick={() => handleStatusChange(emp, "INACTIVE")}
-                        disabled={emp.status === "INACTIVE"}
-                      >
-                        Deactivate
-                      </button>
-                      <button
-                        className="btn btn-sm btn-warning text-dark"
-                        onClick={() => handleStatusChange(emp, "BLOCKED")}
-                        disabled={emp.status === "BLOCKED"}
-                      >
-                        Block
-                      </button>
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleDelete(emp.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+  {/* First row: Status Actions */}
+  <div className="d-flex flex-wrap gap-2 mb-2">
+    <button
+      className="btn btn-sm btn-success flex-fill"
+      onClick={() => handleStatusChange(emp, "ACTIVE")}
+      disabled={emp.status === "ACTIVE"}
+    >
+      <i className="bi bi-check-circle me-1"></i> Activate
+    </button>
+    <button
+      className="btn btn-sm btn-secondary flex-fill"
+      onClick={() => handleStatusChange(emp, "INACTIVE")}
+      disabled={emp.status === "INACTIVE"}
+    >
+      <i className="bi bi-pause-circle me-1"></i> Deactivate
+    </button>
+    <button
+      className="btn btn-sm btn-warning text-dark flex-fill"
+      onClick={() => handleStatusChange(emp, "BLOCKED")}
+      disabled={emp.status === "BLOCKED"}
+    >
+      <i className="bi bi-slash-circle me-1"></i> Block
+    </button>
+  </div>
+
+  {/* Second row: Edit/Delete */}
+  <div className="d-flex flex-wrap gap-2">
+    <button
+      className="btn btn-sm btn-outline-primary flex-fill"
+      onClick={() => openEditModal(emp)}
+    >
+      <i className="bi bi-pencil-square me-1"></i> Edit
+    </button>
+    <button
+      className="btn btn-sm btn-outline-danger flex-fill"
+      onClick={() => handleDelete(emp.id)}
+    >
+      <i className="bi bi-trash me-1"></i> Delete
+    </button>
+  </div>
+</td>
+
                 </tr>
               ))}
             </tbody>
@@ -279,7 +301,7 @@ const Employees: React.FC = () => {
         </div>
       )}
 
-      {/* ✅ Add Employee Modal */}
+      {/*  Add Employee Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Add Employee</Modal.Title>
@@ -378,7 +400,11 @@ const Employees: React.FC = () => {
       </Modal>
 
       {/* ✅ Edit Employee Modal */}
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered>
+      <Modal
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Edit Employee</Modal.Title>
         </Modal.Header>
@@ -392,7 +418,10 @@ const Employees: React.FC = () => {
                   className="form-control"
                   value={editingEmployee.firstName}
                   onChange={(e) =>
-                    setEditingEmployee({ ...editingEmployee, firstName: e.target.value })
+                    setEditingEmployee({
+                      ...editingEmployee,
+                      firstName: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -403,7 +432,10 @@ const Employees: React.FC = () => {
                   className="form-control"
                   value={editingEmployee.lastName}
                   onChange={(e) =>
-                    setEditingEmployee({ ...editingEmployee, lastName: e.target.value })
+                    setEditingEmployee({
+                      ...editingEmployee,
+                      lastName: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -414,7 +446,10 @@ const Employees: React.FC = () => {
                   className="form-control"
                   value={editingEmployee.email}
                   onChange={(e) =>
-                    setEditingEmployee({ ...editingEmployee, email: e.target.value })
+                    setEditingEmployee({
+                      ...editingEmployee,
+                      email: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -425,7 +460,10 @@ const Employees: React.FC = () => {
                   className="form-control"
                   value={editingEmployee.phone || ""}
                   onChange={(e) =>
-                    setEditingEmployee({ ...editingEmployee, phone: e.target.value })
+                    setEditingEmployee({
+                      ...editingEmployee,
+                      phone: e.target.value,
+                    })
                   }
                 />
               </div>

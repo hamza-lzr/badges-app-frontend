@@ -1,25 +1,35 @@
 import React, { useEffect, useState } from "react";
-import type { AirportDTO, CityDTO } from "../types";
-import { fetchAirports, createAirport, deleteAirport, updateAirport } from "../api/apiAirport";
+import type { AirportDTO, CityDTO, CountryDTO } from "../types";
+import {
+  fetchAirports,
+  createAirport,
+  deleteAirport,
+  updateAirport,
+} from "../api/apiAirport";
 import { fetchCities } from "../api/apiCity";
-import { Modal, Button, Spinner } from "react-bootstrap";
+import { fetchCountries } from "../api/apiCountry";
+import { Modal, Button, Spinner, Form } from "react-bootstrap";
 
 const Airports: React.FC = () => {
   const [airports, setAirports] = useState<AirportDTO[]>([]);
   const [cities, setCities] = useState<CityDTO[]>([]);
+  const [countries, setCountries] = useState<CountryDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [sortKey, setSortKey] = useState<keyof AirportDTO | "city">("name");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [countryFilter, setCountryFilter] = useState<string>("");
+
+  const [sortKey, setSortKey] = useState<keyof AirportDTO | "city" | "country">(
+    "name"
+  );
   const [sortAsc, setSortAsc] = useState(true);
 
-  // Add Modal State
+  // Modal states
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Edit Modal State
-  const [showEditModal, setShowEditModal] = useState(false);
   const [editingAirport, setEditingAirport] = useState<AirportDTO | null>(null);
-
   const [newAirport, setNewAirport] = useState<Omit<AirportDTO, "id">>({
     iata: "",
     name: "",
@@ -28,18 +38,28 @@ const Airports: React.FC = () => {
 
   useEffect(() => {
     const loadAll = async () => {
+      await loadCountries();
       await loadCities();
       await loadAirports();
     };
     loadAll();
   }, []);
 
+  const loadCountries = async () => {
+    try {
+      const data = await fetchCountries();
+      setCountries(data);
+    } catch (err) {
+      console.error("Error fetching countries:", err);
+    }
+  };
+
   const loadCities = async () => {
     try {
       const data = await fetchCities();
       setCities(data);
-    } catch (error) {
-      console.error("Error fetching cities:", error);
+    } catch (err) {
+      console.error("Error fetching cities:", err);
     }
   };
 
@@ -48,71 +68,108 @@ const Airports: React.FC = () => {
       setLoading(true);
       const data = await fetchAirports();
       setAirports(data);
-    } catch (error) {
-      console.error("Error fetching airports:", error);
+    } catch (err) {
+      console.error("Error fetching airports:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const getCityName = (cityId: number) => {
-    const city = cities.find((c) => c.id === cityId);
-    return city ? city.name : "Unknown";
+  /** Mappers */
+  const getCity = (cityId: number) => cities.find((c) => c.id === cityId);
+  const getCityName = (cityId: number) => getCity(cityId)?.name || "Unknown";
+
+  const getCountryIdFromCity = (cityId: number) =>
+    getCity(cityId)?.countryId || 0;
+
+  const getCountryName = (cityId: number) => {
+    const countryId = getCountryIdFromCity(cityId);
+    return countries.find((c) => c.id === countryId)?.name || "Unknown";
   };
 
+  /** Build unique country list for filter */
+  const allCountries = Array.from(
+    new Set(
+      cities
+        .map(
+          (c) => countries.find((country) => country.id === c.countryId)?.name
+        )
+        .filter(Boolean)
+    )
+  );
+
   /** Sorting */
-  const sortedAirports = [...airports].sort((a, b) => {
-    let valA: string = "";
-    let valB: string = "";
+  const sortFn = (a: AirportDTO, b: AirportDTO) => {
+    let valA = "";
+    let valB = "";
 
     if (sortKey === "city") {
       valA = getCityName(a.cityId);
       valB = getCityName(b.cityId);
+    } else if (sortKey === "country") {
+      valA = getCountryName(a.cityId);
+      valB = getCountryName(b.cityId);
     } else {
       valA = (a[sortKey] as string) || "";
       valB = (b[sortKey] as string) || "";
     }
-
     return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+  };
+
+  /** Filters: search & country */
+  const filteredAirports = airports.filter((airport) => {
+    const query = searchQuery.toLowerCase();
+    const cityName = getCityName(airport.cityId).toLowerCase();
+    const countryName = getCountryName(airport.cityId).toLowerCase();
+
+    const matchesSearch =
+      airport.name.toLowerCase().includes(query) ||
+      airport.iata.toLowerCase().includes(query) ||
+      cityName.includes(query) ||
+      countryName.includes(query);
+
+    const matchesCountryFilter =
+      countryFilter === "" || countryName === countryFilter.toLowerCase();
+
+    return matchesSearch && matchesCountryFilter;
   });
 
-  const handleSort = (key: keyof AirportDTO | "city") => {
-    if (sortKey === key) {
-      setSortAsc(!sortAsc);
-    } else {
+  const sortedAirports = [...filteredAirports].sort(sortFn);
+
+  const handleSort = (key: keyof AirportDTO | "city" | "country") => {
+    if (sortKey === key) setSortAsc(!sortAsc);
+    else {
       setSortKey(key);
       setSortAsc(true);
     }
   };
 
-  /** Create Airport */
+  /** CRUD Handlers */
   const handleCreateAirport = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
       await createAirport(newAirport);
       await loadAirports();
-      resetForm();
+      setNewAirport({ iata: "", name: "", cityId: 0 });
       setShowModal(false);
-    } catch (error) {
-      console.error("Error creating airport:", error);
+    } catch (err) {
+      console.error("Error creating airport:", err);
     } finally {
       setSubmitting(false);
     }
   };
 
-  /** Delete Airport */
   const handleDeleteAirport = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this airport?")) return;
+    if (!window.confirm("Delete this airport?")) return;
     try {
       await deleteAirport(id);
       await loadAirports();
-    } catch (error) {
-      console.error("Error deleting airport:", error);
+    } catch (err) {
+      console.error("Error deleting airport:", err);
     }
   };
 
-  /** Edit Airport */
   const handleEditAirport = (airport: AirportDTO) => {
     setEditingAirport(airport);
     setShowEditModal(true);
@@ -120,39 +177,66 @@ const Airports: React.FC = () => {
 
   const handleUpdateAirport = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingAirport || !editingAirport.id) return;
+    if (!editingAirport?.id) return;
     setSubmitting(true);
     try {
       await updateAirport(editingAirport.id, editingAirport);
       await loadAirports();
       setShowEditModal(false);
       setEditingAirport(null);
-    } catch (error) {
-      console.error("Error updating airport:", error);
+    } catch (err) {
+      console.error("Error updating airport:", err);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const resetForm = () => {
-    setNewAirport({
-      iata: "",
-      name: "",
-      cityId: 0,
-    });
-  };
-
   return (
     <div className="container py-4">
-      {/* Header Section */}
+      {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0 fw-semibold">Airports</h2>
-        <Button variant="primary" onClick={() => setShowModal(true)}>
-          Add Airport
-        </Button>
+        {/* Left side */}
+        <h2 className="fw-semibold mb-0">Airports Management</h2>
+
+        {/* Right side */}
+        <div className="d-flex align-items-center gap-3">
+          {!loading && (
+            <span className="text-muted">
+              <strong>{filteredAirports.length}</strong> Registered Airport
+              {filteredAirports.length !== 1 ? "s" : ""}
+            </span>
+          )}
+          <Button variant="primary" onClick={() => setShowModal(true)}>
+            Add Airport
+          </Button>
+        </div>
       </div>
 
-      {/* Table Section */}
+      {/* Filters: country + search */}
+      <div className="d-flex gap-3 align-items-center mb-4">
+        <Form.Select
+          value={countryFilter}
+          onChange={(e) => setCountryFilter(e.target.value)}
+          style={{ maxWidth: "200px" }}
+        >
+          <option value="">All Countries</option>
+          {allCountries.map((country) => (
+            <option key={country} value={country!}>
+              {country}
+            </option>
+          ))}
+        </Form.Select>
+
+        <Form.Control
+          type="text"
+          placeholder="Search airport, city, country..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ maxWidth: "300px" }}
+        />
+      </div>
+
+      {/* Table */}
       {loading ? (
         <div className="text-center my-5">
           <Spinner animation="border" variant="secondary" />
@@ -160,59 +244,48 @@ const Airports: React.FC = () => {
         </div>
       ) : sortedAirports.length === 0 ? (
         <div className="alert alert-light border text-center">
-          No airports available. Click <strong>Add Airport</strong> to create one.
+          No airports found. Try a different filter.
         </div>
       ) : (
         <div className="table-responsive shadow-sm rounded">
           <table className="table table-hover align-middle">
             <thead className="table-light">
               <tr>
-                <th style={{ width: "5%" }}>#</th>
                 <th
-                  style={{ cursor: "pointer" }}
                   onClick={() => handleSort("iata")}
+                  style={{ cursor: "pointer" }}
                 >
-                  IATA{" "}
-                  {sortKey === "iata" && (
-                    <span className="text-muted">
-                      {sortAsc ? "▲" : "▼"}
-                    </span>
-                  )}
+                  IATA {sortKey === "iata" && (sortAsc ? "▲" : "▼")}
                 </th>
                 <th
-                  style={{ cursor: "pointer" }}
                   onClick={() => handleSort("name")}
+                  style={{ cursor: "pointer" }}
                 >
-                  Name{" "}
-                  {sortKey === "name" && (
-                    <span className="text-muted">
-                      {sortAsc ? "▲" : "▼"}
-                    </span>
-                  )}
+                  Name {sortKey === "name" && (sortAsc ? "▲" : "▼")}
                 </th>
                 <th
-                  style={{ cursor: "pointer" }}
                   onClick={() => handleSort("city")}
+                  style={{ cursor: "pointer" }}
                 >
-                  City{" "}
-                  {sortKey === "city" && (
-                    <span className="text-muted">
-                      {sortAsc ? "▲" : "▼"}
-                    </span>
-                  )}
+                  City {sortKey === "city" && (sortAsc ? "▲" : "▼")}
                 </th>
-                <th style={{ width: "20%" }}>Actions</th>
+                <th
+                  onClick={() => handleSort("country")}
+                  style={{ cursor: "pointer" }}
+                >
+                  Country {sortKey === "country" && (sortAsc ? "▲" : "▼")}
+                </th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {sortedAirports.map((airport, index) => (
+              {sortedAirports.map((airport) => (
                 <tr key={airport.id}>
-                  <td>
-                    <span className="badge bg-secondary">{index + 1}</span>
-                  </td>
+
                   <td className="fw-bold">{airport.iata}</td>
                   <td>{airport.name}</td>
                   <td>{getCityName(airport.cityId)}</td>
+                  <td>{getCountryName(airport.cityId)}</td>
                   <td className="d-flex gap-2">
                     <Button
                       variant="outline-primary"
@@ -236,10 +309,10 @@ const Airports: React.FC = () => {
         </div>
       )}
 
-      {/* Modal for Adding Airport */}
+      {/* Add Airport Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Add a New Airport</Modal.Title>
+          <Modal.Title>Add Airport</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form id="add-airport-form" onSubmit={handleCreateAirport}>
@@ -280,12 +353,16 @@ const Airports: React.FC = () => {
                 }
                 required
               >
-                <option value="">Select a city</option>
-                {cities.map((city) => (
-                  <option key={city.id} value={city.id}>
-                    {city.name}
-                  </option>
-                ))}
+                <option value="">Select City</option>
+                {cities.map((city) => {
+                  const countryName =
+                    countries.find((c) => c.id === city.countryId)?.name || "";
+                  return (
+                    <option key={city.id} value={city.id}>
+                      {city.name} ({countryName})
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </form>
@@ -305,7 +382,7 @@ const Airports: React.FC = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Modal for Editing Airport */}
+      {/* Edit Modal */}
       <Modal
         show={showEditModal}
         onHide={() => setShowEditModal(false)}
@@ -324,7 +401,10 @@ const Airports: React.FC = () => {
                   className="form-control"
                   value={editingAirport.iata}
                   onChange={(e) =>
-                    setEditingAirport({ ...editingAirport, iata: e.target.value })
+                    setEditingAirport({
+                      ...editingAirport,
+                      iata: e.target.value,
+                    })
                   }
                   required
                 />
@@ -336,7 +416,10 @@ const Airports: React.FC = () => {
                   className="form-control"
                   value={editingAirport.name}
                   onChange={(e) =>
-                    setEditingAirport({ ...editingAirport, name: e.target.value })
+                    setEditingAirport({
+                      ...editingAirport,
+                      name: e.target.value,
+                    })
                   }
                   required
                 />
@@ -354,12 +437,17 @@ const Airports: React.FC = () => {
                   }
                   required
                 >
-                  <option value="">Select a city</option>
-                  {cities.map((city) => (
-                    <option key={city.id} value={city.id}>
-                      {city.name}
-                    </option>
-                  ))}
+                  <option value="">Select City</option>
+                  {cities.map((city) => {
+                    const countryName =
+                      countries.find((c) => c.id === city.countryId)?.name ||
+                      "";
+                    return (
+                      <option key={city.id} value={city.id}>
+                        {city.name} ({countryName})
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             </form>

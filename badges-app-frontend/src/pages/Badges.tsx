@@ -5,28 +5,34 @@ import { createBadge, fetchBadgeById, fetchBadges } from "../api/apiBadge";
 import { fetchCompanies } from "../api/apiCompany";
 import type { UserDTO, BadgeDTO } from "../types";
 
+type BadgeMap = Record<number, BadgeDTO>;
+
 const Badges: React.FC = () => {
   const [employees, setEmployees] = useState<UserDTO[]>([]);
   const [companies, setCompanies] = useState<Record<number, string>>({});
-  const [badges, setBadges] = useState<Record<number, string>>({});
+  const [badges, setBadges] = useState<BadgeMap>({}); // ✅ only ONE badges state with full BadgeDTO
   const [loading, setLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [companyFilter, setCompanyFilter] = useState<number | "">("");
+  const [showExpiredOnly, setShowExpiredOnly] = useState(false);
 
   // Modal states
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  // Selected badge / employee
-  const [selectedEmployee, setSelectedEmployee] = useState<UserDTO | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<UserDTO | null>(
+    null
+  );
   const [selectedBadgeId, setSelectedBadgeId] = useState<number | null>(null);
 
-  // Badge data for creation
+  // Badge creation data
   const [badgeData, setBadgeData] = useState<Partial<BadgeDTO>>({});
   const [badgeDetails, setBadgeDetails] = useState<BadgeDTO | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
 
+  // ✅ Fetch all data initially
   useEffect(() => {
     const loadAll = async () => {
       await loadCompanies();
@@ -39,9 +45,7 @@ const Badges: React.FC = () => {
   const loadCompanies = async () => {
     try {
       const data = await fetchCompanies();
-      const companyMap = Object.fromEntries(
-        data.map((c) => [c.id!, c.name])
-      );
+      const companyMap = Object.fromEntries(data.map((c) => [c.id!, c.name]));
       setCompanies(companyMap);
     } catch (err) {
       console.error("Error fetching companies:", err);
@@ -50,10 +54,11 @@ const Badges: React.FC = () => {
 
   const loadBadges = async () => {
     try {
-      const data = await fetchBadges();
-      const badgeMap = Object.fromEntries(
-        data.map((b) => [b.id!, b.code])
-      );
+      const data = await fetchBadges(); // returns full BadgeDTO[]
+      const badgeMap: BadgeMap = {};
+      data.forEach((b) => {
+        if (b.id) badgeMap[b.id] = b;
+      });
       setBadges(badgeMap);
     } catch (err) {
       console.error("Error fetching badges:", err);
@@ -72,7 +77,40 @@ const Badges: React.FC = () => {
     }
   };
 
-  /** Open Generate Badge Modal */
+  /** ✅ Helper: Does this employee have at least one expired badge? */
+  const employeeHasExpiredBadge = (emp: UserDTO) => {
+    return emp.badgesIds.some((badgeId) => {
+      const badge = badges[badgeId];
+      if (!badge) return false;
+      return new Date(badge.expiryDate) < new Date();
+    });
+  };
+
+  /** ✅ Filtering logic */
+  const filteredEmployees = employees.filter((emp) => {
+    const companyName = companies[emp.companyId]?.toLowerCase() || "";
+    const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+    const matricule = emp.matricule?.toLowerCase() || "";
+    const badgeCodes = emp.badgesIds
+      .map((id) => badges[id]?.code?.toLowerCase() || "")
+      .join(" ");
+
+    const query = searchQuery.toLowerCase();
+    const matchesSearch =
+      fullName.includes(query) ||
+      matricule.includes(query) ||
+      companyName.includes(query) ||
+      badgeCodes.includes(query);
+
+    const matchesCompany =
+      companyFilter === "" || emp.companyId === companyFilter;
+
+    const matchesExpired = !showExpiredOnly || employeeHasExpiredBadge(emp); // ✅ only keep expired if checked
+
+    return matchesSearch && matchesCompany && matchesExpired;
+  });
+
+  /** ✅ Open Generate Badge Modal */
   const openGenerateBadgeModal = (employee: UserDTO) => {
     const now = new Date();
     const expiry = new Date();
@@ -82,7 +120,6 @@ const Badges: React.FC = () => {
     setBadgeData({
       issuedDate: now.toISOString().split("T")[0],
       expiryDate: expiry.toISOString().split("T")[0],
-      userId: employee.id,
       companyId: employee.companyId,
     });
     setShowGenerateModal(true);
@@ -94,10 +131,17 @@ const Badges: React.FC = () => {
     setBadgeData({});
   };
 
-  /** Handle Badge Creation */
+  /** ✅ Handle Badge Creation */
   const handleBadgeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!badgeData.code || !badgeData.issuedDate || !badgeData.expiryDate || !badgeData.userId || !badgeData.companyId) {
+
+    if (
+      !badgeData.code ||
+      !badgeData.issuedDate ||
+      !badgeData.expiryDate ||
+      !selectedEmployee?.id ||
+      !badgeData.companyId
+    ) {
       console.error("Incomplete badge data");
       return;
     }
@@ -109,12 +153,12 @@ const Badges: React.FC = () => {
         issuedDate: badgeData.issuedDate,
         expiryDate: badgeData.expiryDate,
         companyId: badgeData.companyId,
-        userId: badgeData.userId,
+        userId: selectedEmployee.id, // still required
         accessListIds: [],
       });
 
       await loadEmployees();
-      setShowGenerateModal(false);
+      closeGenerateModal();
     } catch (err) {
       console.error("Error creating badge:", err);
     } finally {
@@ -122,7 +166,7 @@ const Badges: React.FC = () => {
     }
   };
 
-  /** Badge Details Modal */
+  /** ✅ Badge Details Modal */
   const openBadgeDetails = async (badgeId: number) => {
     try {
       const badge = await fetchBadgeById(badgeId);
@@ -139,37 +183,56 @@ const Badges: React.FC = () => {
     setSelectedBadgeId(null);
   };
 
-  /** Filter Employees by Search */
-  const filteredEmployees = employees.filter((emp) => {
-    const companyName = companies[emp.companyId]?.toLowerCase() || "";
-    const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
-    const matricule = emp.matricule?.toLowerCase() || "";
-    const badgeCodes = emp.badgesIds.map((id) => badges[id]?.toLowerCase() || "").join(" ");
-    const query = searchQuery.toLowerCase();
-
-    return (
-      fullName.includes(query) ||
-      matricule.includes(query) ||
-      companyName.includes(query) ||
-      badgeCodes.includes(query)
-    );
-  });
-
   return (
     <div className="container py-4">
-      {/* Header */}
+      {/* ✅ Header & Filters */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-semibold">Badges Management</h2>
-        <Form.Control
-          type="text"
-          placeholder="Search employees, companies, badges..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ maxWidth: "300px" }}
-        />
+        <h2 className="fw-semibold mb-0">Badges Management</h2>
+
+        <div className="d-flex gap-3 align-items-center">
+          {/* Company filter */}
+          <Form.Select
+            value={companyFilter}
+            onChange={(e) =>
+              setCompanyFilter(
+                e.target.value === "" ? "" : Number(e.target.value)
+              )
+            }
+            style={{ maxWidth: "200px" }}
+          >
+            <option value="">All Companies</option>
+            {Object.entries(companies).map(([id, name]) => (
+              <option key={id} value={id}>
+                {name}
+              </option>
+            ))}
+          </Form.Select>
+
+          {/* Search */}
+          <Form.Control
+            type="text"
+            placeholder="Search employees, badges..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ maxWidth: "250px" }}
+          />
+
+          {/* ✅ Expired Badge Filter Toggle */}
+          <div className="d-flex align-items-center">
+            <Form.Check
+              type="switch"
+              id="expired-toggle"
+              checked={showExpiredOnly}
+              onChange={(e) => setShowExpiredOnly(e.target.checked)}
+            />
+            <small className="ms-2 text-muted" style={{ whiteSpace: "nowrap" }}>
+              Only expired badges
+            </small>
+          </div>
+        </div>
       </div>
 
-      {/* Table Section */}
+      {/* ✅ Table Section */}
       {loading ? (
         <div className="text-center my-5">
           <Spinner animation="border" />
@@ -177,7 +240,7 @@ const Badges: React.FC = () => {
         </div>
       ) : filteredEmployees.length === 0 ? (
         <div className="alert alert-light text-center border">
-          No employees found matching your search.
+          No employees found matching your search/filter.
         </div>
       ) : (
         <div className="table-responsive shadow-sm rounded">
@@ -196,13 +259,26 @@ const Badges: React.FC = () => {
             <tbody>
               {filteredEmployees.map((emp, index) => (
                 <tr key={emp.id}>
-                  <td><span className="badge bg-secondary">{index + 1}</span></td>
+                  <td>
+                    <span className="badge bg-secondary">{index + 1}</span>
+                  </td>
                   <td>{emp.matricule}</td>
-                  <td><strong>{emp.firstName} {emp.lastName}</strong></td>
+                  <td>
+                    <strong>
+                      {emp.firstName} {emp.lastName}
+                    </strong>
+                  </td>
                   <td>{emp.email}</td>
                   <td>{companies[emp.companyId] || "Unknown"}</td>
                   <td>
-                    {emp.badgesIds.length} badge{emp.badgesIds.length !== 1 ? "s" : ""}
+                    {emp.badgesIds.length} badge
+                    {emp.badgesIds.length !== 1 ? "s" : ""}
+                    {/* ✅ Show small expired marker */}
+                    {employeeHasExpiredBadge(emp) && (
+                      <span className="ms-2 text-danger fw-bold">
+                        (Expired)
+                      </span>
+                    )}
                   </td>
                   <td className="d-flex gap-2">
                     {/* Show available badges */}
@@ -210,13 +286,15 @@ const Badges: React.FC = () => {
                       <Form.Select
                         size="sm"
                         value={selectedBadgeId || ""}
-                        onChange={(e) => setSelectedBadgeId(Number(e.target.value))}
+                        onChange={(e) =>
+                          setSelectedBadgeId(Number(e.target.value))
+                        }
                         style={{ width: "150px" }}
                       >
                         <option value="">Select Badge</option>
                         {emp.badgesIds.map((id) => (
                           <option key={id} value={id}>
-                            {badges[id] || `Badge ${id}`}
+                            {badges[id]?.code || `Badge ${id}`}
                           </option>
                         ))}
                       </Form.Select>
@@ -246,80 +324,135 @@ const Badges: React.FC = () => {
         </div>
       )}
 
-      {/* Generate Badge Modal */}
+      {/* ✅ Generate Badge Modal */}
       <Modal show={showGenerateModal} onHide={closeGenerateModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Generate New Badge</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form id="generate-badge-form" onSubmit={handleBadgeSubmit}>
+            {/* Badge Code */}
             <Form.Group className="mb-3">
               <Form.Label>Badge Code</Form.Label>
               <Form.Control
                 type="text"
                 value={badgeData.code || ""}
-                onChange={(e) => setBadgeData({ ...badgeData, code: e.target.value })}
+                onChange={(e) =>
+                  setBadgeData({ ...badgeData, code: e.target.value })
+                }
                 required
               />
             </Form.Group>
+
+            {/* Issued / Expiry Dates */}
             <Row>
               <Col>
                 <Form.Group className="mb-3">
                   <Form.Label>Issued Date</Form.Label>
-                  <Form.Control type="text" readOnly value={badgeData.issuedDate || ""} />
+                  <Form.Control
+                    type="text"
+                    readOnly
+                    value={badgeData.issuedDate || ""}
+                  />
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group className="mb-3">
                   <Form.Label>Expiry Date</Form.Label>
-                  <Form.Control type="text" readOnly value={badgeData.expiryDate || ""} />
+                  <Form.Control
+                    type="date"
+                    value={badgeData.expiryDate || ""}
+                    onChange={(e) =>
+                      setBadgeData({
+                        ...badgeData,
+                        expiryDate: e.target.value,
+                      })
+                    }
+                  />
                 </Form.Group>
               </Col>
             </Row>
-            <Row>
-              <Col>
-                <Form.Group>
-                  <Form.Label>User</Form.Label>
-                  <Form.Control readOnly value={selectedEmployee?.id || ""} />
-                </Form.Group>
-              </Col>
-              <Col>
-                <Form.Group>
-                  <Form.Label>Company</Form.Label>
-                  <Form.Control readOnly value={selectedEmployee ? companies[selectedEmployee.companyId] : ""} />
-                </Form.Group>
-              </Col>
-            </Row>
+
+            {/* Company Selector */}
+            <Form.Group>
+              <Form.Label>Company</Form.Label>
+              <Form.Select
+                value={badgeData.companyId || ""}
+                onChange={(e) =>
+                  setBadgeData({
+                    ...badgeData,
+                    companyId: Number(e.target.value),
+                  })
+                }
+              >
+                {Object.entries(companies).map(([id, name]) => (
+                  <option key={id} value={id}>
+                    {name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={closeGenerateModal}>Cancel</Button>
-          <Button type="submit" form="generate-badge-form" disabled={submitting}>
+          <Button variant="secondary" onClick={closeGenerateModal}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="generate-badge-form"
+            disabled={submitting}
+          >
             {submitting ? "Generating..." : "Generate"}
           </Button>
         </Modal.Footer>
       </Modal>
 
-      {/* Badge Details Modal */}
+      {/* ✅ Badge Details Modal */}
       <Modal show={showDetailsModal} onHide={closeBadgeDetailsModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Badge Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {badgeDetails ? (
-            <div className="p-3 border rounded bg-light">
-              <h5 className="fw-bold">{badgeDetails.code}</h5>
-              <p className="mb-1"><strong>Issued:</strong> {badgeDetails.issuedDate}</p>
-              <p className="mb-1"><strong>Expiry:</strong> {badgeDetails.expiryDate}</p>
-              <p className="mb-1"><strong>Company:</strong> {badgeDetails.companyId}</p>
-              <p><strong>User ID:</strong> {badgeDetails.userId}</p>
-            </div>
+            (() => {
+              const employee = employees.find(
+                (e) => e.id === badgeDetails.userId
+              );
+              const employeeName = employee
+                ? `${employee.firstName} ${employee.lastName}`
+                : `User #${badgeDetails.userId}`;
+
+              const isExpired = new Date(badgeDetails.expiryDate) < new Date();
+
+              return (
+                <div className="p-3 border rounded bg-light">
+                  <h5 className="fw-bold">{badgeDetails.code}</h5>
+                  <p>
+                    <strong>Full Name:</strong> {employeeName}
+                  </p>
+                  <p>
+                    <strong>Issued:</strong> {badgeDetails.issuedDate}
+                  </p>
+                  <p className={isExpired ? "text-danger fw-bold" : ""}>
+                    <strong>Expiry:</strong> {badgeDetails.expiryDate}{" "}
+                    {isExpired && "(Expired)"}
+                  </p>
+                  <p>
+                    <strong>Company:</strong>{" "}
+                    {companies[badgeDetails.companyId]}
+                  </p>
+                </div>
+              );
+            })()
           ) : (
             <p className="text-muted">No badge selected.</p>
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={closeBadgeDetailsModal}>Close</Button>
+          <Button variant="secondary" onClick={closeBadgeDetailsModal}>
+            Close
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

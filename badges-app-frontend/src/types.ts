@@ -57,7 +57,7 @@ export interface BadgeDTO {
 export interface CityDTO {
   id?: number;
   name: string;
-  countryId: string;
+  countryId: number;
 }
 
 export interface CountryDTO {
