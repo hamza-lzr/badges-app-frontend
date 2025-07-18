@@ -119,6 +119,18 @@ const AdminSidebar: React.FC = () => {
             Access Management
           </NavLink>
         </li>
+        <li>
+          <NavLink
+            to="/admin/notifications"
+            className={({ isActive }) =>
+              `nav-link d-flex align-items-center ${
+                isActive ? "active bg-primary text-white" : "text-white"
+              }`
+            }
+          >
+            <i className="bi bi-bell-fill me-2"></i> Notifications
+          </NavLink>
+        </li>
       </ul>
     </div>
   );

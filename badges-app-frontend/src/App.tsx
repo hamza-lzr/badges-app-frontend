@@ -13,6 +13,11 @@ import Badges from "./pages/Badges";
 import LocationManagement from "./pages/LocationManagement";
 import CitiesPage from "./pages/CitiesPage";
 import Accesses from "./pages/Accesses";
+import Notifications from "./pages/Notifications";
+import EmployeeLayout from "./employeeComponents/EmployeeLayout";
+import HomePage from "./employeePages/HomePage";
+
+
 
 const App = () => {
   return (
@@ -28,6 +33,10 @@ const App = () => {
           <Route path="locations" element={<LocationManagement />} />
           <Route path="cities/:countryId" element={<CitiesPage />} />
           <Route path="accesses" element={<Accesses />} />
+          <Route path="notifications" element={<Notifications />} />
+        </Route>
+        <Route path="/employee" element={<EmployeeLayout />}>
+          <Route path="home" element={<HomePage />} />
         </Route>
       </Routes>
     </Router>
