@@ -1,138 +1,125 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import axios from "axios";
+
+const EXPANDED_WIDTH = 250;
+const COLLAPSED_WIDTH = 80;
 
 const AdminSidebar: React.FC = () => {
+  const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false);
+
+  // ✅ Update a CSS variable so main content adjusts
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--sidebar-width",
+      `${collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px`
+    );
+  }, [collapsed]);
+
+  const handleLogout = async () => {
+    const refreshToken = localStorage.getItem("refresh_token");
+
+    try {
+      if (refreshToken) {
+        await axios.post(
+          "http://localhost:8081/realms/ram/protocol/openid-connect/logout",
+          new URLSearchParams({
+            client_id: "ram-badges",
+            refresh_token: refreshToken,
+          }),
+          { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        );
+      }
+    } catch (err) {
+      console.warn("Keycloak logout failed, clearing tokens anyway.", err);
+    }
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    navigate("/login");
+  };
+
   return (
     <div
-      className="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark"
-      style={{ width: "250px", minHeight: "100vh" }}
+      className="d-flex flex-column text-white bg-dark"
+      style={{
+        width: collapsed ? `${COLLAPSED_WIDTH}px` : `${EXPANDED_WIDTH}px`,
+        minHeight: "100vh",
+        transition: "width 0.3s ease",
+        position: "fixed",
+        left: 0,
+        top: 0,
+      }}
     >
-      <a
-        href="/"
-        className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none"
-      >
-        <i className="bi bi-shield-lock-fill me-2"></i>
-        <span className="fs-4">Admin Panel</span>
-      </a>
-      <hr />
-      <ul className="nav nav-pills flex-column mb-auto">
-        <li className="nav-item">
-          <NavLink
-            to="/admin/dashboard"
-            className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${
-                isActive ? "active bg-primary text-white" : "text-white"
-              }`
-            }
-          >
-            <i className="bi bi-house-door-fill me-2"></i>
-            Dashboard
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/admin/requests"
-            className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${
-                isActive ? "active bg-primary text-white" : "text-white"
-              }`
-            }
-          >
-            <i className="bi bi-list-check me-2"></i>
-            Manage Requests
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/admin/employees"
-            className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${
-                isActive ? "active bg-primary text-white" : "text-white"
-              }`
-            }
-          >
-            <i className="bi bi-person-badge-fill me-2"></i>
-            Employees
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/admin/airports"
-            className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${
-                isActive ? "active bg-primary text-white" : "text-white"
-              }`
-            }
-          >
-            <i className="bi bi-airplane-engines me-2"></i>
-            Airports
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/admin/companies"
-            className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${
-                isActive ? "active bg-primary text-white" : "text-white"
-              }`
-            }
-          >
-            <i className="bi bi-building me-2"></i>
-            Companies
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/admin/badges"
-            className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${
-                isActive ? "active bg-primary text-white" : "text-white"
-              }`
-            }
-          >
-            <i className="bi bi-credit-card me-2"></i> Badges
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/admin/locations"
-            className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${
-                isActive ? "active bg-primary text-white" : "text-white"
-              }`
-            }
-          >
-            <i className="bi bi-geo-alt-fill me-2"></i>
-            Countries
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/admin/accesses"
-            className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${
-                isActive ? "active bg-primary text-white" : "text-white"
-              }`
-            }
-          >
-            <i className="bi bi-shield-check me-2"></i> 
-            Access Management
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/admin/notifications"
-            className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${
-                isActive ? "active bg-primary text-white" : "text-white"
-              }`
-            }
-          >
-            <i className="bi bi-bell-fill me-2"></i> Notifications
-          </NavLink>
-        </li>
-      </ul>
+      {/* Header with Toggle */}
+      <div className="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center">
+        {!collapsed && (
+          <span className="fs-5 fw-bold d-flex align-items-center gap-2">
+            <i className="bi bi-shield-lock-fill"></i> Admin
+          </span>
+        )}
+        <button
+          className="btn btn-sm btn-outline-light"
+          onClick={() => setCollapsed(!collapsed)}
+        >
+          <i className="bi bi-list"></i>
+        </button>
+      </div>
+
+      {/* Menu Links */}
+      <div className="flex-grow-1 p-2 d-flex flex-column">
+        <nav className="nav nav-pills flex-column gap-1">
+          <NavItem to="/admin/dashboard" icon="bi-house-door-fill" label="Dashboard" collapsed={collapsed} />
+          <NavItem to="/admin/requests" icon="bi-list-check" label="Requests" collapsed={collapsed} />
+          <NavItem to="/admin/employees" icon="bi-person-badge-fill" label="Employees" collapsed={collapsed} />
+          <NavItem to="/admin/airports" icon="bi-airplane-engines" label="Airports" collapsed={collapsed} />
+          <NavItem to="/admin/companies" icon="bi-building" label="Companies" collapsed={collapsed} />
+          <NavItem to="/admin/badges" icon="bi-credit-card" label="Badges" collapsed={collapsed} />
+          <NavItem to="/admin/locations" icon="bi-geo-alt-fill" label="Countries" collapsed={collapsed} />
+          <NavItem to="/admin/accesses" icon="bi-shield-check" label="Access" collapsed={collapsed} />
+          <NavItem to="/admin/notifications" icon="bi-bell-fill" label="Notifications" collapsed={collapsed} />
+        </nav>
+      </div>
+
+      {/* Logout Button pinned at bottom */}
+      <div className="p-3 border-top border-secondary mt-auto">
+        <button
+          className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2"
+          onClick={handleLogout}
+          title="Logout"
+        >
+          <i className="bi bi-box-arrow-right"></i>
+          {!collapsed && "Logout"}
+        </button>
+      </div>
     </div>
+  );
+};
+
+const NavItem: React.FC<{
+  to: string;
+  icon: string;
+  label: string;
+  collapsed: boolean;
+}> = ({ to, icon, label, collapsed }) => {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `nav-link d-flex align-items-center gap-2 px-3 py-2 rounded ${
+          isActive ? "active bg-primary text-white fw-bold" : "text-white"
+        }`
+      }
+      style={{
+        transition: "background 0.2s ease",
+        justifyContent: collapsed ? "center" : "flex-start",
+      }}
+      title={collapsed ? label : ""}
+    >
+      <i className={`bi ${icon} fs-5`}></i>
+      {!collapsed && <span>{label}</span>}
+    </NavLink>
   );
 };
 

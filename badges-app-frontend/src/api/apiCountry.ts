@@ -6,32 +6,49 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// ✅ Get all countries
+// ✅ Attach Authorization header dynamically
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token");
+  
+  if (token) {
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${token}`,
+    };
+  }
+  
+  return config;
+});
+
+// ✅ Example API calls
 export const fetchCountries = async (): Promise<CountryDTO[]> => {
-  const response = await api.get<CountryDTO[]>('');
+  const response = await api.get<CountryDTO[]>("");
   return response.data;
 };
 
-// ✅ Get country by ID
 export const fetchCountryById = async (id: number): Promise<CountryDTO> => {
   const response = await api.get<CountryDTO>(`/${id}`);
   return response.data;
 };
 
-// ✅ Create new country
-export const createCountry = async (country: Omit<CountryDTO, "id">): Promise<CountryDTO> => {
-  const response = await api.post<CountryDTO>('', country);
+export const createCountry = async (
+  country: Omit<CountryDTO, "id">
+): Promise<CountryDTO> => {
+  const response = await api.post<CountryDTO>("", country);
   return response.data;
 };
 
-// ✅ Update country
-export const updateCountry = async (id: number, country: Omit<CountryDTO, "id">): Promise<CountryDTO> => {
+export const updateCountry = async (
+  id: number,
+  country: Omit<CountryDTO, "id">
+): Promise<CountryDTO> => {
   const response = await api.put<CountryDTO>(`/${id}`, country);
   return response.data;
 };
 
-// ✅ Delete country
 export const deleteCountry = async (id: number): Promise<string> => {
   const response = await api.delete<string>(`/${id}`);
   return response.data;
 };
+
+export default api;

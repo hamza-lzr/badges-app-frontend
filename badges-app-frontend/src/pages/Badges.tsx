@@ -247,9 +247,8 @@ const Badges: React.FC = () => {
           <table className="table table-hover align-middle">
             <thead className="table-light">
               <tr>
-                <th>#</th>
-                <th>Matricule</th>
                 <th>Employee</th>
+                <th>Matricule</th>
                 <th>Email</th>
                 <th>Company</th>
                 <th>Badges</th>
@@ -257,17 +256,16 @@ const Badges: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredEmployees.map((emp, index) => (
+              {filteredEmployees.map((emp) => (
                 <tr key={emp.id}>
-                  <td>
-                    <span className="badge bg-secondary">{index + 1}</span>
-                  </td>
-                  <td>{emp.matricule}</td>
                   <td>
                     <strong>
                       {emp.firstName} {emp.lastName}
                     </strong>
                   </td>
+                 
+                  <td>{emp.matricule}</td>
+                  
                   <td>{emp.email}</td>
                   <td>{companies[emp.companyId] || "Unknown"}</td>
                   <td>

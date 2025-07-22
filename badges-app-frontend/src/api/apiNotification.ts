@@ -7,6 +7,20 @@ const api = axios.create({
 
 });
 
+// ✅ Attach Authorization header dynamically
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token");
+  
+  if (token) {
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${token}`,
+    };
+  }
+  
+  return config;
+});
+
 export const fetchNotifications = async (): Promise<NotificationDTO[]> => {
     const response = await api.get<NotificationDTO[]>(``);
     return response.data;

@@ -1,5 +1,5 @@
 export type ReqStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
-export type ReqType = 'NEW_BADGE' | 'RENEWAL' | 'LOST_BADGE';
+export type ReqType = 'AIRPORT_ACCESS' | 'BADGE_RENEWAL' | 'NEW_BADGE' | 'COMPANY' | 'OTHER';
 
 export interface Request {
     id: number;

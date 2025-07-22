@@ -199,7 +199,6 @@ const Employees: React.FC = () => {
           <table className="table table-hover align-middle">
             <thead className="table-light">
               <tr>
-                <th>#</th>
                 <th
                   style={{ cursor: "pointer" }}
                   onClick={() => handleSort("matricule")}
@@ -210,7 +209,7 @@ const Employees: React.FC = () => {
                   style={{ cursor: "pointer" }}
                   onClick={() => handleSort("firstName")}
                 >
-                  Name {sortKey === "firstName" && (sortAsc ? "▲" : "▼")}
+                  Full Name {sortKey === "firstName" && (sortAsc ? "▲" : "▼")}
                 </th>
                 <th>Email</th>
                 <th>Phone</th>
@@ -226,11 +225,9 @@ const Employees: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredEmployees.map((emp, index) => (
+              {filteredEmployees.map((emp) => (
                 <tr key={emp.id}>
-                  <td>
-                    <span className="badge bg-secondary">{index + 1}</span>
-                  </td>
+                 
                   <td>{emp.matricule || "—"}</td>
                   <td>
                     <strong>
