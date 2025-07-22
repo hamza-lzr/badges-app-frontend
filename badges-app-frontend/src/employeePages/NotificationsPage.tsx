@@ -8,20 +8,29 @@ const EmployeeNotificationsPage: React.FC = () => {
   const [notifications, setNotifications] = useState<NotificationDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadNotifications = async () => {
-      try {
-        const data = await fetchMyNotifications();
-        setNotifications(data);
-              await markAllNotificationsAsRead();
-      } catch (err) {
-        console.error("Failed to load notifications", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadNotifications();
-  }, []);
+useEffect(() => {
+  const loadNotifications = async () => {
+    try {
+      const data = await fetchMyNotifications();
+
+      // ✅ Sort newest first (most recent date → first)
+      const sorted = [...data].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      setNotifications(sorted);
+
+      // ✅ Mark all as read after loading
+      await markAllNotificationsAsRead();
+    } catch (err) {
+      console.error("Failed to load notifications", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  loadNotifications();
+}, []);
+
 
     const handleMarkAsRead = async (id?: number) => {
     if (!id) return;

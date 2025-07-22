@@ -22,6 +22,8 @@ import ProtectedRoute from "./components/ProtectedRoute"; //  wrapper
 import EmployeeProtectedRoute from "./employeeComponents/EmployeeProtectedRoute"; //  employee wrapper
 import EmployeeBadgesPage from "./employeePages/BadgesPage";
 import EmployeeNotificationsPage from "./employeePages/NotificationsPage";
+import ProfilePage from "./employeePages/ProfilePage";
+import EmployeeAccessesPage from "./employeePages/AccessesPage";
 
 const App = () => {
   return (
@@ -53,6 +55,8 @@ const App = () => {
       <Route path="home" element={<HomePage />} />
       <Route path="badges" element={<EmployeeBadgesPage />} />
       <Route path="notifications" element={<EmployeeNotificationsPage />} />
+      <Route path ="profile" element={<ProfilePage />} />
+      <Route path="accesses" element={<EmployeeAccessesPage />} />
     </Route>
   </Route>
       </Routes>

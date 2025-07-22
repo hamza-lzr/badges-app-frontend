@@ -60,3 +60,9 @@ export const updateAccess = async (id: number, access: AccessDTO): Promise<Acces
 export const deleteAccess = async (id: number): Promise<void> => {
   await api.delete(`/${id}`);
 };
+
+export const fetchMyAccesses = async (): Promise<AccessDTO[]> => {
+  const response = await api.get<AccessDTO[]>(`/my`);
+  return response.data;
+};
+

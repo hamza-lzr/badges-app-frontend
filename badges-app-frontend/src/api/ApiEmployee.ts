@@ -93,3 +93,8 @@ export const addOrUpdateCompany = async (
   const { data } = await api.put<UserDTO>(`/${id}/company`, companyId);
   return data;
 };
+
+export const fetchMyProfile = async (): Promise<UserDTO> => {
+  const { data } = await api.get<UserDTO>("/me");
+  return data;
+};
