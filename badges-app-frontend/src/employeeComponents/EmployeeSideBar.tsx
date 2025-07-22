@@ -1,6 +1,11 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { ListGroup, Button } from "react-bootstrap";
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "react-bootstrap";
+
+interface SidebarProps {
+  collapsed: boolean;
+  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
 const sidebarLinks = [
   { to: "/employee/profile", icon: "bi-person-circle", label: "My Profile" },
@@ -10,60 +15,145 @@ const sidebarLinks = [
   { to: "/employee/requests", icon: "bi-send", label: "Send a Request" },
 ];
 
-const EmployeeSideBar: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
+
+
+
+const EmployeeSideBar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+    const handleLogout = async () => {
+    const refreshToken = localStorage.getItem("refresh_token");
+
+    try {
+      if (refreshToken) {
+        await axios.post(
+          "http://localhost:8081/realms/ram/protocol/openid-connect/logout",
+          new URLSearchParams({
+            client_id: "ram-badges",
+            refresh_token: refreshToken,
+          }),
+          { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        );
+      }
+    } catch (err) {
+      console.warn("Keycloak logout failed, clearing tokens anyway.", err);
+    }
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    navigate("/employee/login");
+  };
+
 
   return (
     <div
-      className={`bg-white border-end shadow-sm d-flex flex-column`}
+      className={`d-flex flex-column`}
       style={{
-        width: collapsed ? 60 : 210,
+        width: collapsed ? 70 : 220,
         minHeight: "100vh",
-        transition: "width 0.2s",
+        background: "#1c1c1c", // ✅ Dark background
+        color: "#fff",
+        transition: "width 0.25s ease",
         position: "fixed",
         left: 0,
         top: 0,
-        zIndex: 100,
+        zIndex: 1000,
       }}
     >
-      <div className="d-flex align-items-center justify-content-between px-3 py-3 border-bottom">
+      {/* ✅ Sidebar Header */}
+      <div
+        className="d-flex align-items-center justify-content-between px-3 py-3 border-bottom"
+        style={{ borderColor: "rgba(255,255,255,0.1)" }}
+      >
         {!collapsed && (
-          <span className="fw-bold text-primary" style={{ fontSize: "1.1rem" }}>
-            Employee
+          <span
+            className="fw-bold"
+            style={{ fontSize: "1.1rem", color: "#f5f5f5" }}
+          >
+            Employee Portal
           </span>
         )}
         <Button
-          variant="light"
+          variant="outline-light"
           size="sm"
-          className="p-1"
+          className="border-0"
+          style={{
+            background: "transparent",
+            color: "#ccc",
+            padding: "4px",
+          }}
           onClick={() => setCollapsed((c) => !c)}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          <i className={`bi ${collapsed ? "bi-chevron-double-right" : "bi-chevron-double-left"}`}></i>
+          <i
+            className={`bi ${
+              collapsed ? "bi-chevron-double-right" : "bi-chevron-double-left"
+            }`}
+          ></i>
         </Button>
       </div>
-      <ListGroup variant="flush" className="flex-grow-1">
-        {sidebarLinks.map((link) => (
-          <ListGroup.Item
-            key={link.to}
-            as={Link}
-            to={link.to}
-            className={`d-flex align-items-center gap-2 border-0 rounded-0 px-3 py-3 ${
-              location.pathname === link.to ? "bg-primary text-white" : "bg-white text-dark"
-            }`}
-            style={{
-              fontWeight: location.pathname === link.to ? 600 : 400,
-              fontSize: "1rem",
-              transition: "background 0.15s",
-              justifyContent: collapsed ? "center" : "flex-start",
-            }}
-          >
-            <i className={`bi ${link.icon}`} style={{ fontSize: "1.3rem" }}></i>
-            {!collapsed && <span>{link.label}</span>}
-          </ListGroup.Item>
-        ))}
-      </ListGroup>
+
+      {/* ✅ Navigation Links */}
+      <div className="flex-grow-1 d-flex flex-column">
+        {sidebarLinks.map((link) => {
+          const active = location.pathname === link.to;
+          return (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`d-flex align-items-center px-3 py-3 sidebar-link ${
+                active ? "active-link" : ""
+              }`}
+              style={{
+                gap: collapsed ? 0 : 12,
+                color: active ? "#fff" : "#bbb",
+                fontWeight: active ? 600 : 400,
+                fontSize: "0.95rem",
+                textDecoration: "none",
+                justifyContent: collapsed ? "center" : "flex-start",
+                transition: "background 0.2s ease",
+              }}
+            >
+              <i
+                className={`bi ${link.icon}`}
+                style={{
+                  fontSize: "1.4rem",
+                  color: active ? "#fff" : "#ccc",
+                }}
+              ></i>
+              {!collapsed && <span>{link.label}</span>}
+            </Link>
+          );
+        })}
+      </div>
+
+
+        {/* Logout Button pinned at bottom */}
+      <div className="p-3 border-top border-secondary mt-auto">
+        <button
+          className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2"
+          onClick={handleLogout}
+          title="Logout"
+        >
+          <i className="bi bi-box-arrow-right"></i>
+          {!collapsed && "Logout"}
+        </button>
+      </div>
+
+      {/* ✅ Extra styling */}
+      <style>
+        {`
+          .sidebar-link:hover {
+            background: rgba(255,255,255,0.05);
+            color: #fff !important;
+          }
+          .active-link {
+            background: rgba(255,255,255,0.1);
+            border-left: 4px solid #b11e2f;
+            color: #fff !important;
+          }
+        `}
+      </style>
     </div>
   );
 };

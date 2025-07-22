@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Row, Col } from "react-bootstrap";
+import { Card, Row, Col, Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 const gridItems = [
@@ -35,26 +35,89 @@ const gridItems = [
   },
 ];
 
+// ✅ Color palette
+const accentRed = "#b11e2f"; // Subtle Royal Air Maroc accent
+const softGrey = "#f8f9fa";  // Background grey
+const textGrey = "#555";     // Neutral text color
+
 const HomePage: React.FC = () => {
   return (
-    <div className="container py-5">
-      <h2 className="mb-4 fw-semibold text-center">Welcome to Your Employee Portal</h2>
-      <Row className="g-4 justify-content-center">
-        {gridItems.map((item) => (
-          <Col key={item.title} xs={12} sm={6} md={4} lg={3}>
-            <Link to={item.link} style={{ textDecoration: "none" }}>
-              <Card className="h-100 shadow-sm border-0 hover-shadow transition">
-                <Card.Body className="d-flex flex-column align-items-center justify-content-center text-center py-4">
-                  <i className={`bi ${item.icon} mb-3`} style={{ fontSize: "2.5rem", color: "#0d6efd" }}></i>
-                  <Card.Title className="fw-bold mb-2" style={{ color: "#222" }}>{item.title}</Card.Title>
-                  <Card.Text className="text-muted small">{item.description}</Card.Text>
-                </Card.Body>
-              </Card>
-            </Link>
-          </Col>
-        ))}
-      </Row>
-    </div>
+    <>
+      {/* ✅ Minimalist Hero */}
+      <div className="py-5 mb-4" style={{ background: softGrey }}>
+        <Container className="text-center">
+          <h1 className="fw-semibold mb-2" style={{ color: "#222" }}>
+            Employee Portal
+          </h1>
+          <p className="text-muted mb-0" style={{ fontSize: "1.05rem" }}>
+            Access your profile, badges, requests, and notifications in one place.
+          </p>
+        </Container>
+      </div>
+
+      {/* ✅ Grid of Features */}
+      <Container className="pb-5">
+        <Row className="g-4 justify-content-center">
+          {gridItems.map((item) => (
+            <Col key={item.title} xs={12} sm={6} md={4} lg={3}>
+              <Link
+                to={item.link}
+                style={{ textDecoration: "none" }}
+                className="d-block h-100"
+              >
+                <Card
+                  className="h-100 border-0 shadow-sm rounded-4 hover-card"
+                  style={{ background: "#fff" }}
+                >
+                  <Card.Body className="d-flex flex-column align-items-center text-center p-4">
+                    {/* ✅ Subtle icon with minimalist background */}
+                    <div
+                      className="d-flex align-items-center justify-content-center mb-3 rounded-circle"
+                      style={{
+                        width: "60px",
+                        height: "60px",
+                        background: softGrey,
+                      }}
+                    >
+                      <i
+                        className={`bi ${item.icon}`}
+                        style={{
+                          fontSize: "1.8rem",
+                          color: accentRed,
+                        }}
+                      ></i>
+                    </div>
+
+                    <Card.Title
+                      className="fw-semibold mb-2"
+                      style={{ color: "#222" }}
+                    >
+                      {item.title}
+                    </Card.Title>
+                    <Card.Text className="text-muted small" style={{ color: textGrey }}>
+                      {item.description}
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
+              </Link>
+            </Col>
+          ))}
+        </Row>
+      </Container>
+
+      {/* ✅ Hover animation */}
+      <style>
+        {`
+          .hover-card {
+            transition: all 0.25s ease;
+          }
+          .hover-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+          }
+        `}
+      </style>
+    </>
   );
 };
 

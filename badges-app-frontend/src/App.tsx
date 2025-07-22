@@ -16,8 +16,12 @@ import Accesses from "./pages/Accesses";
 import Notifications from "./pages/Notifications";
 import EmployeeLayout from "./employeeComponents/EmployeeLayout";
 import HomePage from "./employeePages/HomePage";
-import LoginPage from "./pages/LoginPage"; // ✅ new login page
-import ProtectedRoute from "./components/ProtectedRoute"; // ✅ wrapper
+import EmployeeLoginPage from "./employeePages/LoginPage";
+import LoginPage from "./pages/LoginPage"; //  new login page
+import ProtectedRoute from "./components/ProtectedRoute"; //  wrapper
+import EmployeeProtectedRoute from "./employeeComponents/EmployeeProtectedRoute"; //  employee wrapper
+import EmployeeBadgesPage from "./employeePages/BadgesPage";
+import EmployeeNotificationsPage from "./employeePages/NotificationsPage";
 
 const App = () => {
   return (
@@ -25,6 +29,7 @@ const App = () => {
       <Routes>
         {/* ✅ Public route for login */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/employee/login" element={<EmployeeLoginPage />} />
 
         {/* ✅ Protected admin routes */}
         <Route element={<ProtectedRoute />}>
@@ -42,10 +47,14 @@ const App = () => {
           </Route>
         </Route>
 
-        {/* ✅ Employee routes (could also be protected) */}
-        <Route path="/employee" element={<EmployeeLayout />}>
-          <Route path="home" element={<HomePage />} />
-        </Route>
+        {/* ✅ Protected Employee route */}
+  <Route element={<EmployeeProtectedRoute />}>
+    <Route path="/employee" element={<EmployeeLayout />}>
+      <Route path="home" element={<HomePage />} />
+      <Route path="badges" element={<EmployeeBadgesPage />} />
+      <Route path="notifications" element={<EmployeeNotificationsPage />} />
+    </Route>
+  </Route>
       </Routes>
     </Router>
   );

@@ -57,3 +57,9 @@ export const updateBadgeExpiryDate = async (id: number, expiryDate: string): Pro
     return response.data;
 };
 
+export const fetchBadgesByEmployee = async (): Promise<BadgeDTO[]> => {
+    const response = await api.get<BadgeDTO[]>(`/my`);
+    return response.data;
+};
+
+

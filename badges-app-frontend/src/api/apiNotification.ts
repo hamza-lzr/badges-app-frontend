@@ -56,4 +56,15 @@ export const markNotificationAsRead = async (id: number): Promise<NotificationDT
     return response.data;
 };
 
+export const fetchMyNotifications = async (): Promise<NotificationDTO[]> => {
+  const response = await api.get<NotificationDTO[]>("/my");
+  return response.data;
+};
+
+export const markAllNotificationsAsRead = async (): Promise<void> => {
+ api.put("mark-all-read");
+
+};
+
+
 

@@ -15,7 +15,7 @@ const CitiesPage: React.FC = () => {
   const [loadingCities, setLoadingCities] = useState(true);
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newCity, setNewCity] = useState<CityDTO>({ name: "", countryId: countryId || "" });
+  const [newCity, setNewCity] = useState<CityDTO>({ name: "", countryId: Number(countryId) || 0 });
 
   useEffect(() => {
     if (countryId) {
@@ -39,8 +39,8 @@ const CitiesPage: React.FC = () => {
     e.preventDefault();
     if (!countryId) return;
     try {
-      await createCity({ ...newCity, countryId: countryId });
-      setNewCity({ name: "", countryId: countryId });
+      await createCity({ ...newCity, countryId: Number(countryId) });
+      setNewCity({ name: "", countryId: Number(countryId) });
       setShowAddForm(false);
       loadCities(Number(countryId));
     } catch (error) {
