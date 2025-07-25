@@ -4,6 +4,7 @@ import { fetchEmployees } from "../api/ApiEmployee";
 import { createBadge, fetchBadgeById, fetchBadges } from "../api/apiBadge";
 import { fetchCompanies } from "../api/apiCompany";
 import type { UserDTO, BadgeDTO } from "../types";
+import { useLocation, useNavigate } from "react-router-dom";
 
 type BadgeMap = Record<number, BadgeDTO>;
 
@@ -32,8 +33,13 @@ const Badges: React.FC = () => {
 
   const [submitting, setSubmitting] = useState(false);
 
+      const location = useLocation();
+    const navigate = useNavigate();
+
   // ✅ Fetch all data initially
   useEffect(() => {
+
+    
     const loadAll = async () => {
       await loadCompanies();
       await loadBadges();
@@ -41,6 +47,28 @@ const Badges: React.FC = () => {
     };
     loadAll();
   }, []);
+
+   useEffect(() => {
+    const state = (location.state || {}) as {
+      openGenerateModalForUser?: number;
+    };
+
+    // if the router told us to open for a specific user…
+    if (state.openGenerateModalForUser != null && employees.length) {
+      const user = employees.find((e) => e.id === state.openGenerateModalForUser);
+      if (user) {
+        openGenerateBadgeModal(user);
+        // clear the router‐state so it doesn’t re‑fire
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [
+    location.state,     // watch for incoming router‐state
+    employees,          // only fire once we actually have employees
+    navigate,
+    location.pathname,
+  ]);
+
 
   const loadCompanies = async () => {
     try {

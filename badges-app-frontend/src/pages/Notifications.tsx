@@ -1,18 +1,43 @@
-import React, { useEffect, useState } from "react";
-import { fetchNotifications, createNotification, deleteNotification, markNotificationAsRead } from "../api/apiNotification";
+import React, { useEffect, useState, useMemo } from "react";
+import {
+  fetchNotifications,
+  createNotification,
+  deleteNotification,
+  markNotificationAsRead,
+} from "../api/apiNotification";
 import { fetchEmployees } from "../api/ApiEmployee";
 import type { NotificationDTO, UserDTO } from "../types";
-import { Modal, Button, Form } from "react-bootstrap";
+import {
+  Modal,
+  Button,
+  Form,
+  Card,
+  Row,
+  Col,
+  Table,
+  Badge,
+  Spinner,
+  Pagination,
+} from "react-bootstrap";
 
 const Notifications: React.FC = () => {
+  // --- Data ---
   const [notifications, setNotifications] = useState<NotificationDTO[]>([]);
+  const [employees, setEmployees] = useState<UserDTO[]>([]);
+  const [userMap, setUserMap] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
 
-  // For user lookup
-  const [employees, setEmployees] = useState<UserDTO[]>([]);
-  const [userMap, setUserMap] = useState<Record<number, { fullName: string; matricule: string }>>({});
+  // --- Filters state ---
+  const [filterUserId, setFilterUserId] = useState<number | "">("");
+  const [filterStatus, setFilterStatus] = useState<"all" | "read" | "unread">("all");
+  const [filterFrom, setFilterFrom] = useState<string>(""); // yyyy‑mm‑dd
+  const [filterTo, setFilterTo] = useState<string>("");
 
-  // Modal state for creating a notification
+  // --- Pagination state ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // --- Modal state ---
   const [showModal, setShowModal] = useState(false);
   const [newNotification, setNewNotification] = useState<Partial<NotificationDTO>>({
     message: "",
@@ -27,10 +52,9 @@ const Notifications: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Build user map after employees are loaded
-    const map: Record<number, { fullName: string; matricule: string }> = {};
-    employees.forEach(emp => {
-      map[emp.id] = { fullName: `${emp.firstName} ${emp.lastName}`, matricule: emp.matricule };
+    const map: Record<number, string> = {};
+    employees.forEach((e) => {
+      map[e.id] = `${e.firstName} ${e.lastName} (${e.matricule})`;
     });
     setUserMap(map);
   }, [employees]);
@@ -40,136 +64,201 @@ const Notifications: React.FC = () => {
     try {
       const data = await fetchNotifications();
       setNotifications(data);
-    } catch (err) {
-      console.error("Error fetching notifications:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const loadEmployees = async () => {
-    try {
-      const data = await fetchEmployees();
-      setEmployees(data);
-    } catch (err) {
-      console.error("Error fetching employees:", err);
-    }
+    const data = await fetchEmployees();
+    setEmployees(data);
   };
 
+  // --- Handlers for create, delete, mark as read (unchanged) ---
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newNotification.message || !newNotification.userId) return;
-    try {
-      await createNotification(newNotification as NotificationDTO);
-      setShowModal(false);
-      setNewNotification({ message: "", userId: 0, read: false, createdAt: new Date().toISOString() });
-      loadNotifications();
-    } catch (err) {
-      console.error("Error creating notification:", err);
-    }
+    await createNotification(newNotification as NotificationDTO);
+    setShowModal(false);
+    setNewNotification({ message: "", userId: 0, read: false, createdAt: new Date().toISOString() });
+    loadNotifications();
   };
-
   const handleDelete = async (id?: number) => {
-    if (!id) return;
-    if (!window.confirm("Delete this notification?")) return;
-    try {
-      await deleteNotification(id);
-      loadNotifications();
-    } catch (err) {
-      console.error("Error deleting notification:", err);
-    }
+    if (!id || !window.confirm("Delete this notification?")) return;
+    await deleteNotification(id);
+    loadNotifications();
   };
-
   const handleMarkAsRead = async (id?: number) => {
     if (!id) return;
-    try {
-      await markNotificationAsRead(id);
-      loadNotifications();
-    } catch (err) {
-      console.error("Error marking as read:", err);
-    }
+    await markNotificationAsRead(id);
+    loadNotifications();
   };
+
+  // --- Apply filters ---
+  const filtered = useMemo(() => {
+    return notifications
+      .filter((n) => {
+        // by user
+        if (filterUserId && n.userId !== filterUserId) return false;
+        // by status
+        if (filterStatus === "read" && !n.read) return false;
+        if (filterStatus === "unread" && n.read) return false;
+        // by date range
+        const created = new Date(n.createdAt).toISOString().slice(0, 10);
+        if (filterFrom && created < filterFrom) return false;
+        if (filterTo && created > filterTo) return false;
+        return true;
+      });
+  }, [notifications, filterUserId, filterStatus, filterFrom, filterTo]);
+
+  // --- Pagination logic ---
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div className="container py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">Notifications Management</h2>
-        <Button variant="primary" onClick={() => setShowModal(true)}>
-          Add Notification
-        </Button>
-      </div>
+      <Row className="align-items-center mb-3">
+        <Col><h2>Notifications</h2></Col>
+        <Col className="text-end">
+          <Button onClick={() => setShowModal(true)}>Add Notification</Button>
+        </Col>
+      </Row>
 
+      {/* Filters */}
+      <Card className="mb-4">
+        <Card.Body>
+          <Row className="g-2">
+            <Col md>
+              <Form.Label>From</Form.Label>
+              <Form.Control
+                type="date"
+                value={filterFrom}
+                onChange={(e) => { setFilterFrom(e.target.value); setCurrentPage(1); }}
+              />
+            </Col>
+            <Col md>
+              <Form.Label>To</Form.Label>
+              <Form.Control
+                type="date"
+                value={filterTo}
+                onChange={(e) => { setFilterTo(e.target.value); setCurrentPage(1); }}
+              />
+            </Col>
+            <Col md>
+              <Form.Label>User</Form.Label>
+              <Form.Select
+                value={filterUserId}
+                onChange={(e) => { setFilterUserId(Number(e.target.value) || ""); setCurrentPage(1); }}
+              >
+                <option value="">All users</option>
+                {employees.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.firstName} {e.lastName}
+                  </option>
+                ))}
+              </Form.Select>
+            </Col>
+            <Col md>
+              <Form.Label>Status</Form.Label>
+              <Form.Select
+                value={filterStatus}
+                onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
+              >
+                <option value="all">All</option>
+                <option value="read">Read</option>
+                <option value="unread">Unread</option>
+              </Form.Select>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
+
+      {/* Table */}
       {loading ? (
         <div className="text-center my-5">
-          <div className="spinner-border text-primary" role="status" />
-          <p className="mt-2">Loading notifications...</p>
+          <Spinner animation="border" />
         </div>
-      ) : notifications.length === 0 ? (
-        <div className="alert alert-info text-center">No notifications found.</div>
       ) : (
-        <div className="table-responsive shadow-sm rounded">
-          <table className="table table-hover align-middle">
+        <>
+          <Table hover responsive className="shadow-sm rounded">
             <thead className="table-light">
               <tr>
                 <th>Message</th>
                 <th>User</th>
                 <th>Status</th>
                 <th>Created At</th>
-                <th style={{ width: "20%" }}>Actions</th>
+                <th className="text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {notifications.map((n) => (
+              {paginated.map((n) => (
                 <tr key={n.id}>
                   <td>{n.message}</td>
+                  <td>{userMap[n.userId] || "—"}</td>
                   <td>
-                    {userMap[n.userId]
-                      ? (
-                        <>
-                          <span>{userMap[n.userId].fullName}</span>
-                          <br />
-                          <small className="text-muted">Matricule: {userMap[n.userId].matricule}</small>
-                        </>
-                      )
-                      : <span className="text-danger">Unknown User</span>
-                    }
-                  </td>
-                  <td>
-                    {n.read ? (
-                      <span className="badge bg-success">Read</span>
-                    ) : (
-                      <span className="badge bg-warning text-dark">Unread</span>
-                    )}
+                    <Badge bg={n.read ? "success" : "warning"} text={n.read ? undefined : "dark"}>
+                      {n.read ? "Read" : "Unread"}
+                    </Badge>
                   </td>
                   <td>{new Date(n.createdAt).toLocaleString()}</td>
-                  <td>
-                    <div className="d-flex gap-2">
-                      {!n.read && (
-                        <Button
-                          size="sm"
-                          variant="outline-success"
-                          onClick={() => handleMarkAsRead(n.id)}
-                        >
-                          Mark as Read
-                        </Button>
-                      )}
+                  <td className="text-end">
+                    {!n.read && (
                       <Button
                         size="sm"
-                        variant="outline-danger"
-                        onClick={() => handleDelete(n.id)}
+                        variant="outline-success"
+                        onClick={() => handleMarkAsRead(n.id)}
+                        className="me-2"
                       >
-                        Delete
+                        Mark as Read
                       </Button>
-                    </div>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      onClick={() => handleDelete(n.id)}
+                    >
+                      Delete
+                    </Button>
                   </td>
                 </tr>
               ))}
+
+              {paginated.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="text-center text-muted">
+                    No notifications match your filters.
+                  </td>
+                </tr>
+              )}
             </tbody>
-          </table>
-        </div>
+          </Table>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Pagination className="justify-content-center">
+              <Pagination.Prev
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+              />
+              {[...Array(totalPages)].map((_, i) => (
+                <Pagination.Item
+                  key={i + 1}
+                  active={currentPage === i + 1}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </Pagination.Item>
+              ))}
+              <Pagination.Next
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              />
+            </Pagination>
+          )}
+        </>
       )}
 
-      {/* Modal for Add Notification */}
+      {/* Add-Notification Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Add Notification</Modal.Title>
@@ -197,16 +286,21 @@ const Notifications: React.FC = () => {
                 required
               >
                 <option value="">Select user</option>
-                {employees.map(emp => (
+                {employees.map((emp) => (
                   <option key={emp.id} value={emp.id}>
-                    {emp.firstName} {emp.lastName} (Matricule: {emp.matricule})
+                    {emp.firstName} {emp.lastName}
                   </option>
                 ))}
               </Form.Select>
             </Form.Group>
-            <Button type="submit" variant="primary">
-              Save
-            </Button>
+            <div className="text-end">
+              <Button variant="secondary" onClick={() => setShowModal(false)} className="me-2">
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary">
+                Save
+              </Button>
+            </div>
           </Form>
         </Modal.Body>
       </Modal>

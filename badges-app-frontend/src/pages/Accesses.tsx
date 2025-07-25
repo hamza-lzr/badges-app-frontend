@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Button, Form } from "react-bootstrap";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Modal, Button, Form , Spinner} from "react-bootstrap";
 import {
   fetchAccesses,
   createAccess,
@@ -8,20 +9,21 @@ import {
 } from "../api/apiAccess";
 import { fetchAirports } from "../api/apiAirport";
 import { fetchBadges } from "../api/apiBadge";
+import { fetchEmployees } from "../api/ApiEmployee";
 import type { AccessDTO, AirportDTO, BadgeDTO } from "../types";
 
 const AccessManagement: React.FC = () => {
   const [accessList, setAccessList] = useState<AccessDTO[]>([]);
   const [airports, setAirports] = useState<Record<number, string>>({});
-  const [badges, setBadges] = useState<Record<number, string>>({});
+  const [badges, setBadges] = useState<Record<number, BadgeDTO>>({});
+  const [employeeMap, setEmployeeMap] = useState<
+    Record<number, { fullName: string; matricule: string }>
+  >({});
   const [loading, setLoading] = useState(true);
 
+  // modal + form state
   const [showModal, setShowModal] = useState(false);
   const [editingAccess, setEditingAccess] = useState<AccessDTO | null>(null);
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [airportFilter, setAirportFilter] = useState<number | "">("");
-
   const [formData, setFormData] = useState<AccessDTO>({
     startDate: "",
     endDate: "",
@@ -29,122 +31,140 @@ const AccessManagement: React.FC = () => {
     badgeId: 0,
   });
 
-  useEffect(() => {
-    loadAll();
-  }, []);
-
-  const loadAll = async () => {
-    try {
-      setLoading(true);
-      const [accesses, airportsData, badgesData] = await Promise.all([
-        fetchAccesses(),
-        fetchAirports(),
-        fetchBadges(),
-      ]);
-
-      setAccessList(accesses);
-
-      // Map airportId -> airport name
-      const airportMap = Object.fromEntries(
-        airportsData.map((a: AirportDTO) => [a.id, `${a.name} (${a.iata})`])
-      );
-      setAirports(airportMap);
-
-      // Map badgeId -> badge code
-      const badgeMap = Object.fromEntries(
-        badgesData.map((b: BadgeDTO) => [b.id, b.code])
-      );
-      setBadges(badgeMap);
-    } catch (err) {
-      console.error("Error loading data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Badge search filter
+  // filters
+  const [searchQuery, setSearchQuery] = useState("");
+  const [airportFilter, setAirportFilter] = useState<number | "">("");
+  const [matriculeFilter, setMatriculeFilter] = useState("");
   const [badgeSearchQuery, setBadgeSearchQuery] = useState("");
 
-  // Filter badges dynamically based on search
-  const filteredBadges = Object.fromEntries(
-    Object.entries(badges).filter(([, code]) =>
-      code.toLowerCase().includes(badgeSearchQuery.toLowerCase())
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      try {
+        const [accesses, airportsData, badgesData, employeesData] =
+          await Promise.all([
+            fetchAccesses(),
+            fetchAirports(),
+            fetchBadges(),
+            fetchEmployees(),
+          ]);
+
+        setAccessList(accesses);
+
+        setAirports(
+          Object.fromEntries(
+            airportsData.map((a: AirportDTO) => [
+              a.id,
+              `${a.name} (${a.iata})`,
+            ])
+          )
+        );
+
+        setBadges(
+          Object.fromEntries(
+            badgesData.map((b) => [b.id!, b])
+          ) as Record<number, BadgeDTO>
+        );
+
+        setEmployeeMap(
+          Object.fromEntries(
+            employeesData.map((e) => [
+              e.id,
+              { fullName: `${e.firstName} ${e.lastName}`, matricule: e.matricule },
+            ])
+          )
+        );
+
+        // apply any incoming state from Requests.tsx
+        const state = (location.state || {}) as {
+          matriculeFilter?: string;
+          openAddModal?: boolean;
+        };
+        if (state.matriculeFilter) {
+          setMatriculeFilter(state.matriculeFilter);
+        }
+        if (state.openAddModal) {
+          openAddModal();
+        }
+
+        // clear it so it won't re-trigger
+        navigate(location.pathname, { replace: true, state: {} });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const filteredBadges = Object.values(badges)
+    .filter((b) =>
+      b.code.toLowerCase().includes(badgeSearchQuery.toLowerCase())
     )
-  );
+    .reduce((map, b) => {
+      map[b.id!] = b.code;
+      return map;
+    }, {} as Record<number, string>);
 
-  const openAddModal = () => {
+  const filteredAccesses = accessList.filter((a) => {
+    const q = searchQuery.toLowerCase();
+    const airportName = (airports[a.airportId] || "").toLowerCase();
+    const badgeCode = (badges[a.badgeId]?.code || "").toLowerCase();
+    const ownerId = badges[a.badgeId]?.userId;
+    const empMat = ownerId ? employeeMap[ownerId]?.matricule.toLowerCase() : "";
+
+    const matchesSearch = badgeCode.includes(q) || airportName.includes(q);
+    const matchesAirport =
+      airportFilter === "" || a.airportId === airportFilter;
+    const matchesMatricule =
+      matriculeFilter === "" || empMat.includes(matriculeFilter.toLowerCase());
+
+    return matchesSearch && matchesAirport && matchesMatricule;
+  });
+
+  function openAddModal() {
     setEditingAccess(null);
-    setFormData({
-      startDate: "",
-      endDate: "",
-      airportId: 0,
-      badgeId: 0,
-    });
+    setFormData({ startDate: "", endDate: "", airportId: 0, badgeId: 0 });
     setShowModal(true);
-  };
+  }
 
-  const openEditModal = (access: AccessDTO) => {
+  function openEditModal(access: AccessDTO) {
     setEditingAccess(access);
     setFormData({ ...access });
     setShowModal(true);
-  };
+  }
 
-  const handleDelete = async (id?: number) => {
-    if (!id) return;
-    if (!window.confirm("Are you sure you want to delete this access?")) return;
-    try {
-      await deleteAccess(id);
-      await loadAll();
-    } catch (err) {
-      console.error("Error deleting access:", err);
-    }
-  };
+  async function handleDelete(id?: number) {
+    if (!id || !window.confirm("Delete this access?")) return;
+    await deleteAccess(id);
+    setAccessList(await fetchAccesses());
+  }
 
-  const handleSave = async (e: React.FormEvent) => {
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    try {
-      if (editingAccess?.id) {
-        await updateAccess(editingAccess.id, formData);
-      } else {
-        await createAccess(formData);
-      }
-      setShowModal(false);
-      await loadAll();
-    } catch (err) {
-      console.error("Error saving access:", err);
-    }
-  };
-
-  // ✅ Filtered list
-  const filteredAccesses = accessList.filter((a) => {
-    const query = searchQuery.toLowerCase();
-    const airportName = airports[a.airportId]?.toLowerCase() || "";
-    const badgeCode = badges[a.badgeId]?.toLowerCase() || "";
-
-    const matchesSearch =
-      badgeCode.includes(query) || airportName.includes(query);
-
-    const matchesAirport =
-      airportFilter === "" || a.airportId === airportFilter;
-
-    return matchesSearch && matchesAirport;
-  });
+    if (editingAccess?.id) await updateAccess(editingAccess.id, formData);
+    else await createAccess(formData);
+    setShowModal(false);
+    setAccessList(await fetchAccesses());
+  }
 
   return (
     <div className="container py-4">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0 fw-semibold">Access Management</h2>
-        <Button variant="primary" onClick={openAddModal}>
-          Add Access
-        </Button>
+        <h2 className="fw-semibold mb-0">Access Management</h2>
+        <Button onClick={openAddModal}>Add Access</Button>
       </div>
 
       {/* Filters */}
-      <div className="d-flex gap-3 mb-4 align-items-center">
-        {/* Airport Filter */}
+      <div className="d-flex flex-wrap gap-3 mb-4">
         <Form.Select
-          style={{ maxWidth: "220px" }}
+          style={{ maxWidth: 200 }}
           value={airportFilter}
           onChange={(e) =>
             setAirportFilter(
@@ -154,27 +174,32 @@ const AccessManagement: React.FC = () => {
         >
           <option value="">All Airports</option>
           {Object.entries(airports).map(([id, name]) => (
-            <option key={id} value={id}>
-              {name}
-            </option>
+            <option key={id} value={id}>{name}</option>
           ))}
         </Form.Select>
 
-        {/* Search Field */}
         <Form.Control
           type="text"
-          placeholder="Search by badge code or airport..."
+          placeholder="Search badge code or airport…"
+          style={{ maxWidth: 250 }}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ maxWidth: "250px" }}
+        />
+
+        <Form.Control
+          type="text"
+          placeholder="Filter by employee matricule…"
+          style={{ maxWidth: 250 }}
+          value={matriculeFilter}
+          onChange={(e) => setMatriculeFilter(e.target.value)}
         />
       </div>
 
       {/* Table */}
       {loading ? (
         <div className="text-center my-5">
-          <div className="spinner-border text-primary" role="status" />
-          <p className="mt-2">Loading accesses...</p>
+          <Spinner animation="border" />
+          <p>Loading…</p>
         </div>
       ) : filteredAccesses.length === 0 ? (
         <div className="alert alert-info text-center">No accesses found.</div>
@@ -185,18 +210,16 @@ const AccessManagement: React.FC = () => {
               <tr>
                 <th>Badge</th>
                 <th>Airport</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th style={{ width: "20%" }}>Actions</th>
+                <th>Start</th>
+                <th>End</th>
+                <th style={{ width: 180 }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredAccesses.map((a) => (
                 <tr key={a.id}>
-                  <td>
-                    <strong>{badges[a.badgeId] || `Badge ${a.badgeId}`}</strong>
-                  </td>
-                  <td>{airports[a.airportId] || `Airport ${a.airportId}`}</td>
+                  <td><strong>{badges[a.badgeId]?.code}</strong></td>
+                  <td>{airports[a.airportId]}</td>
                   <td>{a.startDate}</td>
                   <td>{a.endDate}</td>
                   <td>
@@ -206,14 +229,14 @@ const AccessManagement: React.FC = () => {
                         variant="outline-secondary"
                         onClick={() => openEditModal(a)}
                       >
-                        <i className="bi bi-pencil"></i> Edit
+                        Edit
                       </Button>
                       <Button
                         size="sm"
                         variant="outline-danger"
                         onClick={() => handleDelete(a.id)}
                       >
-                        <i className="bi bi-trash"></i> Delete
+                        Delete
                       </Button>
                     </div>
                   </td>
@@ -224,7 +247,7 @@ const AccessManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Modal for Add/Edit */}
+      {/* Add/Edit Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Form onSubmit={handleSave}>
           <Modal.Header closeButton>
@@ -232,88 +255,70 @@ const AccessManagement: React.FC = () => {
               {editingAccess ? "Edit Access" : "Add New Access"}
             </Modal.Title>
           </Modal.Header>
-
           <Modal.Body>
-            {/* Airport Selector */}
-            <div className="mb-3">
+            <Form.Group className="mb-3">
               <Form.Label>Airport</Form.Label>
               <Form.Select
-                value={formData.airportId || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    airportId: Number(e.target.value),
-                  })
-                }
                 required
+                value={formData.airportId}
+                onChange={(e) =>
+                  setFormData({ ...formData, airportId: +e.target.value })
+                }
               >
-                <option value="">Select an airport</option>
+                <option value={0}>Select an airport</option>
                 {Object.entries(airports).map(([id, name]) => (
-                  <option key={id} value={id}>
-                    {name}
-                  </option>
+                  <option key={id} value={id}>{name}</option>
                 ))}
               </Form.Select>
-            </div>
+            </Form.Group>
 
-            {/* Badge Search + Selector */}
-            <div className="mb-3">
+            <Form.Group className="mb-3">
               <Form.Label>Badge</Form.Label>
-
-              {/* Search Text Field */}
               <Form.Control
-                type="text"
-                placeholder="Search badge code..."
+                className="mb-2"
+                placeholder="Search badge code…"
                 value={badgeSearchQuery}
                 onChange={(e) => setBadgeSearchQuery(e.target.value)}
-                className="mb-2"
               />
-
-              {/* Filtered Dropdown */}
               <Form.Select
-                value={formData.badgeId || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, badgeId: Number(e.target.value) })
-                }
                 required
+                value={formData.badgeId}
+                onChange={(e) =>
+                  setFormData({ ...formData, badgeId: +e.target.value })
+                }
               >
-                <option value="">Select a badge</option>
+                <option value={0}>Select a badge</option>
                 {Object.entries(filteredBadges).map(([id, code]) => (
-                  <option key={id} value={id}>
-                    {code}
-                  </option>
+                  <option key={id} value={id}>{code}</option>
                 ))}
               </Form.Select>
-            </div>
+            </Form.Group>
 
-            {/* Start Date */}
-            <div className="mb-3">
+            <Form.Group className="mb-3">
               <Form.Label>Start Date</Form.Label>
               <Form.Control
                 type="date"
+                required
                 value={formData.startDate}
                 onChange={(e) =>
                   setFormData({ ...formData, startDate: e.target.value })
                 }
-                required
               />
-            </div>
+            </Form.Group>
 
-            {/* End Date */}
-            <div className="mb-3">
+            <Form.Group className="mb-3">
               <Form.Label>End Date</Form.Label>
               <Form.Control
                 type="date"
+                required
                 value={formData.endDate}
                 onChange={(e) =>
                   setFormData({ ...formData, endDate: e.target.value })
                 }
-                required
               />
-            </div>
+            </Form.Group>
           </Modal.Body>
-
-          <Modal.Footer>
+          <Modal.Footer className="justify-content-end">
             <Button variant="secondary" onClick={() => setShowModal(false)}>
               Cancel
             </Button>

@@ -64,3 +64,13 @@ export const deleteRequest = async (id: number): Promise<string> => {
     const response = await api.delete<string>(`/${id}`);
     return response.data;
 };
+
+export const fetchMyRequests = async (): Promise<Request[]> => {
+  const response = await api.get<Request[]>('/my');
+  return response.data;
+};
+
+export const createMyRequest = async (request: Partial<Request>): Promise<Request> => {
+    const response = await api.post<Request>('/my', request);
+    return response.data;
+};

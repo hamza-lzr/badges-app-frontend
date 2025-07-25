@@ -1,11 +1,11 @@
 export type ReqStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
-export type ReqType = 'AIRPORT_ACCESS' | 'BADGE_RENEWAL' | 'NEW_BADGE' | 'COMPANY' | 'OTHER';
+export type ReqType = 'AIRPORT_ACCESS' | 'PROFILE' | 'NEW_BADGE' | 'COMPANY' | 'OTHER';
 
 export interface Request {
     id: number;
     description: string;
     reqStatus: ReqStatus;
-    employeeId: number;
+    userId: number;
     createdAt: string;
     reqType: ReqType;
 }

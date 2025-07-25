@@ -24,6 +24,7 @@ import EmployeeBadgesPage from "./employeePages/BadgesPage";
 import EmployeeNotificationsPage from "./employeePages/NotificationsPage";
 import ProfilePage from "./employeePages/ProfilePage";
 import EmployeeAccessesPage from "./employeePages/AccessesPage";
+import EmployeeRequestsPage from "./employeePages/RequestsPage";
 
 const App = () => {
   return (
@@ -57,6 +58,7 @@ const App = () => {
       <Route path="notifications" element={<EmployeeNotificationsPage />} />
       <Route path ="profile" element={<ProfilePage />} />
       <Route path="accesses" element={<EmployeeAccessesPage />} />
+      <Route path="requests" element={<EmployeeRequestsPage />} />
     </Route>
   </Route>
       </Routes>

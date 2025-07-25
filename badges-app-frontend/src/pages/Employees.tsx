@@ -5,9 +5,11 @@ import {
   updateEmployeeStatus,
   deleteEmployee,
   createEmployee,
+  
 } from "../api/ApiEmployee";
 import { fetchCompanies } from "../api/apiCompany";
 import { Modal, Button } from "react-bootstrap";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Employees: React.FC = () => {
   const [employees, setEmployees] = useState<UserDTO[]>([]);
@@ -17,6 +19,9 @@ const Employees: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<keyof UserDTO>("firstName");
   const [sortAsc, setSortAsc] = useState(true);
+
+        const location = useLocation();
+      const navigate = useNavigate();
 
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
@@ -41,6 +46,21 @@ const Employees: React.FC = () => {
     loadEmployees();
     loadCompanies();
   }, []);
+
+    useEffect(() => {
+    const state = (location.state || {}) as { openEditModalForUser?: number };
+    if (state.openEditModalForUser) {
+      const userId = state.openEditModalForUser;
+      const user = employees.find((emp) => emp.id === userId);
+      if (user) {
+        openEditModal(user);
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [    location.state,     // watch for incoming router‐state
+    employees,          // only fire once we actually have employees
+    navigate,
+    location.pathname,]);
 
   const loadEmployees = async () => {
     try {
