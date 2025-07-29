@@ -90,21 +90,28 @@ const RequestsPage: React.FC = () => {
     setRequests(await fetchRequests());
   };
 
-  const filteredRequests = useMemo(() => {
-    return requests.filter(r => {
-      // search
-      const matchesSearch =
-        r.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        getEmployeeName(r.userId).toLowerCase().includes(searchQuery.toLowerCase());
-      // status
-      const matchesStatus = statusFilter === 'ALL' || r.reqStatus === statusFilter;
-      // date range
-      const created = new Date(r.createdAt);
-      const fromOK = dateFrom ? created >= new Date(dateFrom) : true;
-      const toOK = dateTo ? created <= new Date(dateTo) : true;
-      return matchesSearch && matchesStatus && fromOK && toOK;
-    });
-  }, [requests, searchQuery, statusFilter, dateFrom, dateTo]);
+const filteredRequests = useMemo(() => {
+  const result = requests.filter(r => {
+    // search
+    const matchesSearch =
+      r.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      getEmployeeName(r.userId).toLowerCase().includes(searchQuery.toLowerCase());
+    // status
+    const matchesStatus = statusFilter === 'ALL' || r.reqStatus === statusFilter;
+    // date range
+    const created = new Date(r.createdAt);
+    const fromOK = dateFrom ? created >= new Date(dateFrom) : true;
+    const toOK = dateTo ? created <= new Date(dateTo) : true;
+    return matchesSearch && matchesStatus && fromOK && toOK;
+  });
+
+  // Sort by createdAt descending (newest first)
+  result.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  
+  return result;
+}, [requests, searchQuery, statusFilter, dateFrom, dateTo]);
 
   // pagination calculations
   const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);

@@ -4,8 +4,7 @@ import { fetchBadges } from "../api/apiBadge";
 import { fetchAirports } from "../api/apiAirport";
 import { fetchCompanies } from "../api/apiCompany";
 import { fetchRequests } from "../api/apiRequest";
-
-import type {  Request } from "../types";
+import type { Request } from "../types";
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -40,7 +39,7 @@ const Dashboard: React.FC = () => {
         fetchRequests(),
       ]);
 
-      // ✅ Build Employee Name map & Employee → Company map
+      // Build Employee Name map & Employee → Company map
       const empNameMap: Record<number, string> = {};
       const empCompanyMap: Record<number, number> = {};
       employees.forEach((emp) => {
@@ -50,26 +49,22 @@ const Dashboard: React.FC = () => {
       setEmployeeMap(empNameMap);
       setEmployeeCompanyMap(empCompanyMap);
 
-      // ✅ Build Company name map
+      // Build Company name map
       const compMap: Record<number, string> = {};
       companies.forEach((c) => {
         if (c.id) compMap[c.id] = c.name;
       });
       setCompanyMap(compMap);
 
-      // ✅ Stats
+      // Update stats
       setTotalEmployees(employees.length);
       setActiveUsers(employees.filter((e) => e.status === "ACTIVE").length);
-
       setTotalBadges(badges.length);
-      setExpiredBadges(
-        badges.filter((b) => new Date(b.expiryDate) < new Date()).length
-      );
-
+      setExpiredBadges(badges.filter((b) => new Date(b.expiryDate) < new Date()).length);
       setTotalAirports(airports.length);
       setTotalCompanies(companies.length);
 
-      // ✅ Sort requests by createdAt desc and take last 5
+      // Sort requests by createdAt desc and take the 5 most recent
       const recent = [...requests]
         .sort(
           (a, b) =>
@@ -94,32 +89,37 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="container py-4">
-      <h1 className="mb-4">Admin Dashboard</h1>
+      <h1 className="mb-4 text-center">
+        <strong>Badges Administration Dashboard</strong>
+      </h1>
 
       {loading ? (
-        <p>Loading dashboard data...</p>
+        <div className="text-center my-5">
+          <p>Loading dashboard data...</p>
+        </div>
       ) : (
         <>
-          {/* ✅ Stats */}
+          {/* Stats Section */}
           <div className="row g-4 mb-5">
-            <StatCard title="Employees (All Companies)" value={totalEmployees} />
-            <StatCard title="Badges Registered" value={totalBadges} />
-            <StatCard title="Expired Badges" value={expiredBadges} />
-            <StatCard title="Airports Registered" value={totalAirports} />
-            <StatCard title="Companies Registered" value={totalCompanies} />
-            <StatCard title="Active Users" value={activeUsers} />
+            <StatCard title="Employees" value={totalEmployees} icon="bi-people" />
+            <StatCard title="Badges Registered" value={totalBadges} icon="bi-card-checklist" />
+            <StatCard title="Expired Badges" value={expiredBadges} icon="bi-exclamation-circle" />
+            <StatCard title="Airports Registered" value={totalAirports} icon="bi-airplane" />
+            <StatCard title="Companies Registered" value={totalCompanies} icon="bi-building" />
+            <StatCard title="Active Users" value={activeUsers} icon="bi-person-check" />
           </div>
 
-          {/* ✅ Recent Requests Table */}
+          {/* Recent Requests Section */}
           <div className="card shadow-sm">
+            <div className="card-header bg-dark text-white">
+              <h5 className="mb-0">Recent Requests</h5>
+            </div>
             <div className="card-body">
-              <h5 className="card-title mb-4">Recent Requests</h5>
-
               {recentRequests.length === 0 ? (
                 <p className="text-muted">No recent requests.</p>
               ) : (
                 <div className="table-responsive">
-                  <table className="table table-bordered table-hover">
+                  <table className="table table-bordered table-hover mb-0">
                     <thead className="table-light">
                       <tr>
                         <th>Employee</th>
@@ -131,7 +131,7 @@ const Dashboard: React.FC = () => {
                     <tbody>
                       {recentRequests.map((req) => (
                         <tr key={req.id}>
-                          <td>{getEmployeeDisplay(req.employeeId)}</td>
+                          <td>{getEmployeeDisplay(req.userId)}</td>
                           <td>{req.reqType}</td>
                           <td>
                             <span className={`badge ${getStatusClass(req.reqStatus)}`}>
@@ -153,29 +153,29 @@ const Dashboard: React.FC = () => {
   );
 };
 
-// ✅ Reusable Stat Card
-const StatCard: React.FC<{ title: string; value: number }> = ({ title, value }) => (
+// Reusable Stat Card component with icon improvements
+const StatCard: React.FC<{ title: string; value: number; icon: string }> = ({ title, value, icon }) => (
   <div className="col-sm-6 col-lg-4">
     <div className="card shadow-sm border-0">
-      <div className="card-body">
-        <h6 className="text-muted">{title}</h6>
-        <h3 className="fw-bold text-primary">{value}</h3>
+      <div className="card-body d-flex align-items-center">
+        <i className={`bi ${icon} display-6 text-primary me-3`} style={{ fontSize: "2rem" }}></i>
+        <div>
+          <h6 className="text-muted">{title}</h6>
+          <h3 className="fw-bold text-primary">{value}</h3>
+        </div>
       </div>
     </div>
   </div>
 );
 
-// ✅ Bootstrap badge colors for request status
+// Function to get bootstrap badge classes for request status
 const getStatusClass = (status: string) => {
-  switch (status) {
+  switch (status.toUpperCase()) {
     case "PENDING":
-    case "Pending":
       return "bg-warning text-dark";
     case "APPROVED":
-    case "Approved":
       return "bg-success";
     case "REJECTED":
-    case "Rejected":
       return "bg-danger";
     default:
       return "bg-secondary";

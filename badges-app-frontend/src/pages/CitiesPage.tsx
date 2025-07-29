@@ -58,9 +58,10 @@ const CitiesPage: React.FC = () => {
     }
   };
 
-  const goToAirports = (cityId: number, cityName: string) => {
-    navigate(`/admin/airports/${cityId}`, { state: { cityName } });
-  };
+const goToAirports = (cityId: number, cityName: string) => {
+  // Pass the cityId as a query parameter
+  navigate(`/admin/airports?cityId=${cityId}`, { state: { cityName } });
+};
 
   return (
     <div className="container">

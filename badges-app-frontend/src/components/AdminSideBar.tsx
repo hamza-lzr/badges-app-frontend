@@ -17,28 +17,30 @@ const AdminSidebar: React.FC = () => {
     );
   }, [collapsed]);
 
-  const handleLogout = async () => {
-    const refreshToken = localStorage.getItem("refresh_token");
+const handleLogout = async () => {
+  if (!window.confirm("Are you sure you want to log out?")) return;
 
-    try {
-      if (refreshToken) {
-        await axios.post(
-          "http://localhost:8081/realms/ram/protocol/openid-connect/logout",
-          new URLSearchParams({
-            client_id: "ram-badges",
-            refresh_token: refreshToken,
-          }),
-          { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-        );
-      }
-    } catch (err) {
-      console.warn("Keycloak logout failed, clearing tokens anyway.", err);
+  const refreshToken = localStorage.getItem("refresh_token");
+
+  try {
+    if (refreshToken) {
+      await axios.post(
+        "http://localhost:8081/realms/ram/protocol/openid-connect/logout",
+        new URLSearchParams({
+          client_id: "ram-badges",
+          refresh_token: refreshToken,
+        }),
+        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+      );
     }
+  } catch (err) {
+    console.warn("Keycloak logout failed, clearing tokens anyway.", err);
+  }
 
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    navigate("/login");
-  };
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+  navigate("/login");
+};
 
   return (
     <div

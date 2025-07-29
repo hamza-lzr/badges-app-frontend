@@ -8,6 +8,7 @@ interface SidebarProps {
 }
 
 const sidebarLinks = [
+    { to: "/employee/home", icon: "bi-house", label: "Home" },
   { to: "/employee/profile", icon: "bi-person-circle", label: "My Profile" },
   { to: "/employee/badges", icon: "bi-credit-card-2-front", label: "My Badges" },
   { to: "/employee/accesses", icon: "bi-shield-check", label: "My Accesses" },
@@ -52,19 +53,19 @@ const EmployeeSideBar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) =>
       style={{
         width: collapsed ? 70 : 220,
         minHeight: "100vh",
-        background: "#1c1c1c", // ✅ Dark background
-        color: "#fff",
+        background: "#212529", // ✅ Dark background
+        color: "#ffffff",
         transition: "width 0.25s ease",
         position: "fixed",
         left: 0,
         top: 0,
-        zIndex: 1000,
+        zIndex: 1030  ,
       }}
     >
       {/* ✅ Sidebar Header */}
       <div
         className="d-flex align-items-center justify-content-between px-3 py-3 border-bottom"
-        style={{ borderColor: "rgba(255,255,255,0.1)" }}
+        style={{ borderColor: "#b11e2f", background: "#212529", color: "#f5f5f5" }}
       >
         {!collapsed && (
           <span
@@ -75,7 +76,7 @@ const EmployeeSideBar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) =>
           </span>
         )}
         <Button
-          variant="outline-light"
+          variant="outline-primary"
           size="sm"
           className="border-0"
           style={{

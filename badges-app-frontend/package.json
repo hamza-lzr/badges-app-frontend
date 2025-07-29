@@ -25,6 +25,7 @@
     "react": "^19.1.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.1.0",
+    "react-router-bootstrap": "^0.26.3",
     "react-router-dom": "^7.6.3"
   },
   "devDependencies": {
@@ -33,6 +34,7 @@
     "@types/node": "^24.1.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@types/react-router-bootstrap": "^0.26.8",
     "@vitejs/plugin-react": "^4.6.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.30.1",

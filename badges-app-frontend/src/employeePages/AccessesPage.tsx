@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Spinner, Alert, Card, Button, Row, Col, Table } from "react-bootstrap";
 import { fetchMyAccesses } from "../api/apiAccess";
 import { fetchBadgesByEmployee } from "../api/apiBadge";
@@ -14,6 +15,8 @@ const EmployeeAccessesPage: React.FC = () => {
   const [airports, setAirports] = useState<AirportDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("table");
+    const navigate = useNavigate();
+
 
   // ✅ Build quick lookup maps
   const badgeMap = badges.reduce<Record<number, string>>((acc, badge) => {
@@ -75,11 +78,19 @@ const EmployeeAccessesPage: React.FC = () => {
 
   if (accesses.length === 0) {
     return (
-      <div className="container py-5">
-        <Alert variant="info" className="text-center shadow-sm">
-          You don’t have any airport accesses assigned yet.
-        </Alert>
-      </div>
+      <Alert variant="info" className="text-center mt-5">
+        You have no airport accesses.{" "}
+        <Button
+          variant="primary"
+          onClick={() =>
+            navigate("/employee/requests", {
+              state: { openRequestModal: true, reqType: "AIRPORT_ACCESS" },
+            })
+          }
+        >
+          Request Access
+        </Button>
+      </Alert>
     );
   }
 
@@ -108,6 +119,21 @@ const EmployeeAccessesPage: React.FC = () => {
             title="Grid View"
           >
             <i className="bi bi-grid" style={{ fontSize: "1.2rem" }}></i>
+          </Button>
+
+          {/* Request Access Button */}
+          <Button
+            variant="success"
+            size="sm"
+            onClick={() =>
+              navigate("/employee/requests", {
+                state: { openRequestModal: true, reqType: "AIRPORT_ACCESS" },
+              })
+            }
+            title="Request New Access"
+          >
+            <i className="bi bi-plus-circle" style={{ fontSize: "1.2rem" }}></i>{" "}
+            Request Access
           </Button>
         </div>
       </div>

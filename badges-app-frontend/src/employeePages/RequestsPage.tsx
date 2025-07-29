@@ -13,6 +13,8 @@ import {
   Alert,
 } from "react-bootstrap";
 import { formatDistanceToNow } from "date-fns";
+import { useLocation } from "react-router-dom";
+
 
 const STATUS_OPTIONS: ReqStatus[] = ["PENDING", "APPROVED", "REJECTED"];
 const TYPE_OPTIONS: ReqType[] = [
@@ -47,6 +49,9 @@ const EmployeeRequestsPage: React.FC = () => {
   // ✅ Logged-in user
   const [currentUser, setCurrentUser] = useState<UserDTO | null>(null);
 
+   const location = useLocation();
+  const state = location.state as { openRequestModal?: boolean; reqType?: ReqType };
+
   // ✅ Fetch logged-in user first
   useEffect(() => {
     const loadUserAndRequests = async () => {
@@ -70,6 +75,16 @@ const EmployeeRequestsPage: React.FC = () => {
 
     loadUserAndRequests();
   }, []);
+
+   useEffect(() => {
+    if (state?.openRequestModal) {
+      setShowModal(true);
+      setNewRequest((prev) => ({
+        ...prev,
+        reqType: state.reqType || "OTHER",
+      }));
+    }
+  }, [state]);
 
   const filteredRequests =
     filterStatus === "ALL"

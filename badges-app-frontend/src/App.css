@@ -40,3 +40,14 @@
 .read-the-docs {
   color: #888;
 }
+
+.custom-table th,
+.custom-table td {
+  border-right: 1px solid #dee2e6;
+  padding: 0.75rem;
+}
+
+.custom-table th:last-child,
+.custom-table td:last-child {
+  border-right: none;
+}

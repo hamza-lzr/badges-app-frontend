@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Button, Spinner, Form, Row, Col } from "react-bootstrap";
+import { Modal, Button, Spinner, Form, Row, Col, Pagination } from "react-bootstrap";
 import { fetchEmployees } from "../api/ApiEmployee";
 import { createBadge, fetchBadgeById, fetchBadges } from "../api/apiBadge";
 import { fetchCompanies } from "../api/apiCompany";
 import type { UserDTO, BadgeDTO } from "../types";
 import { useLocation, useNavigate } from "react-router-dom";
+
 
 type BadgeMap = Record<number, BadgeDTO>;
 
@@ -33,13 +34,14 @@ const Badges: React.FC = () => {
 
   const [submitting, setSubmitting] = useState(false);
 
-      const location = useLocation();
-    const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // ✅ Fetch all data initially
   useEffect(() => {
-
-    
     const loadAll = async () => {
       await loadCompanies();
       await loadBadges();
@@ -48,14 +50,16 @@ const Badges: React.FC = () => {
     loadAll();
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     const state = (location.state || {}) as {
       openGenerateModalForUser?: number;
     };
 
     // if the router told us to open for a specific user…
     if (state.openGenerateModalForUser != null && employees.length) {
-      const user = employees.find((e) => e.id === state.openGenerateModalForUser);
+      const user = employees.find(
+        (e) => e.id === state.openGenerateModalForUser
+      );
       if (user) {
         openGenerateBadgeModal(user);
         // clear the router‐state so it doesn’t re‑fire
@@ -63,12 +67,11 @@ const Badges: React.FC = () => {
       }
     }
   }, [
-    location.state,     // watch for incoming router‐state
-    employees,          // only fire once we actually have employees
+    location.state, // watch for incoming router‐state
+    employees, // only fire once we actually have employees
     navigate,
     location.pathname,
   ]);
-
 
   const loadCompanies = async () => {
     try {
@@ -114,6 +117,14 @@ const Badges: React.FC = () => {
     });
   };
 
+  // Returns true only if every badge for the employee is expired
+  const employeeAllBadgesExpired = (emp: UserDTO): boolean =>
+    emp.badgesIds.every((badgeId) => {
+      const badge = badges[badgeId];
+      if (!badge) return false;
+      return new Date(badge.expiryDate) < new Date();
+    });
+
   /** ✅ Filtering logic */
   const filteredEmployees = employees.filter((emp) => {
     const companyName = companies[emp.companyId]?.toLowerCase() || "";
@@ -137,6 +148,12 @@ const Badges: React.FC = () => {
 
     return matchesSearch && matchesCompany && matchesExpired;
   });
+//Pagination
+    const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+  const paginatedEmployees = filteredEmployees.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   /** ✅ Open Generate Badge Modal */
   const openGenerateBadgeModal = (employee: UserDTO) => {
@@ -211,6 +228,34 @@ const Badges: React.FC = () => {
     setSelectedBadgeId(null);
   };
 
+    const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    return (
+      <Pagination className="justify-content-center mt-3">
+        <Pagination.Prev
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        />
+        {Array.from({ length: totalPages }).map((_, index) => {
+          const page = index + 1;
+          return (
+            <Pagination.Item
+              key={page}
+              active={page === currentPage}
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </Pagination.Item>
+          );
+        })}
+        <Pagination.Next
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        />
+      </Pagination>
+    );
+  };
+
   return (
     <div className="container py-4">
       {/* ✅ Header & Filters */}
@@ -271,83 +316,83 @@ const Badges: React.FC = () => {
           No employees found matching your search/filter.
         </div>
       ) : (
-        <div className="table-responsive shadow-sm rounded">
-          <table className="table table-hover align-middle">
-            <thead className="table-light">
-              <tr>
-                <th>Employee</th>
-                <th>Matricule</th>
-                <th>Email</th>
-                <th>Company</th>
-                <th>Badges</th>
-                <th style={{ width: "22%" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredEmployees.map((emp) => (
-                <tr key={emp.id}>
-                  <td>
-                    <strong>
-                      {emp.firstName} {emp.lastName}
-                    </strong>
-                  </td>
-                 
-                  <td>{emp.matricule}</td>
-                  
-                  <td>{emp.email}</td>
-                  <td>{companies[emp.companyId] || "Unknown"}</td>
-                  <td>
-                    {emp.badgesIds.length} badge
-                    {emp.badgesIds.length !== 1 ? "s" : ""}
-                    {/* ✅ Show small expired marker */}
-                    {employeeHasExpiredBadge(emp) && (
-                      <span className="ms-2 text-danger fw-bold">
-                        (Expired)
-                      </span>
-                    )}
-                  </td>
-                  <td className="d-flex gap-2">
-                    {/* Show available badges */}
-                    {emp.badgesIds.length > 0 && (
-                      <Form.Select
-                        size="sm"
-                        value={selectedBadgeId || ""}
-                        onChange={(e) =>
-                          setSelectedBadgeId(Number(e.target.value))
-                        }
-                        style={{ width: "150px" }}
-                      >
-                        <option value="">Select Badge</option>
-                        {emp.badgesIds.map((id) => (
-                          <option key={id} value={id}>
-                            {badges[id]?.code || `Badge ${id}`}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    )}
+<div className="card shadow-sm mb-4">
 
-                    <Button
-                      variant="outline-secondary"
+  <div className="card-body p-0">
+    <div className="table-responsive">
+      <table className="table table-hover mb-0 custom-table">
+        <thead>
+          <tr className="table-dark">
+            <th>Employee</th>
+            <th>Matricule</th>
+            <th>Email</th>
+            <th>Company</th>
+            <th>Badges</th>
+            <th style={{ width: "22%" }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {paginatedEmployees.map((emp) => (
+            <tr key={emp.id}>
+              <td>
+                <strong>
+                  {emp.firstName} {emp.lastName}
+                </strong>
+              </td>
+              <td>{emp.matricule}</td>
+              <td>{emp.email}</td>
+              <td>{companies[emp.companyId] || "Unknown"}</td>
+              <td>
+                {emp.badgesIds.length} badge
+                {emp.badgesIds.length !== 1 ? "s" : ""}
+                {emp.badgesIds.length > 0 && employeeAllBadgesExpired(emp) && (
+                  <span className="ms-2 text-danger fw-bold">(Expired)</span>
+                )}
+              </td>
+              <td>
+                <div className="d-flex gap-2">
+                  {emp.badgesIds.length > 0 && (
+                    <Form.Select
                       size="sm"
-                      onClick={() => openBadgeDetails(selectedBadgeId!)}
-                      disabled={!selectedBadgeId}
+                      value={selectedBadgeId || ""}
+                      onChange={(e) =>
+                        setSelectedBadgeId(Number(e.target.value))
+                      }
+                      style={{ width: "150px" }}
                     >
-                      View
-                    </Button>
-
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => openGenerateBadgeModal(emp)}
-                    >
-                      Add Badge
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      <option value="">Select Badge</option>
+                      {emp.badgesIds.map((id) => (
+                        <option key={id} value={id}>
+                          {badges[id]?.code || `Badge ${id}`}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  )}
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    onClick={() => openBadgeDetails(selectedBadgeId!)}
+                    disabled={!selectedBadgeId}
+                  >
+                    View
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => openGenerateBadgeModal(emp)}
+                  >
+                    Add Badge
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+    {renderPagination()}
+</div>
       )}
 
       {/* ✅ Generate Badge Modal */}

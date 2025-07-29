@@ -1,5 +1,4 @@
 import {
-  BrowserRouter as Router,
   Route,
   Routes,
 } from "react-router-dom";
@@ -28,7 +27,6 @@ import EmployeeRequestsPage from "./employeePages/RequestsPage";
 
 const App = () => {
   return (
-    <Router>
       <Routes>
         {/* ✅ Public route for login */}
         <Route path="/login" element={<LoginPage />} />
@@ -62,7 +60,6 @@ const App = () => {
     </Route>
   </Route>
       </Routes>
-    </Router>
   );
 };
 

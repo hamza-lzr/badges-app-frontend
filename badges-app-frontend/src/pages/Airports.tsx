@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import type { AirportDTO, CityDTO, CountryDTO } from "../types";
+import { useSearchParams } from "react-router-dom";
 import {
   fetchAirports,
   createAirport,
@@ -35,6 +36,9 @@ const Airports: React.FC = () => {
     name: "",
     cityId: 0,
   });
+
+  const [searchParams] = useSearchParams();
+const cityIdFilter = searchParams.get("cityId"); // Note: this will be a string if exists
 
   useEffect(() => {
     const loadAll = async () => {
@@ -117,22 +121,27 @@ const Airports: React.FC = () => {
   };
 
   /** Filters: search & country */
-  const filteredAirports = airports.filter((airport) => {
-    const query = searchQuery.toLowerCase();
-    const cityName = getCityName(airport.cityId).toLowerCase();
-    const countryName = getCountryName(airport.cityId).toLowerCase();
+// inside Airports.tsx, in your filteredAirports definition:
+const filteredAirports = airports.filter((airport) => {
+  const query = searchQuery.toLowerCase();
+  const cityName = getCityName(airport.cityId).toLowerCase();
+  const countryName = getCountryName(airport.cityId).toLowerCase();
 
-    const matchesSearch =
-      airport.name.toLowerCase().includes(query) ||
-      airport.iata.toLowerCase().includes(query) ||
-      cityName.includes(query) ||
-      countryName.includes(query);
+  const matchesSearch =
+    airport.name.toLowerCase().includes(query) ||
+    airport.iata.toLowerCase().includes(query) ||
+    cityName.includes(query) ||
+    countryName.includes(query);
 
-    const matchesCountryFilter =
-      countryFilter === "" || countryName === countryFilter.toLowerCase();
+  const matchesCountryFilter =
+    countryFilter === "" || countryName === countryFilter.toLowerCase();
 
-    return matchesSearch && matchesCountryFilter;
-  });
+  // Add filtering by city if cityIdFilter exists
+  const matchesCity =
+    cityIdFilter ? airport.cityId === Number(cityIdFilter) : true;
+
+  return matchesSearch && matchesCountryFilter && matchesCity;
+});
 
   const sortedAirports = [...filteredAirports].sort(sortFn);
 

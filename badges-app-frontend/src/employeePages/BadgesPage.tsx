@@ -79,8 +79,10 @@ const EmployeeBadgesPage: React.FC = () => {
 
       let matchesStatus = true;
       if (statusFilter !== "all") {
-        if (statusFilter === "expired") matchesStatus = isExpired(badge.expiryDate);
-        else if (statusFilter === "expiring") matchesStatus = isExpiringSoon(badge.expiryDate);
+        if (statusFilter === "expired")
+          matchesStatus = isExpired(badge.expiryDate);
+        else if (statusFilter === "expiring")
+          matchesStatus = isExpiringSoon(badge.expiryDate);
         else if (statusFilter === "active")
           matchesStatus =
             !isExpired(badge.expiryDate) && !isExpiringSoon(badge.expiryDate);
@@ -226,30 +228,17 @@ const EmployeeBadgesPage: React.FC = () => {
                       </div>
 
                       <Card.Text className="small text-muted mb-1">
-                        <i className="bi bi-building"></i> {getCompanyName(badge.companyId)}
+                        <i className="bi bi-building"></i>{" "}
+                        {getCompanyName(badge.companyId)}
                       </Card.Text>
 
                       <Card.Text className="small text-muted">
-                        <i className="bi bi-calendar-x"></i>{" "}
-                        Expires:{" "}
+                        <i className="bi bi-calendar-x"></i> Expires:{" "}
                         <strong>
                           {new Date(badge.expiryDate).toLocaleDateString()}
                         </strong>
                       </Card.Text>
                     </Card.Body>
-
-                    <Card.Footer className="bg-light text-center">
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent opening modal
-                          handleRequestModification(badge.id!);
-                        }}
-                      >
-                        <i className="bi bi-send"></i> Request Modification
-                      </Button>
-                    </Card.Footer>
                   </Card>
                 </Col>
               );
@@ -265,7 +254,11 @@ const EmployeeBadgesPage: React.FC = () => {
       <div className="text-center mt-4">
         <Button
           variant="outline-success"
-          onClick={() => navigate("/employee/requests?type=new_badge")}
+          onClick={() =>
+            navigate("/employee/requests", {
+              state: { openRequestModal: true, reqType: "NEW_BADGE" },
+            })
+          }
         >
           <i className="bi bi-plus-circle"></i> Request a New Badge
         </Button>
@@ -280,7 +273,10 @@ const EmployeeBadgesPage: React.FC = () => {
           size="lg"
         >
           <Modal.Header closeButton>
-            <Modal.Title> <strong>Badge Details</strong></Modal.Title>
+            <Modal.Title>
+              {" "}
+              <strong>Badge Details</strong>
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <p>
@@ -306,7 +302,6 @@ const EmployeeBadgesPage: React.FC = () => {
                 ? "Expiring Soon"
                 : "Active"}
             </p>
-            
           </Modal.Body>
           <Modal.Footer>
             <Button
@@ -329,4 +324,3 @@ const EmployeeBadgesPage: React.FC = () => {
 };
 
 export default EmployeeBadgesPage;
-
