@@ -25,7 +25,7 @@ import ProfilePage from "./employeePages/ProfilePage";
 import EmployeeAccessesPage from "./employeePages/AccessesPage";
 import "bootstrap/dist/css/bootstrap.min.css";
 import EmployeeRequestsPage from "./employeePages/RequestsPage";
-
+import { ToastContainer } from "react-toastify";
 const App = () => {
   return (
     <div style={{ fontFamily: "Roboto, sans-serif" }}>
@@ -62,6 +62,14 @@ const App = () => {
           </Route>
         </Route>
       </Routes>
+       <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+      />
     </div>
   );
 };

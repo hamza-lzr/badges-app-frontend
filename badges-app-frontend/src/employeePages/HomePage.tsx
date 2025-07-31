@@ -53,7 +53,7 @@ const HomePage: React.FC = () => {
         className="position-relative"
         style={{
           background: colors.lightGrey,
-          padding: "4rem 0",
+          padding: "0rem 2rem",
           marginBottom: "2rem",
         }}
       >
@@ -61,10 +61,10 @@ const HomePage: React.FC = () => {
           <img 
             src="/Logo_Royal_Air_Maroc.svg.png" 
             alt="RAM Logo" 
-            className="mb-4" 
-            height="50"
+            className="mb-3" 
+            height="150"
           />
-          <h1 className="display-5 fw-bold mb-3" style={{ color: colors.dark }}>
+          <h1 className="display-5 fw-bold mb-2" style={{ color: colors.dark }}>
             Welcome to Your Employee Portal
           </h1>
           <p className="lead mb-0" style={{ color: colors.textGrey }}>

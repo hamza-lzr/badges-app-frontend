@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import {jwtDecode} from "jwt-decode";
-import {AxiosError}  from "axios";
-
+import { jwtDecode } from "jwt-decode";
+import type { AxiosError } from "axios";
 
 // ✅ Define Keycloak token response type
 interface KeycloakTokenResponse {

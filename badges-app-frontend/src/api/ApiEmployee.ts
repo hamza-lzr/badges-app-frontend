@@ -98,3 +98,8 @@ export const fetchMyProfile = async (): Promise<UserDTO> => {
   const { data } = await api.get<UserDTO>("/me");
   return data;
 };
+
+export const changeMyPassword = async (newPassword: string): Promise<void> => {
+  await api.post("/change-password", { newPassword });
+};
+
