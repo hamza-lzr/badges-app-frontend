@@ -11,10 +11,10 @@ import {
   Row,
   Col,
   Alert,
+  Pagination,
 } from "react-bootstrap";
 import { formatDistanceToNow } from "date-fns";
 import { useLocation } from "react-router-dom";
-
 
 const STATUS_OPTIONS: ReqStatus[] = ["PENDING", "APPROVED", "REJECTED"];
 const TYPE_OPTIONS: ReqType[] = [
@@ -49,8 +49,12 @@ const EmployeeRequestsPage: React.FC = () => {
   // ✅ Logged-in user
   const [currentUser, setCurrentUser] = useState<UserDTO | null>(null);
 
-   const location = useLocation();
+  const location = useLocation();
   const state = location.state as { openRequestModal?: boolean; reqType?: ReqType };
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const requestsPerPage = 5;
 
   // ✅ Fetch logged-in user first
   useEffect(() => {
@@ -76,7 +80,7 @@ const EmployeeRequestsPage: React.FC = () => {
     loadUserAndRequests();
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     if (state?.openRequestModal) {
       setShowModal(true);
       setNewRequest((prev) => ({
@@ -115,15 +119,13 @@ const EmployeeRequestsPage: React.FC = () => {
       return;
     }
 
-
-
     try {
-await createMyRequest({
-  description: newRequest.description,
-  reqType: newRequest.reqType,
-  reqStatus: "PENDING",
-  userId: currentUser.id // ✅ ONLY send this
-});
+      await createMyRequest({
+        description: newRequest.description,
+        reqType: newRequest.reqType,
+        reqStatus: "PENDING",
+        userId: currentUser.id, // ✅ ONLY send this
+      });
       setShowModal(false);
       setNewRequest({ description: "", reqType: "OTHER" });
 
@@ -139,13 +141,25 @@ await createMyRequest({
     }
   };
 
+  // Get current requests for the active page
+  const indexOfLastRequest = currentPage * requestsPerPage;
+  const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
+  const currentRequests = filteredRequests.slice(
+    indexOfFirstRequest,
+    indexOfLastRequest
+  );
+
   return (
     <div className="container py-4" style={{ maxWidth: "800px" }}>
       {/* HEADER */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="fw-bold mb-0">My Requests</h3>
-        <Button variant="primary" onClick={() => setShowModal(true)}>
-          New Request
+        <h3 className="fw-bold" style={{ color: "#333333" }}>My Requests</h3>
+        <Button
+          variant="success"
+          className="rounded-pill shadow-sm"
+          onClick={() => setShowModal(true)}
+        >
+          <i className="bi bi-plus-circle" style={{ fontSize: "1.2rem" }}></i> New Request
         </Button>
       </div>
 
@@ -156,6 +170,7 @@ await createMyRequest({
             <Button
               variant={filterStatus === "ALL" ? "dark" : "outline-secondary"}
               size="sm"
+              className="rounded-pill shadow-sm"
               onClick={() => setFilterStatus("ALL")}
             >
               All
@@ -165,6 +180,7 @@ await createMyRequest({
                 key={s}
                 variant={filterStatus === s ? "dark" : "outline-secondary"}
                 size="sm"
+                className="rounded-pill shadow-sm"
                 onClick={() => setFilterStatus(s)}
               >
                 {formatEnum(s)}
@@ -180,24 +196,21 @@ await createMyRequest({
           <Spinner animation="border" variant="primary" />
           <p className="mt-2">Loading your requests...</p>
         </div>
-      ) : filteredRequests.length === 0 ? (
+      ) : currentRequests.length === 0 ? (
         <Alert variant="info" className="text-center shadow-sm">
-          No requests{" "}
-          {filterStatus !== "ALL" &&
-            `with status ${filterStatus.toLowerCase()}`}
-          .
+          No requests {filterStatus !== "ALL" && `with status ${filterStatus.toLowerCase()}`}.
         </Alert>
       ) : (
         <div className="d-flex flex-column gap-3">
-          {filteredRequests.map((req) => (
+          {currentRequests.map((req) => (
             <div
               key={req.id}
-              className="p-3 rounded shadow-sm border bg-white"
+              className="p-3 rounded shadow-sm border bg-white hover-shadow"
               style={{ transition: "0.2s ease-in-out" }}
             >
               {/* Header */}
               <div className="d-flex justify-content-between align-items-center mb-2">
-                <h6 className="mb-0 text-dark fw-semibold">
+                <h6 className="mb-0 text-dark fw-bold">
                   {formatEnum(req.reqType)}
                 </h6>
                 {getStatusBadge(req.reqStatus)}
@@ -209,14 +222,31 @@ await createMyRequest({
               {/* Timestamp */}
               <small className="text-muted">
                 {req.createdAt
-                  ? `Submitted ${formatDistanceToNow(
-                      new Date(req.createdAt),
-                      { addSuffix: true }
-                    )}`
+                  ? `Submitted ${formatDistanceToNow(new Date(req.createdAt), {
+                      addSuffix: true,
+                    })}`
                   : "Date unavailable"}
               </small>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {filteredRequests.length > 0 && (
+        <div className="d-flex justify-content-center mt-4">
+          <Pagination className="shadow-sm rounded-pill">
+            {[...Array(Math.ceil(filteredRequests.length / requestsPerPage))].map((_, index) => (
+              <Pagination.Item
+                key={index}
+                active={index + 1 === currentPage}
+                onClick={() => setCurrentPage(index + 1)}
+                className="rounded-pill"
+              >
+                {index + 1}
+              </Pagination.Item>
+            ))}
+          </Pagination>
         </div>
       )}
 
@@ -226,15 +256,20 @@ await createMyRequest({
         onHide={() => setShowModal(false)}
         centered
         backdrop="static"
+        className="rounded-4 shadow-sm"
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Create New Request</Modal.Title>
+        <Modal.Header closeButton className="border-0">
+          <Modal.Title className="fw-bold" style={{ color: "#333333" }}>
+            Create New Request
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleCreateRequest}>
             {/* Request Type */}
             <Form.Group className="mb-3">
-              <Form.Label>Request Type</Form.Label>
+              <Form.Label className="fw-bold" style={{ color: "#333333" }}>
+                Request Type
+              </Form.Label>
               <Form.Select
                 value={newRequest.reqType}
                 onChange={(e) =>
@@ -243,6 +278,7 @@ await createMyRequest({
                     reqType: e.target.value as ReqType,
                   })
                 }
+                className="shadow-sm rounded-pill"
               >
                 {TYPE_OPTIONS.map((t) => (
                   <option key={t} value={t}>
@@ -254,16 +290,22 @@ await createMyRequest({
 
             {/* Description */}
             <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
+              <Form.Label className="fw-bold" style={{ color: "#333333" }}>
+                Description
+              </Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 value={newRequest.description}
                 onChange={(e) =>
-                  setNewRequest({ ...newRequest, description: e.target.value })
+                  setNewRequest({
+                    ...newRequest,
+                    description: e.target.value,
+                  })
                 }
                 placeholder="Explain your request..."
                 required
+                className="shadow-sm rounded-4"
               />
             </Form.Group>
 
@@ -271,17 +313,47 @@ await createMyRequest({
               <Button
                 variant="outline-secondary"
                 onClick={() => setShowModal(false)}
-                className="me-2"
+                className="rounded-pill shadow-sm me-2"
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="primary">
+              <Button
+                type="submit"
+                variant="success"
+                className="rounded-pill shadow-sm"
+              >
                 Submit Request
               </Button>
             </div>
           </Form>
         </Modal.Body>
       </Modal>
+
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+          body {
+            font-family: 'Roboto', sans-serif;
+          }
+
+          h3, h6 {
+            font-weight: 700;
+          }
+
+          .rounded-pill {
+            border-radius: 50px;
+          }
+
+          .rounded-4 {
+            border-radius: 1rem;
+          }
+
+          .hover-shadow:hover {
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+          }
+        `}
+      </style>
     </div>
   );
 };

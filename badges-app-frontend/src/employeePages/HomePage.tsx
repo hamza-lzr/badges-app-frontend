@@ -35,66 +35,67 @@ const gridItems = [
   },
 ];
 
-// ✅ Color palette
-const accentRed = "#b11e2f"; // Subtle Royal Air Maroc accent
-const softGrey = "#f8f9fa";  // Background grey
-const textGrey = "#555";     // Neutral text color
+// RAM Brand Colors
+const colors = {
+  primary: "#C4122F",    // RAM Red
+  secondary: "#D4AF37",  // Gold accent
+  dark: "#333333",       // Dark grey
+  light: "#FFFFFF",      // White
+  lightGrey: "#F8F9FA",  // Background grey
+  textGrey: "#666666"    // Text grey
+};
 
 const HomePage: React.FC = () => {
   return (
     <>
-      {/* ✅ Minimalist Hero */}
-      <div className="py-5 mb-4" style={{ background: softGrey }}>
+      {/* Hero Section */}
+      <div 
+        className="position-relative"
+        style={{
+          background: colors.lightGrey,
+          padding: "4rem 0",
+          marginBottom: "2rem",
+        }}
+      >
         <Container className="text-center">
-          <h1 className="fw-semibold mb-2" style={{ color: "#222" }}>
-            Employee Portal
+          <img 
+            src="/Logo_Royal_Air_Maroc.svg.png" 
+            alt="RAM Logo" 
+            className="mb-4" 
+            height="50"
+          />
+          <h1 className="display-5 fw-bold mb-3" style={{ color: colors.dark }}>
+            Welcome to Your Employee Portal
           </h1>
-          <p className="text-muted mb-0" style={{ fontSize: "1.05rem" }}>
-            Access your profile, badges, requests, and notifications in one place.
+          <p className="lead mb-0" style={{ color: colors.textGrey }}>
+            Access and manage your professional credentials with Royal Air Maroc
           </p>
         </Container>
       </div>
 
-      {/* ✅ Grid of Features */}
+      {/* Grid of Features */}
       <Container className="pb-5">
-        <Row className="g-4 justify-content-center">
+        <Row className="g-4">
           {gridItems.map((item) => (
-            <Col key={item.title} xs={12} sm={6} md={4} lg={3}>
+            <Col key={item.title} xs={12} sm={6} md={6} lg={4}>
               <Link
                 to={item.link}
                 style={{ textDecoration: "none" }}
                 className="d-block h-100"
               >
                 <Card
-                  className="h-100 border-0 shadow-sm rounded-4 hover-card"
-                  style={{ background: "#fff" }}
+                  className="h-100 border-0 shadow-sm rounded-4 feature-card"
+                  style={{ background: colors.light }}
                 >
                   <Card.Body className="d-flex flex-column align-items-center text-center p-4">
-                    {/* ✅ Subtle icon with minimalist background */}
-                    <div
-                      className="d-flex align-items-center justify-content-center mb-3 rounded-circle"
-                      style={{
-                        width: "60px",
-                        height: "60px",
-                        background: softGrey,
-                      }}
-                    >
-                      <i
-                        className={`bi ${item.icon}`}
-                        style={{
-                          fontSize: "1.8rem",
-                          color: accentRed,
-                        }}
-                      ></i>
+                    <div className="icon-container mb-3">
+                      <i className={`bi ${item.icon}`}></i>
                     </div>
 
-                    <Card.Title
-                      className="fw-semibold mb-2"
-                      style={{ color: "#222" }}
-                    >
+                    <Card.Title className="h5 mb-3" style={{ color: colors.dark }}>
                       {item.title}
                     </Card.Title>
-                    <Card.Text className="text-muted small" style={{ color: textGrey }}>
+                    <Card.Text className="text-muted small">
                       {item.description}
                     </Card.Text>
                   </Card.Body>
@@ -105,15 +106,61 @@ const HomePage: React.FC = () => {
         </Row>
       </Container>
 
-      {/* ✅ Hover animation */}
+      {/* Styles */}
       <style>
         {`
-          .hover-card {
-            transition: all 0.25s ease;
+          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+          body {
+            font-family: 'Roboto', sans-serif;
           }
-          .hover-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+
+          .feature-card {
+            background: ${colors.light};
+            border-radius: 12px;
+            transition: all 0.3s ease;
+          }
+
+          .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+          }
+
+          .icon-container {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: ${colors.lightGrey};
+            transition: all 0.3s ease;
+          }
+
+          .icon-container i {
+            font-size: 1.8rem;
+            color: ${colors.primary};
+            transition: all 0.3s ease;
+          }
+
+          .feature-card:hover .icon-container {
+            background: ${colors.primary};
+          }
+
+          .feature-card:hover .icon-container i {
+            color: ${colors.light};
+          }
+          
+          .feature-card:hover .card-title {
+            color: ${colors.primary} !important;
+          }
+
+          h1, h5 {
+            font-weight: 700;
+          }
+
+          p, .card-text {
+            font-weight: 400;
           }
         `}
       </style>

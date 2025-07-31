@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Spinner,
   Alert,
@@ -10,9 +10,10 @@ import {
   Card,
   Badge as BsBadge,
   Modal,
+  Container,
 } from "react-bootstrap";
 import { fetchBadgesByEmployee } from "../api/apiBadge";
-import { fetchCompanies } from "../api/apiCompany"; // ✅ New: API to get companies
+import { fetchCompanies } from "../api/apiCompany";
 import type { BadgeDTO, CompanyDTO } from "../types";
 import { useNavigate } from "react-router-dom";
 
@@ -39,7 +40,6 @@ const EmployeeBadgesPage: React.FC = () => {
         const data = await fetchBadgesByEmployee();
         setBadges(data);
 
-        // ✅ Fetch all companies for mapping
         const companyData = await fetchCompanies();
         setCompanies(companyData);
       } catch (err) {
@@ -60,15 +60,17 @@ const EmployeeBadgesPage: React.FC = () => {
   const isExpired = (expiryDate: string) => new Date(expiryDate) < new Date();
   const isExpiringSoon = (expiryDate: string) => {
     const diff = new Date(expiryDate).getTime() - new Date().getTime();
-    return diff > 0 && diff <= 7 * 24 * 60 * 60 * 1000; // 7 days
+    return diff > 0 && diff <= 7 * 24 * 60 * 60 * 1000;
   };
 
-  const getCompanyName = (companyId: number) => {
-    const company = companies.find((c) => c.id === companyId);
-    return company ? company.name : `Company #${companyId}`;
-  };
+  const getCompanyName = useCallback(
+    (companyId: number) => {
+      const company = companies.find((c) => c.id === companyId);
+      return company ? company.name : `Company #${companyId}`;
+    },
+    [companies]
+  );
 
-  // ✅ Filter badges by search + status
   const filteredBadges = useMemo(() => {
     return badges.filter((badge) => {
       const matchesSearch =
@@ -90,9 +92,8 @@ const EmployeeBadgesPage: React.FC = () => {
 
       return matchesSearch && matchesStatus;
     });
-  }, [badges, searchTerm, statusFilter, companies]);
+  }, [badges, searchTerm, statusFilter, getCompanyName]);
 
-  // ✅ Pagination logic
   const totalPages = Math.ceil(filteredBadges.length / badgesPerPage);
   const paginatedBadges = filteredBadges.slice(
     (currentPage - 1) * badgesPerPage,
@@ -131,9 +132,9 @@ const EmployeeBadgesPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="text-center mt-5">
+      <div className="d-flex flex-column align-items-center mt-5">
         <Spinner animation="border" variant="primary" />
-        <p className="mt-2">Loading your badges...</p>
+        <p className="text-muted mt-3">Loading your badges...</p>
       </div>
     );
   }
@@ -147,10 +148,12 @@ const EmployeeBadgesPage: React.FC = () => {
   }
 
   return (
-    <div className="container py-4">
-      <h2 className="mb-4 text-center fw-semibold">My Badges</h2>
+    <Container className="py-5">
+      <div className="text-center mb-5">
+        <h1 className="fw-bold" style={{ color: "#333333" }}>My Badges</h1>
+        <p className="text-muted">Manage your badge information and requests</p>
+      </div>
 
-      {/* ✅ Filters */}
       <Row className="mb-4">
         <Col md={6} className="mb-2">
           <Form.Control
@@ -179,7 +182,6 @@ const EmployeeBadgesPage: React.FC = () => {
         </Col>
       </Row>
 
-      {/* ✅ Grid of Badge Cards */}
       {filteredBadges.length === 0 ? (
         <Alert variant="info" className="text-center shadow-sm">
           No badges found matching your criteria.
@@ -215,7 +217,7 @@ const EmployeeBadgesPage: React.FC = () => {
               return (
                 <Col key={badge.id} xs={12} sm={6} md={4} lg={4}>
                   <Card
-                    className="shadow-sm h-100 border-0 hover-shadow"
+                    className="shadow-sm h-100 border-0 hover-shadow rounded-4"
                     onClick={() => openBadgeModal(badge)}
                     style={{ cursor: "pointer" }}
                   >
@@ -228,15 +230,11 @@ const EmployeeBadgesPage: React.FC = () => {
                       </div>
 
                       <Card.Text className="small text-muted mb-1">
-                        <i className="bi bi-building"></i>{" "}
-                        {getCompanyName(badge.companyId)}
+                        <i className="bi bi-building"></i> {getCompanyName(badge.companyId)}
                       </Card.Text>
 
                       <Card.Text className="small text-muted">
-                        <i className="bi bi-calendar-x"></i> Expires:{" "}
-                        <strong>
-                          {new Date(badge.expiryDate).toLocaleDateString()}
-                        </strong>
+                        <i className="bi bi-calendar-x"></i> Expires: <strong>{new Date(badge.expiryDate).toLocaleDateString()}</strong>
                       </Card.Text>
                     </Card.Body>
                   </Card>
@@ -245,15 +243,14 @@ const EmployeeBadgesPage: React.FC = () => {
             })}
           </Row>
 
-          {/* ✅ Pagination */}
           {renderPagination()}
         </>
       )}
 
-      {/* ✅ Request new badge */}
       <div className="text-center mt-4">
         <Button
           variant="outline-success"
+          className="rounded-pill px-4 py-2 shadow-sm"
           onClick={() =>
             navigate("/employee/requests", {
               state: { openRequestModal: true, reqType: "NEW_BADGE" },
@@ -264,48 +261,58 @@ const EmployeeBadgesPage: React.FC = () => {
         </Button>
       </div>
 
-      {/* ✅ Badge Details Modal */}
       {selectedBadge && (
         <Modal
           show={showModal}
           onHide={() => setShowModal(false)}
           centered
           size="lg"
+          className="badge-modal"
         >
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {" "}
-              <strong>Badge Details</strong>
+          <Modal.Header closeButton className="border-0">
+            <Modal.Title className="text-center w-100">
+              <strong style={{ color: "#333333" }}>Badge Details</strong>
             </Modal.Title>
           </Modal.Header>
-          <Modal.Body>
-            <p>
-              <strong>Badge Code:</strong> {selectedBadge.code}
-            </p>
-            <p>
-              <strong>Company:</strong>{" "}
-              {getCompanyName(selectedBadge.companyId)}
-            </p>
-            <p>
-              <strong>Issued Date:</strong>{" "}
-              {new Date(selectedBadge.issuedDate).toLocaleDateString()}
-            </p>
-            <p>
-              <strong>Expiry Date:</strong>{" "}
-              {new Date(selectedBadge.expiryDate).toLocaleDateString()}
-            </p>
-            <p>
-              <strong>Status:</strong>{" "}
-              {isExpired(selectedBadge.expiryDate)
-                ? "Expired"
-                : isExpiringSoon(selectedBadge.expiryDate)
-                ? "Expiring Soon"
-                : "Active"}
-            </p>
+          <Modal.Body className="d-flex flex-column align-items-center">
+            <div
+              className="rounded-4 shadow-sm d-flex flex-column align-items-center justify-content-center"
+              style={{
+                width: "400px",
+                height: "250px",
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #ddd",
+                padding: "20px",
+              }}
+            >
+              <h5 className="fw-bold mb-3" style={{ color: "#333333" }}>
+                Badge Code: {selectedBadge.code}
+              </h5>
+              <p className="text-muted mb-2">
+                <i className="bi bi-building"></i> Company: {getCompanyName(selectedBadge.companyId)}
+              </p>
+              <p className="text-muted mb-2">
+                <i className="bi bi-calendar"></i> Issued Date: {new Date(selectedBadge.issuedDate).toLocaleDateString()}
+              </p>
+              <p className="text-muted mb-2">
+                <i className="bi bi-calendar-x"></i> Expiry Date: {new Date(selectedBadge.expiryDate).toLocaleDateString()}
+              </p>
+              <BsBadge
+                bg={isExpired(selectedBadge.expiryDate) ? "danger" : isExpiringSoon(selectedBadge.expiryDate) ? "warning" : "success"}
+                className="px-3 py-2 mt-3"
+              >
+                {isExpired(selectedBadge.expiryDate)
+                  ? "Expired"
+                  : isExpiringSoon(selectedBadge.expiryDate)
+                  ? "Expiring Soon"
+                  : "Active"}
+              </BsBadge>
+            </div>
           </Modal.Body>
-          <Modal.Footer>
+          <Modal.Footer className="border-0">
             <Button
               variant="outline-primary"
+              className="rounded-pill px-4 py-2 shadow-sm"
               onClick={() => {
                 handleRequestModification(selectedBadge.id!);
                 setShowModal(false);
@@ -313,13 +320,39 @@ const EmployeeBadgesPage: React.FC = () => {
             >
               <i className="bi bi-send"></i> Request Modification
             </Button>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
+            <Button
+              variant="secondary"
+              className="rounded-pill px-4 py-2 shadow-sm"
+              onClick={() => setShowModal(false)}
+            >
               Close
             </Button>
           </Modal.Footer>
         </Modal>
       )}
-    </div>
+
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+          body {
+            font-family: 'Roboto', sans-serif;
+          }
+
+          h1, h5 {
+            font-weight: 700;
+          }
+
+          p, .card-text {
+            font-weight: 400;
+          }
+
+          .rounded-pill {
+            border-radius: 50px;
+          }
+        `}
+      </style>
+    </Container>
   );
 };
 

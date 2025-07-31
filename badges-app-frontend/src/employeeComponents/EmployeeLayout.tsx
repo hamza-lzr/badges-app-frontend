@@ -41,7 +41,7 @@ const EmployeeLayout: React.FC = () => {
         expand="md"
         sticky="top"
         className="shadow-sm"
-        style={{ borderBottom: `3px solid ${accentRed}` }}
+        style={{ borderBottom: `3px solid #b11e2f`, background: "#333333" }}
       >
         <Container fluid>
           {/* Brand / logo */}

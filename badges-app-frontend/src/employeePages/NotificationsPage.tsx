@@ -63,7 +63,7 @@ const EmployeeNotificationsPage: React.FC = () => {
   return (
     <div className="container py-4" style={{ maxWidth: "700px" }}>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="fw-bold mb-0">My Notifications</h3>
+        <h3 className="fw-bold" style={{ color: "#333333" }}>My Notifications</h3>
       </div>
 
       {notifications.length === 0 ? (
@@ -76,7 +76,7 @@ const EmployeeNotificationsPage: React.FC = () => {
               return (
                 <div
                   key={notif.id}
-                  className="p-3 rounded shadow-sm"
+                  className="p-3 rounded shadow-sm hover-shadow"
                   style={{
                     background: isUnread ? "#f8f9fa" : "#fff",
                     border: "1px solid #e9ecef",
@@ -142,12 +142,13 @@ const EmployeeNotificationsPage: React.FC = () => {
 
           {/* Pagination */}
           <div className="d-flex justify-content-center mt-4">
-            <Pagination>
+            <Pagination className="shadow-sm rounded-pill">
               {[...Array(totalPages)].map((_, index) => (
                 <Pagination.Item
                   key={index}
                   active={index + 1 === currentPage}
                   onClick={() => handlePageChange(index + 1)}
+                  className="rounded-pill"
                 >
                   {index + 1}
                 </Pagination.Item>
@@ -156,6 +157,28 @@ const EmployeeNotificationsPage: React.FC = () => {
           </div>
         </>
       )}
+
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+          body {
+            font-family: 'Roboto', sans-serif;
+          }
+
+          h3 {
+            font-weight: 700;
+          }
+
+          .hover-shadow:hover {
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+          }
+
+          .rounded-pill {
+            border-radius: 50px;
+          }
+        `}
+      </style>
     </div>
   );
 };

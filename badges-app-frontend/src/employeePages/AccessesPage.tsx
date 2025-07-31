@@ -15,8 +15,7 @@ const EmployeeAccessesPage: React.FC = () => {
   const [airports, setAirports] = useState<AirportDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("table");
-    const navigate = useNavigate();
-
+  const navigate = useNavigate();
 
   // ✅ Build quick lookup maps
   const badgeMap = badges.reduce<Record<number, string>>((acc, badge) => {
@@ -98,13 +97,14 @@ const EmployeeAccessesPage: React.FC = () => {
     <div className="container py-4">
       {/* ✅ Header with view mode toggle */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-semibold">My Airport Accesses</h2>
+        <h2 className="fw-bold" style={{ color: "#333333" }}>My Airport Accesses</h2>
 
         <div className="d-flex gap-2">
           {/* Table view icon */}
           <Button
             variant={viewMode === "table" ? "primary" : "outline-secondary"}
             size="sm"
+            className="rounded-pill shadow-sm"
             onClick={() => setViewMode("table")}
             title="Table View"
           >
@@ -115,6 +115,7 @@ const EmployeeAccessesPage: React.FC = () => {
           <Button
             variant={viewMode === "grid" ? "primary" : "outline-secondary"}
             size="sm"
+            className="rounded-pill shadow-sm"
             onClick={() => setViewMode("grid")}
             title="Grid View"
           >
@@ -125,6 +126,7 @@ const EmployeeAccessesPage: React.FC = () => {
           <Button
             variant="success"
             size="sm"
+            className="rounded-pill shadow-sm"
             onClick={() =>
               navigate("/employee/requests", {
                 state: { openRequestModal: true, reqType: "AIRPORT_ACCESS" },
@@ -132,15 +134,14 @@ const EmployeeAccessesPage: React.FC = () => {
             }
             title="Request New Access"
           >
-            <i className="bi bi-plus-circle" style={{ fontSize: "1.2rem" }}></i>{" "}
-            Request Access
+            <i className="bi bi-plus-circle" style={{ fontSize: "1.2rem" }}></i> Request Access
           </Button>
         </div>
       </div>
 
       {/* ✅ TABLE VIEW */}
       {viewMode === "table" && (
-        <Table bordered hover responsive className="shadow-sm align-middle">
+        <Table bordered hover responsive className="shadow-sm align-middle rounded-4">
           <thead className="table-dark">
             <tr>
               <th>#</th>
@@ -157,7 +158,7 @@ const EmployeeAccessesPage: React.FC = () => {
               const badgeCode = badgeMap[access.badgeId] || `Badge #${access.badgeId}`;
 
               return (
-                <tr key={access.id}>
+                <tr key={access.id} className="shadow-sm">
                   <td>{idx + 1}</td>
                   <td>Access to <strong>{airportName}</strong></td>
                   <td>{badgeCode}</td>
@@ -180,20 +181,17 @@ const EmployeeAccessesPage: React.FC = () => {
 
             return (
               <Col key={access.id} xs={12} md={6} lg={4}>
-                <Card className="shadow-sm h-100">
+                <Card className="shadow-sm h-100 border-0 hover-shadow rounded-4">
                   <Card.Body>
-                    <Card.Title className="fw-bold">
+                    <Card.Title className="fw-bold text-primary">
                       Access to {airportName}
                     </Card.Title>
                     <Card.Text className="text-muted small">
                       Badge: {badgeCode}
                     </Card.Text>
                     <Card.Text>
-                      <strong>Start:</strong>{" "}
-                      {new Date(access.startDate).toLocaleDateString()}
-                      <br />
-                      <strong>End:</strong>{" "}
-                      {new Date(access.endDate).toLocaleDateString()}
+                      <strong>Start:</strong> {new Date(access.startDate).toLocaleDateString()}<br />
+                      <strong>End:</strong> {new Date(access.endDate).toLocaleDateString()}
                     </Card.Text>
                     <div>
                       <AccessStatusBadge endDate={access.endDate} />
@@ -205,6 +203,28 @@ const EmployeeAccessesPage: React.FC = () => {
           })}
         </Row>
       )}
+
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+          body {
+            font-family: 'Roboto', sans-serif;
+          }
+
+          h2 {
+            font-weight: 700;
+          }
+
+          .rounded-pill {
+            border-radius: 50px;
+          }
+
+          .hover-shadow:hover {
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+          }
+        `}
+      </style>
     </div>
   );
 };

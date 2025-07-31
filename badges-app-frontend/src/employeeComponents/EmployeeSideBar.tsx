@@ -64,8 +64,8 @@ const EmployeeSideBar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) =>
     >
       {/* ✅ Sidebar Header */}
       <div
-        className="d-flex align-items-center justify-content-between px-3 py-3 border-bottom"
-        style={{ borderColor: "#b11e2f", background: "#212529", color: "#f5f5f5" }}
+        className="d-flex align-items-center justify-content-between px-3 py-4"
+        style={{ borderColor: "#212529", background: "#212529", color: "#f5f5f5" }}
       >
         {!collapsed && (
           <span

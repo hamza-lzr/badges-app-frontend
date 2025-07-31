@@ -23,10 +23,12 @@ import EmployeeBadgesPage from "./employeePages/BadgesPage";
 import EmployeeNotificationsPage from "./employeePages/NotificationsPage";
 import ProfilePage from "./employeePages/ProfilePage";
 import EmployeeAccessesPage from "./employeePages/AccessesPage";
+import "bootstrap/dist/css/bootstrap.min.css";
 import EmployeeRequestsPage from "./employeePages/RequestsPage";
 
 const App = () => {
   return (
+    <div style={{ fontFamily: "Roboto, sans-serif" }}>
       <Routes>
         {/* ✅ Public route for login */}
         <Route path="/login" element={<LoginPage />} />
@@ -49,17 +51,18 @@ const App = () => {
         </Route>
 
         {/* ✅ Protected Employee route */}
-  <Route element={<EmployeeProtectedRoute />}>
-    <Route path="/employee" element={<EmployeeLayout />}>
-      <Route path="home" element={<HomePage />} />
-      <Route path="badges" element={<EmployeeBadgesPage />} />
-      <Route path="notifications" element={<EmployeeNotificationsPage />} />
-      <Route path ="profile" element={<ProfilePage />} />
-      <Route path="accesses" element={<EmployeeAccessesPage />} />
-      <Route path="requests" element={<EmployeeRequestsPage />} />
-    </Route>
-  </Route>
+        <Route element={<EmployeeProtectedRoute />}>
+          <Route path="/employee" element={<EmployeeLayout />}>
+            <Route path="home" element={<HomePage />} />
+            <Route path="badges" element={<EmployeeBadgesPage />} />
+            <Route path="notifications" element={<EmployeeNotificationsPage />} />
+            <Route path ="profile" element={<ProfilePage />} />
+            <Route path="accesses" element={<EmployeeAccessesPage />} />
+            <Route path="requests" element={<EmployeeRequestsPage />} />
+          </Route>
+        </Route>
       </Routes>
+    </div>
   );
 };
 
