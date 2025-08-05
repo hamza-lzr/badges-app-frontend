@@ -5,11 +5,11 @@ import {
   updateEmployeeStatus,
   deleteEmployee,
   createEmployee,
-  
 } from "../api/ApiEmployee";
 import { fetchCompanies } from "../api/apiCompany";
 import { Modal, Button } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Pagination } from "react-bootstrap";
 
 const Employees: React.FC = () => {
   const [employees, setEmployees] = useState<UserDTO[]>([]);
@@ -20,13 +20,17 @@ const Employees: React.FC = () => {
   const [sortKey, setSortKey] = useState<keyof UserDTO>("firstName");
   const [sortAsc, setSortAsc] = useState(true);
 
-        const location = useLocation();
-      const navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<UserDTO | null>(null);
+
+  //Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const [newEmployee, setNewEmployee] = useState<UserDTO>({
     id: 0,
@@ -47,7 +51,7 @@ const Employees: React.FC = () => {
     loadCompanies();
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     const state = (location.state || {}) as { openEditModalForUser?: number };
     if (state.openEditModalForUser) {
       const userId = state.openEditModalForUser;
@@ -57,10 +61,12 @@ const Employees: React.FC = () => {
         navigate(location.pathname, { replace: true, state: {} });
       }
     }
-  }, [    location.state,     // watch for incoming router‐state
-    employees,          // only fire once we actually have employees
+  }, [
+    location.state, // watch for incoming router‐state
+    employees, // only fire once we actually have employees
     navigate,
-    location.pathname,]);
+    location.pathname,
+  ]);
 
   const loadEmployees = async () => {
     try {
@@ -167,6 +173,12 @@ const Employees: React.FC = () => {
     );
   });
 
+  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+  const pageData = filteredEmployees.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const openEditModal = (employee: UserDTO) => {
     setEditingEmployee(employee);
     setShowEditModal(true);
@@ -245,9 +257,8 @@ const Employees: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredEmployees.map((emp) => (
+              {pageData.map((emp) => (
                 <tr key={emp.id}>
-                 
                   <td>{emp.matricule || "—"}</td>
                   <td>
                     <strong>
@@ -269,54 +280,79 @@ const Employees: React.FC = () => {
                     </span>
                   </td>
                   <td>
-  {/* First row: Status Actions */}
-  <div className="d-flex flex-wrap gap-2 mb-2">
-    <button
-      className="btn btn-sm btn-success flex-fill"
-      onClick={() => handleStatusChange(emp, "ACTIVE")}
-      disabled={emp.status === "ACTIVE"}
-    >
-      <i className="bi bi-check-circle me-1"></i> Activate
-    </button>
-    <button
-      className="btn btn-sm btn-secondary flex-fill"
-      onClick={() => handleStatusChange(emp, "INACTIVE")}
-      disabled={emp.status === "INACTIVE"}
-    >
-      <i className="bi bi-pause-circle me-1"></i> Deactivate
-    </button>
-    <button
-      className="btn btn-sm btn-warning text-dark flex-fill"
-      onClick={() => handleStatusChange(emp, "BLOCKED")}
-      disabled={emp.status === "BLOCKED"}
-    >
-      <i className="bi bi-slash-circle me-1"></i> Block
-    </button>
-  </div>
+                    {/* First row: Status Actions */}
+                    <div className="d-flex flex-wrap gap-2 mb-2">
+                      <button
+                        className="btn btn-sm btn-success flex-fill"
+                        onClick={() => handleStatusChange(emp, "ACTIVE")}
+                        disabled={emp.status === "ACTIVE"}
+                      >
+                        <i className="bi bi-check-circle me-1"></i> Activate
+                      </button>
+                      <button
+                        className="btn btn-sm btn-secondary flex-fill"
+                        onClick={() => handleStatusChange(emp, "INACTIVE")}
+                        disabled={emp.status === "INACTIVE"}
+                      >
+                        <i className="bi bi-pause-circle me-1"></i> Deactivate
+                      </button>
+                      <button
+                        className="btn btn-sm btn-warning text-dark flex-fill"
+                        onClick={() => handleStatusChange(emp, "BLOCKED")}
+                        disabled={emp.status === "BLOCKED"}
+                      >
+                        <i className="bi bi-slash-circle me-1"></i> Block
+                      </button>
+                    </div>
 
-  {/* Second row: Edit/Delete */}
-  <div className="d-flex flex-wrap gap-2">
-    <button
-      className="btn btn-sm btn-outline-primary flex-fill"
-      onClick={() => openEditModal(emp)}
-    >
-      <i className="bi bi-pencil-square me-1"></i> Edit
-    </button>
-    <button
-      className="btn btn-sm btn-outline-danger flex-fill"
-      onClick={() => handleDelete(emp.id)}
-    >
-      <i className="bi bi-trash me-1"></i> Delete
-    </button>
-  </div>
-</td>
-
+                    {/* Second row: Edit/Delete */}
+                    <div className="d-flex flex-wrap gap-2">
+                      <button
+                        className="btn btn-sm btn-outline-primary flex-fill"
+                        onClick={() => openEditModal(emp)}
+                      >
+                        <i className="bi bi-pencil-square me-1"></i> Edit
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-danger flex-fill"
+                        onClick={() => handleDelete(emp.id)}
+                      >
+                        <i className="bi bi-trash me-1"></i> Delete
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+  <div className="d-flex justify-content-center mt-3">
+    <Pagination>
+      <Pagination.Prev
+        onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+        disabled={currentPage === 1}
+      />
+      {[...Array(totalPages)].map((_, i) => (
+        <Pagination.Item
+          key={i}
+          active={currentPage === i + 1}
+          onClick={() => setCurrentPage(i + 1)}
+        >
+          {i + 1}
+        </Pagination.Item>
+      ))}
+      <Pagination.Next
+        onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+        disabled={currentPage === totalPages}
+      />
+    </Pagination>
+  </div>
+)}
+      
 
       {/*  Add Employee Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>

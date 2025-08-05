@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Container,
   Row,
   Col,
+  Card,
   Table,
   Form,
   InputGroup,
@@ -10,27 +11,53 @@ import {
   Badge,
   Spinner,
   Pagination,
-} from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import type { Request, ReqStatus, UserDTO } from '../types';
-import { fetchRequests, updateRequestStatus, deleteRequest } from '../api/apiRequest';
-import { fetchEmployees } from '../api/ApiEmployee';
+  OverlayTrigger,
+  Tooltip,
+  Modal,
+} from "react-bootstrap";
+import {
+  BiSearch,
+  BiFilter,
+  BiCalendar,
+  BiCheckCircle,
+  BiXCircle,
+  BiTrash,
+} from "react-icons/bi";
+import { useNavigate } from "react-router-dom";
+import {
+  fetchRequests,
+  updateRequestStatus,
+  deleteRequest,
+} from "../api/apiRequest";
+import { fetchEmployees } from "../api/ApiEmployee";
+import type { Request, ReqStatus, UserDTO } from "../types";
 
-const STATUS_OPTIONS: Array<ReqStatus | 'ALL'> = ['ALL', 'PENDING', 'APPROVED', 'REJECTED'];
+const STATUS_OPTIONS: Array<ReqStatus | "ALL"> = [
+  "ALL",
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+];
 
 const RequestsPage: React.FC = () => {
   const [requests, setRequests] = useState<Request[]>([]);
   const [employees, setEmployees] = useState<UserDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ReqStatus | 'ALL'>('ALL');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  // filters
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<ReqStatus | "ALL">("ALL");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // details modal
+  const [showDetailModal, setShowDetailModal] = useState(false);
+const [detailRequest, setDetailRequest] = useState<Request | null>(null);
+
 
   const navigate = useNavigate();
 
@@ -38,11 +65,12 @@ const RequestsPage: React.FC = () => {
     (async () => {
       setLoading(true);
       try {
-        const [reqs, emps] = await Promise.all([fetchRequests(), fetchEmployees()]);
+        const [reqs, emps] = await Promise.all([
+          fetchRequests(),
+          fetchEmployees(),
+        ]);
         setRequests(reqs);
         setEmployees(emps);
-      } catch (err) {
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -50,195 +78,290 @@ const RequestsPage: React.FC = () => {
   }, []);
 
   const getEmployeeName = (userId: number) => {
-    const emp = employees.find(e => e.id === userId);
+    const emp = employees.find((e) => e.id === userId);
     return emp ? `${emp.firstName} ${emp.lastName}` : `#${userId}`;
   };
 
   const handleStatusChange = async (req: Request, status: ReqStatus) => {
+    setLoading(true);
     await updateRequestStatus(req.id, status);
-    if (status === 'APPROVED' && req.reqType !== 'OTHER') {
-      const emp = employees.find(e => e.id === req.userId)!;
+    setRequests(await fetchRequests());
+    setLoading(false);
+
+    if (status === "APPROVED" && req.reqType !== "OTHER") {
+      const emp = employees.find((e) => e.id === req.userId)!;
       const matricule = emp.matricule;
       switch (req.reqType) {
-        case 'PROFILE':
-          navigate('/admin/employees', { state: { openEditModalForUser: req.userId } });
+        case "PROFILE":
+          navigate("/admin/employees", {
+            state: { openEditModalForUser: req.userId },
+          });
           break;
-        case 'NEW_BADGE':
-          navigate('/admin/badges', { state: { openGenerateModalForUser: req.userId } });
+        case "NEW_BADGE":
+          navigate("/admin/badges", {
+            state: { openGenerateModalForUser: req.userId },
+          });
           break;
-        case 'COMPANY':
-          navigate('/admin/companies', { state: { highlightCompanyModal: true } });
+        case "COMPANY":
+          navigate("/admin/companies", {
+            state: { highlightCompanyModal: true },
+          });
           break;
-        case 'AIRPORT_ACCESS':
-          navigate('/admin/accesses', {
+        case "AIRPORT_ACCESS":
+          navigate("/admin/accesses", {
             state: { matriculeFilter: matricule, openAddModal: false },
           });
           break;
-        default:
-          break;
       }
-    } else {
-      setLoading(true);
-      const reqs = await fetchRequests();
-      setRequests(reqs);
-      setLoading(false);
     }
   };
+
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Confirm deletion?')) return;
+    if (!window.confirm("Are you sure you want to delete?")) return;
     await deleteRequest(id);
     setRequests(await fetchRequests());
   };
 
-const filteredRequests = useMemo(() => {
-  const result = requests.filter(r => {
-    // search
-    const matchesSearch =
-      r.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      getEmployeeName(r.userId).toLowerCase().includes(searchQuery.toLowerCase());
-    // status
-    const matchesStatus = statusFilter === 'ALL' || r.reqStatus === statusFilter;
-    // date range
-    const created = new Date(r.createdAt);
-    const fromOK = dateFrom ? created >= new Date(dateFrom) : true;
-    const toOK = dateTo ? created <= new Date(dateTo) : true;
-    return matchesSearch && matchesStatus && fromOK && toOK;
-  });
+  // filter & sort
+  const filteredRequests = useMemo(() => {
+    return requests
+      .filter((r) => {
+        const q = searchQuery.toLowerCase();
+        const matchesSearch =
+          r.description.toLowerCase().includes(q) ||
+          getEmployeeName(r.userId).toLowerCase().includes(q);
+        const matchesStatus =
+          statusFilter === "ALL" || r.reqStatus === statusFilter;
+        const created = new Date(r.createdAt);
+        const fromOK = dateFrom ? created >= new Date(dateFrom) : true;
+        const toOK = dateTo ? created <= new Date(dateTo) : true;
+        return matchesSearch && matchesStatus && fromOK && toOK;
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+  }, [requests, searchQuery, statusFilter, dateFrom, dateTo]);
 
-  // Sort by createdAt descending (newest first)
-  result.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-  
-  return result;
-}, [requests, searchQuery, statusFilter, dateFrom, dateTo]);
-
-  // pagination calculations
+  // pagination
   const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
-  const pageRequests = filteredRequests.slice(
+  const pageData = filteredRequests.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const badgeVariant = (status: ReqStatus) => {
-    switch (status) {
-      case 'PENDING': return 'warning';
-      case 'APPROVED': return 'success';
-      case 'REJECTED': return 'danger';
-      default: return 'secondary';
-    }
-  };
+  const badgeVariant = (status: ReqStatus) =>
+    status === "PENDING"
+      ? "warning"
+      : status === "APPROVED"
+      ? "success"
+      : "danger";
 
   return (
-    <Container className="py-4">
-      <h2 className="mb-4">Manage Requests</h2>
+    <Container fluid className="bg-light py-3">
+      <h4 className="mb-4 fs-2 display-5 text-black font-weight-bold">Request Management</h4>
 
-      <Row className="align-items-center mb-3 g-2">
-        <Col md={4} lg={3}>
-          <Form.Control
-            placeholder="Search description or employee…"
-            value={searchQuery}
-            onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-          />
-        </Col>
-        <Col md={3} lg={2}>
-          <Form.Select
-            value={statusFilter}
-            onChange={e => { setStatusFilter(e.target.value as ReqStatus | 'ALL'); setCurrentPage(1); }}
+      {/* Filters */}
+      <Card className="mb-4 shadow-sm border-0">
+        <Card.Body className="py-3">
+          <Row className="align-items-center gx-3">
+            {/* Search */}
+            <Col xs={12} md={5} lg={4}>
+              <InputGroup className="shadow-sm rounded-pill overflow-hidden">
+                <InputGroup.Text className="bg-white border-0 px-3">
+                  <BiSearch size={20} className="text-secondary" />
+                </InputGroup.Text>
+                <Form.Control
+                  placeholder="Search by description or employee "
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="border-0 px-3"
+                />
+              </InputGroup>
+            </Col>
+
+            {/* Status */}
+            <Col xs={12} md={3} lg={2}>
+              <InputGroup className="shadow-sm rounded-pill overflow-hidden">
+                <InputGroup.Text className="bg-white border-0 px-3">
+                  <BiFilter size={20} className="text-secondary" />
+                </InputGroup.Text>
+                <Form.Select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value as ReqStatus | "ALL");
+                    setCurrentPage(1);
+                  }}
+                  className="border-0 px-3"
+                >
+                  {STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s === "ALL" ? "All Statuses" : s}
+                    </option>
+                  ))}
+                </Form.Select>
+              </InputGroup>
+            </Col>
+
+            {/* From–To Date Range */}
+            <Col xs={12} md={6} lg={4}>
+              <InputGroup className="shadow-sm rounded-pill overflow-hidden">
+                {/* calendar icon */}
+                <InputGroup.Text className="bg-white border-0 px-3">
+                  <BiCalendar size={18} className="text-secondary" />
+                </InputGroup.Text>
+                {/* From */}
+                <Form.Control
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => {
+                    setDateFrom(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="border-0 px-2"
+                />
+                <InputGroup.Text className="bg-white border-0 px-2 text-secondary">
+                  to
+                </InputGroup.Text>
+                {/* To */}
+                <Form.Control
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => {
+                    setDateTo(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="border-0 px-2"
+                />
+              </InputGroup>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
+
+      {/* Table */}
+      <Card className="shadow-sm border-0">
+        <div className="position-relative">
+          {loading && (
+            <div className="position-absolute w-100 h-100 d-flex justify-content-center align-items-center bg-white bg-opacity-75 rounded-top">
+              <Spinner animation="border" variant="primary" />
+            </div>
+          )}
+
+          <Table
+            responsive
+            hover
+            striped
+            className="mb-0"
+            style={{ borderRadius: "0 0 .375rem .375rem", overflow: "hidden" }}
           >
-            {STATUS_OPTIONS.map(s => (
-              <option key={s} value={s}>
-                {s === 'ALL' ? 'All' : s.charAt(0) + s.slice(1).toLowerCase()}
-              </option>
-            ))}
-          </Form.Select>
-        </Col>
-        <Col md={5} lg={4}>
-          <InputGroup>
-            <Form.Control
-              type="date"
-              placeholder="From"
-              value={dateFrom}
-              onChange={e => { setDateFrom(e.target.value); setCurrentPage(1); }}
-            />
-            <Form.Control
-              type="date"
-              placeholder="To"
-              value={dateTo}
-              onChange={e => { setDateTo(e.target.value); setCurrentPage(1); }}
-            />
-          </InputGroup>
-        </Col>
-      </Row>
-
-      {loading ? (
-        <div className="text-center py-5">
-          <Spinner animation="border" />
-        </div>
-      ) : (
-        <>
-          <Table hover responsive size="sm" className="shadow-sm">
-            <thead className="table-light">
+            <thead className="table-dark">
               <tr>
-                <th>#</th>
                 <th>Description</th>
-                <th>Type</th>
-                <th>Status</th>
+                <th style={{ width: "8rem" }}>Type</th>
+                <th style={{ width: "8rem" }}>Status</th>
                 <th>Employee</th>
-                <th>Created At</th>
-                <th>Actions</th>
+                <th style={{ width: "8rem" }}>Created At</th>
+                <th style={{ width: "10rem" }} className="text-end">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
-              {pageRequests.length === 0 && (
+              {pageData.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center text-muted py-4">
+                  <td colSpan={7} className="text-center py-4 text-muted">
                     No requests found.
                   </td>
                 </tr>
+              ) : (
+                pageData.map((r) => (
+                  <tr key={r.id} className="align-middle"
+                    style={{ cursor: 'pointer' }}
+  onClick={() => {
+    setDetailRequest(r);
+    setShowDetailModal(true);
+  }}
+                  >
+                    <td>{r.description}</td>
+                    <td className="text-capitalize">
+                      {r.reqType.replace("_", " ").toLowerCase()}
+                    </td>
+                    <td>
+                      <Badge bg={badgeVariant(r.reqStatus)} pill>
+                        {r.reqStatus}
+                      </Badge>
+                    </td>
+                    <td>{getEmployeeName(r.userId)}</td>
+                    <td>
+                      {new Date(r.createdAt).toLocaleString([], {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false, // or `true` if you prefer AM/PM
+                      })}
+                    </td>
+                    <td className="text-end">
+                      <OverlayTrigger
+                        placement="top"
+                        overlay={<Tooltip>Approve</Tooltip>}
+                      >
+                        <Button
+                          size="sm"
+                          variant="link"
+                          onClick={() => handleStatusChange(r, "APPROVED")}
+                          disabled={r.reqStatus === "APPROVED"}
+                          className="text-success p-1"
+                        >
+                          <BiCheckCircle size={20} />
+                        </Button>
+                      </OverlayTrigger>
+                      <OverlayTrigger
+                        placement="top"
+                        overlay={<Tooltip>Reject</Tooltip>}
+                      >
+                        <Button
+                          size="sm"
+                          variant="link"
+                          onClick={() => handleStatusChange(r, "REJECTED")}
+                          disabled={r.reqStatus === "REJECTED"}
+                          className="text-warning p-1"
+                        >
+                          <BiXCircle size={20} />
+                        </Button>
+                      </OverlayTrigger>
+                      <OverlayTrigger
+                        placement="top"
+                        overlay={<Tooltip>Delete</Tooltip>}
+                      >
+                        <Button
+                          size="sm"
+                          variant="link"
+                          onClick={() => handleDelete(r.id)}
+                          className="text-danger p-1"
+                        >
+                          <BiTrash size={20} />
+                        </Button>
+                      </OverlayTrigger>
+                    </td>
+                  </tr>
+                ))
               )}
-              {pageRequests.map((r, idx) => (
-                <tr key={r.id}>
-                  <td>{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                  <td>{r.description}</td>
-                  <td>{r.reqType.replace('_', ' ')}</td>
-                  <td>
-                    <Badge bg={badgeVariant(r.reqStatus)} pill>
-                      {r.reqStatus}
-                    </Badge>
-                  </td>
-                  <td>{getEmployeeName(r.userId)}</td>
-                  <td>{r.createdAt ? new Date(r.createdAt).toLocaleString() : 'N/A'}</td>
-                  <td>
-                    <Button
-                      size="sm"
-                      variant="outline-success"
-                      disabled={r.reqStatus === 'APPROVED'}
-                      onClick={() => handleStatusChange(r, 'APPROVED')}
-                      className="me-2"
-                    >Approve</Button>
-                    <Button
-                      size="sm"
-                      variant="outline-warning"
-                      disabled={r.reqStatus === 'REJECTED'}
-                      onClick={() => handleStatusChange(r, 'REJECTED')}
-                      className="me-2"
-                    >Reject</Button>
-                    <Button
-                      size="sm"
-                      variant="outline-danger"
-                      onClick={() => handleDelete(r.id)}
-                    >Delete</Button>
-                  </td>
-                </tr>
-              ))}
             </tbody>
           </Table>
+        </div>
 
-          {totalPages > 1 && (
-            <Pagination className="justify-content-center">
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <Card.Footer className="bg-white border-0 d-flex justify-content-center">
+            <Pagination>
               <Pagination.Prev
-                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
               />
               {[...Array(totalPages)].map((_, i) => (
@@ -246,20 +369,69 @@ const filteredRequests = useMemo(() => {
                   key={i + 1}
                   active={currentPage === i + 1}
                   onClick={() => setCurrentPage(i + 1)}
-                >{i + 1}</Pagination.Item>
+                >
+                  {i + 1}
+                </Pagination.Item>
               ))}
               <Pagination.Next
-                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
               />
             </Pagination>
-          )}
-        </>
+          </Card.Footer>
+        )}
+      </Card>
+      <Modal
+  show={showDetailModal}
+  onHide={() => setShowDetailModal(false)}
+  centered
+>
+  <Modal.Header closeButton>
+    <Modal.Title>Request Details</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <p>
+      <strong>Description:</strong><br/>
+      {detailRequest?.description}
+    </p>
+    <p>
+      <strong>Type:</strong> {detailRequest && detailRequest.reqType.replace('_', ' ')}
+    </p>
+    <p>
+      <strong>Status:</strong>{' '}
+      {detailRequest && (
+        <Badge bg={badgeVariant(detailRequest.reqStatus)} pill>
+          {detailRequest.reqStatus}
+        </Badge>
       )}
+    </p>
+    <p>
+      <strong>Employee:</strong>{' '}
+      {detailRequest && getEmployeeName(detailRequest.userId)}
+    </p>
+    <p>
+      <strong>Created At:</strong>{' '}
+      {detailRequest && new Date(detailRequest.createdAt).toLocaleString([], {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })}
+    </p>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setShowDetailModal(false)}>
+      Close
+    </Button>
+  </Modal.Footer>
+</Modal>
+
     </Container>
   );
 };
 
 export default RequestsPage;
-
-
