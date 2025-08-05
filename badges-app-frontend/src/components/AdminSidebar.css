@@ -1,0 +1,53 @@
+.admin-sidebar {
+  background-color: #111827;
+  color: white;
+  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #1f2937;
+  z-index: 1000;
+}
+
+.admin-sidebar .sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #374151;
+}
+
+.admin-sidebar .toggle-btn {
+  color: white;
+  border: none;
+  background: transparent;
+}
+
+.sidebar-link {
+  color: #cbd5e1;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-link:hover {
+  background-color: #1e293b;
+  color: white;
+}
+
+.sidebar-link.active {
+  background-color: #c4122f;
+  color: white;
+  font-weight: 600;
+}
+
+.sidebar-footer {
+  border-top: 1px solid #374151;
+}
+
+.admin-sidebar.collapsed .sidebar-link span {
+  display: none;
+}
