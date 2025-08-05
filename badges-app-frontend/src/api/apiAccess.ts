@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosRequestHeaders } from "axios";
 import type { AccessDTO } from "../types";
 
 const api = axios.create({
@@ -14,7 +14,7 @@ api.interceptors.request.use((config) => {
     config.headers = {
       ...config.headers,
       Authorization: `Bearer ${token}`,
-    };
+    } as AxiosRequestHeaders;
   }
   
   return config;

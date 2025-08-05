@@ -229,7 +229,7 @@ const Employees: React.FC = () => {
       ) : (
         <div className="table-responsive shadow-sm rounded">
           <table className="table table-hover align-middle">
-            <thead className="table-light">
+            <thead className="table-dark">
               <tr>
                 <th
                   style={{ cursor: "pointer" }}
@@ -281,23 +281,26 @@ const Employees: React.FC = () => {
                   </td>
                   <td>
                     {/* First row: Status Actions */}
-                    <div className="d-flex flex-wrap gap-2 mb-2">
+                    <div className="d-flex flex-wrap gap-1 mb-2">
                       <button
-                        className="btn btn-sm btn-success flex-fill"
+                        className="btn btn-sm btn-success"
+                        style={{ flex: "1 1 auto" }}
                         onClick={() => handleStatusChange(emp, "ACTIVE")}
                         disabled={emp.status === "ACTIVE"}
                       >
                         <i className="bi bi-check-circle me-1"></i> Activate
                       </button>
                       <button
-                        className="btn btn-sm btn-secondary flex-fill"
+                        className="btn btn-sm btn-secondary"
+                        style={{ flex: "1 1 auto" }}
                         onClick={() => handleStatusChange(emp, "INACTIVE")}
                         disabled={emp.status === "INACTIVE"}
                       >
                         <i className="bi bi-pause-circle me-1"></i> Deactivate
                       </button>
                       <button
-                        className="btn btn-sm btn-warning text-dark flex-fill"
+                        className="btn btn-sm btn-warning text-dark"
+                        style={{ flex: "1 1 auto" }}
                         onClick={() => handleStatusChange(emp, "BLOCKED")}
                         disabled={emp.status === "BLOCKED"}
                       >
