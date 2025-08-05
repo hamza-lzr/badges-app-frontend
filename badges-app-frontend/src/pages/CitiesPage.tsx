@@ -114,7 +114,7 @@ const goToAirports = (cityId: number, cityName: string) => {
       <hr />
 
       {/* List of Cities */}
-      <h4>Available Cities</h4>
+      <h4>Registered Cities</h4>
 
       {loadingCities ? (
         <p>Loading cities...</p>

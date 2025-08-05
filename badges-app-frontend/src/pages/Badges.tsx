@@ -393,7 +393,30 @@ const Badges: React.FC = () => {
   </div>
     {renderPagination()}
 </div>
+      
       )}
+      {/* Pagination */}
+          <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+            <small className="text-muted">
+              Page {currentPage} of {totalPages}
+            </small>
+            <div className="pagination-buttons">
+              <button
+                className="btn btn-sm btn-outline-secondary me-2"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                Previous
+              </button>
+              <button
+                className="btn btn-sm btn-outline-secondary"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next
+              </button>
+            </div>
+          </div>
 
       {/* ✅ Generate Badge Modal */}
       <Modal show={showGenerateModal} onHide={closeGenerateModal} centered>

@@ -14,6 +14,10 @@ const LocationManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -66,6 +70,13 @@ const LocationManagement: React.FC = () => {
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name)
     );
+
+    //Pagination
+    const totalPages = Math.ceil(filteredCountries.length / itemsPerPage);
+  const paginatedCountries = filteredCountries.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="container py-4">
@@ -138,14 +149,14 @@ const LocationManagement: React.FC = () => {
       ) : (
         <div className="table-responsive shadow-sm rounded">
           <table className="table table-hover align-middle">
-            <thead className="table-light">
+            <thead className="table-dark">
               <tr>
                 <th>Country</th>
                 <th style={{ width: "200px" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredCountries.map((country) => (
+              {paginatedCountries.map((country) => (
                 <tr key={country.id}>
                   <td>
                     <strong>{country.name}</strong>
@@ -174,6 +185,28 @@ const LocationManagement: React.FC = () => {
           </table>
         </div>
       )}
+      {/* Pagination */}
+          <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+            <small className="text-muted">
+              Page {currentPage} of {totalPages}
+            </small>
+            <div className="pagination-buttons">
+              <button
+                className="btn btn-sm btn-outline-secondary me-2"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                Previous
+              </button>
+              <button
+                className="btn btn-sm btn-outline-secondary"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next
+              </button>
+            </div>
+          </div>
     </div>
   );
 };

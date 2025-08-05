@@ -177,6 +177,7 @@ const Companies: React.FC = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="mb-0">Companies</h2>
         <button className="btn btn-primary" onClick={openAddModal}>
+          <i className="bi bi-plus-lg me-1" />
           Add Company
         </button>
       </div>
@@ -211,9 +212,8 @@ const Companies: React.FC = () => {
         <>
           <div className="table-responsive shadow-sm rounded">
             <table className="table table-hover align-middle">
-              <thead className="table-light">
+              <thead className="table-dark">
                 <tr>
-                  <th>#</th>
                   <th
                     style={{ cursor: "pointer" }}
                     onClick={() => handleSort("name")}
@@ -229,7 +229,8 @@ const Companies: React.FC = () => {
                   <th
                     style={{ cursor: "pointer" }}
                     onClick={() => handleSort("address")}
-                  >Address{"     "}
+                  >
+                    Address{"     "}
                     {sortKey === "address" &&
                       (sortAsc ? (
                         <i className="bi bi-caret-up-fill text-primary"></i>
@@ -240,7 +241,8 @@ const Companies: React.FC = () => {
                   <th
                     style={{ cursor: "pointer" }}
                     onClick={() => handleSort("phone")}
-                  >Phone {"     "}
+                  >
+                    Phone {"     "}
                     {sortKey === "phone" &&
                       (sortAsc ? (
                         <i className="bi bi-caret-up-fill text-primary"></i>
@@ -253,34 +255,33 @@ const Companies: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {paginatedCompanies.map((company, index) => (
+                {paginatedCompanies.map((company) => (
                   <tr key={company.id}>
-                    <td>
-                      <span className="badge bg-secondary">
-                        {(currentPage - 1) * pageSize + index + 1}
-                      </span>
-                    </td>
                     <td>
                       <strong>{company.name}</strong>
                     </td>
                     <td>{company.address || "—"}</td>
                     <td>{company.phone || "—"}</td>
                     <td>{company.description || "—"}</td>
-                    <td className="d-flex gap-2">
-                      {/* ✅ Edit Button */}
-                      <button
-                        className="btn btn-sm btn-outline-primary"
-                        onClick={() => openEditModal(company)}
-                      >
-                        <i className="bi bi-pencil"></i> Edit
-                      </button>
-                      {/* ✅ Delete Button */}
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => handleDelete(company.id!)}
-                      >
-                        <i className="bi bi-trash"></i> Delete
-                      </button>
+                    <td>
+                      <div className="d-flex gap-2">
+                        <button
+                          className="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
+                          onClick={() => openEditModal(company)}
+                          title="Edit"
+                        >
+                          <i className="bi bi-pencil" />
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
+                          onClick={() => handleDelete(company.id!)}
+                          title="Delete"
+                        >
+                          <i className="bi bi-trash" />
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -288,23 +289,21 @@ const Companies: React.FC = () => {
             </table>
           </div>
 
-          {/* ✅ Pagination */}
-          <div className="d-flex justify-content-between align-items-center mt-3">
-            <span>
+          {/* Pagination */}
+          <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+            <small className="text-muted">
               Page {currentPage} of {totalPages}
-            </span>
-            <div>
+            </small>
+            <div className="pagination-buttons">
               <button
-                className="btn btn-md btn-outline-secondary me-2"
+                className="btn btn-sm btn-outline-secondary me-2"
                 disabled={currentPage === 1}
-                style={{ width: "80px" }}
                 onClick={() => setCurrentPage((p) => p - 1)}
               >
                 Previous
               </button>
               <button
-                className="btn btn-md btn-outline-secondary"
-                style={{ width: "80px" }}
+                className="btn btn-sm btn-outline-secondary"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((p) => p + 1)}
               >

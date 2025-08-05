@@ -1,0 +1,19 @@
+
+*La politique des notifications
+
+Aspect fonctionnel: plateforme employé read-only ?
+cad:
+*est-ce que l'admin doit manuellement renseigner chaque nouveau badge/ accès etc... 
+*Badge est-il modifiable ? 
+
+*a-t-on besoin d'ajouter une page "Historique des notifs" dans l'admin platform ?
+
+
+*Statuts des employés: actif, inactif, bloqué/banni ?
+
+*Politique d'auth employé
+
+
+
+
+

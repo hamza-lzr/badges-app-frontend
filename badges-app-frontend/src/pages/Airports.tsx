@@ -258,7 +258,7 @@ const filteredAirports = airports.filter((airport) => {
       ) : (
         <div className="table-responsive shadow-sm rounded">
           <table className="table table-hover align-middle">
-            <thead className="table-light">
+            <thead className="table-dark">
               <tr>
                 <th
                   onClick={() => handleSort("iata")}

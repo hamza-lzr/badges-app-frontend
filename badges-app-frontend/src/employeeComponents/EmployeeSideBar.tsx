@@ -1,6 +1,9 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "react-bootstrap";
+import axios from "axios";
+import { Modal } from "react-bootstrap";
+import { useState } from "react";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -45,6 +48,8 @@ const EmployeeSideBar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) =>
     localStorage.removeItem("refresh_token");
     navigate("/employee/login");
   };
+
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
 
   return (
@@ -133,7 +138,7 @@ const EmployeeSideBar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) =>
       <div className="p-3 border-top border-secondary mt-auto">
         <button
           className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2"
-          onClick={handleLogout}
+          onClick={() => setShowLogoutModal(true)}
           title="Logout"
         >
           <i className="bi bi-box-arrow-right"></i>
@@ -155,6 +160,33 @@ const EmployeeSideBar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) =>
           }
         `}
       </style>
+      <Modal
+  show={showLogoutModal}
+  onHide={() => setShowLogoutModal(false)}
+  centered
+>
+  <Modal.Header closeButton>
+    <Modal.Title>Confirm Logout</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    Are you sure you want to log out?
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setShowLogoutModal(false)}>
+      Cancel
+    </Button>
+    <Button
+      variant="danger"
+      onClick={() => {
+        setShowLogoutModal(false);
+        handleLogout();
+      }}
+    >
+      Logout
+    </Button>
+  </Modal.Footer>
+</Modal>
+
     </div>
   );
 };
