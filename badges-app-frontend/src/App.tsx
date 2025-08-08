@@ -25,6 +25,8 @@ import ProfilePage from "./employeePages/ProfilePage";
 import EmployeeAccessesPage from "./employeePages/AccessesPage";
 import "bootstrap/dist/css/bootstrap.min.css";
 import EmployeeRequestsPage from "./employeePages/RequestsPage";
+import CongeManagement from "./pages/Conges";
+import CongePage from "./employeePages/CongesPage";
 import { ToastContainer } from "react-toastify";
 const App = () => {
   return (
@@ -47,6 +49,7 @@ const App = () => {
             <Route path="cities/:countryId" element={<CitiesPage />} />
             <Route path="accesses" element={<Accesses />} />
             <Route path="notifications" element={<Notifications />} />
+            <Route path="conges" element = {<CongeManagement />} />
           </Route>
         </Route>
 
@@ -59,6 +62,7 @@ const App = () => {
             <Route path ="profile" element={<ProfilePage />} />
             <Route path="accesses" element={<EmployeeAccessesPage />} />
             <Route path="requests" element={<EmployeeRequestsPage />} />
+            <Route path="conges" element={<CongePage />} />
           </Route>
         </Route>
       </Routes>

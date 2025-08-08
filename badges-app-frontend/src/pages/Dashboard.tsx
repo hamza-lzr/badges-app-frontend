@@ -19,6 +19,7 @@ import {
   MdNotifications,
   MdFlight,
 } from "react-icons/md";
+import { FaSuitcase } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 import { fetchEmployees } from "../api/ApiEmployee";
@@ -47,14 +48,31 @@ const Dashboard: React.FC = () => {
   const [employeeMap, setEmployeeMap] = useState<Record<number, string>>({});
 
   const adminLinks = [
-    { to: "/admin/employees", label: "Employees", icon: <MdPeople size={32} /> },
+    {
+      to: "/admin/employees",
+      label: "Employees",
+      icon: <MdPeople size={32} />,
+    },
     { to: "/admin/requests", label: "Requests", icon: <MdWork size={32} /> },
     { to: "/admin/airports", label: "Airports", icon: <MdFlight size={32} /> },
-    { to: "/admin/companies", label: "Companies", icon: <MdBusiness size={32} /> },
+    {
+      to: "/admin/companies",
+      label: "Companies",
+      icon: <MdBusiness size={32} />,
+    },
     { to: "/admin/badges", label: "Badges", icon: <MdBadge size={32} /> },
-    { to: "/admin/locations", label: "Locations", icon: <MdLocationOn size={32} /> },
+    {
+      to: "/admin/locations",
+      label: "Locations",
+      icon: <MdLocationOn size={32} />,
+    },
     { to: "/admin/accesses", label: "Accesses", icon: <MdLock size={32} /> },
-    { to: "/admin/notifications", label: "Notifications", icon: <MdNotifications size={32} /> },
+    {
+      to: "/admin/notifications",
+      label: "Notifications",
+      icon: <MdNotifications size={32} />,
+    },
+    { to: "/admin/conges", label: "Congés", icon: <FaSuitcase size={32} /> }, // Assuming MdWork for Congés
   ];
 
   useEffect(() => {
@@ -81,12 +99,17 @@ const Dashboard: React.FC = () => {
       setTotalEmployees(emps.length);
       setActiveUsers(emps.filter((e) => e.status === "ACTIVE").length);
       setTotalBadges(badges.length);
-      setExpiredBadges(badges.filter((b) => new Date(b.expiryDate) < new Date()).length);
+      setExpiredBadges(
+        badges.filter((b) => new Date(b.expiryDate) < new Date()).length
+      );
       setTotalAirports(airports.length);
       setTotalCompanies(companies.length);
 
       const recent = [...reqs]
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
         .slice(0, 5);
       setRecentRequests(recent);
     } catch (error) {
@@ -111,122 +134,159 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-  <div className="dashboard-bg">
-    <Container fluid className="text-center py-3">
-      <motion.h1
-        className="text-center fw-bold display-6 mb-5"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        Badges Management Dashboard
-      </motion.h1>
+    <div className="dashboard-bg">
+      <Container fluid className="text-center py-3">
+        <motion.h1
+          className="text-center fw-bold display-6 mb-5"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          Badges Management Dashboard
+        </motion.h1>
 
-      {/* ==== Navigation Cards ==== */}
-      <Row className="row-cols-1 row-cols-md-4 g-4 mb-5">
-        {adminLinks.map(({ to, label, icon }, i) => (
-          <Col key={to}>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: i * 0.1 }}
-            >
-              <Card onClick={() => navigate(to)} className="dashboard-card">
-                <Card.Body className="d-flex flex-column align-items-center justify-content-center p-4">
-                  <motion.div
-                    whileHover={{ rotate: 5 }}
-                    className="dashboard-icon mb-3"
-                  >
-                    {icon}
-                  </motion.div>
-                  <h5 className="fw-bold text-dark text-center">{label}</h5>
-                </Card.Body>
-              </Card>
-            </motion.div>
-          </Col>
-        ))}
-      </Row>
-
-      {loading ? (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="primary" />
-        </div>
-      ) : (
-        <>
-          {/* ==== Statistics Title ==== */}
-          <motion.h2
-            className="fw-bold text-start mb-4 px-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            Statistics
-          </motion.h2>
-
-          {/* ==== Statistics Cards ==== */}
-          <Row className="row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 mb-5">
-            <StatCard title="Employees" value={totalEmployees} icon={<MdPeople />} delay={0.1} />
-            <StatCard title="Active Users" value={activeUsers} icon={<MdPeople />} delay={0.2} />
-            <StatCard title="Badges" value={totalBadges} icon={<MdBadge />} delay={0.3} />
-            <StatCard title="Expired Badges" value={expiredBadges} icon={<MdBadge />} delay={0.4} />
-            <StatCard title="Airports" value={totalAirports} icon={<MdFlight />} delay={0.5} />
-            <StatCard title="Companies" value={totalCompanies} icon={<MdBusiness />} delay={0.6} />
+        {/* ==== Navigation Cards ==== */}
+        <Container style={{ maxWidth: "1200px" }} className="mx-auto">
+          <Row className="row-cols-3 row-cols-md-3 g-4 mb-5">
+            {adminLinks.map(({ to, label, icon }, i) => (
+              <Col key={to}>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.1 }}
+                >
+                  <Card onClick={() => navigate(to)} className="dashboard-card">
+                    <Card.Body className="d-flex flex-column align-items-center justify-content-center p-4">
+                      <motion.div
+                        whileHover={{ rotate: 5 }}
+                        className="dashboard-icon mb-3"
+                      >
+                        {icon}
+                      </motion.div>
+                      <h5 className="fw-bold text-dark text-center">{label}</h5>
+                    </Card.Body>
+                  </Card>
+                </motion.div>
+              </Col>
+            ))}
           </Row>
+        </Container>
 
-          {/* ==== Recent Requests ==== */}
-          <Card className="shadow-sm border-0">
-            <Card.Header className="card-header">Recent Requests</Card.Header>
-            <Card.Body className="p-0">
-              {requestsLoading ? (
-                <div className="text-center py-4">
-                  <Spinner animation="border" variant="secondary" />
-                </div>
-              ) : recentRequests.length === 0 ? (
-                <p className="p-4 text-center text-muted">No recent requests.</p>
-              ) : (
-                <div className="table-responsive">
-                  <Table hover bordered className="mb-0">
-                    <thead>
-                      <tr>
-                        <th>Employee</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recentRequests.map((r) => (
-                        <tr key={r.id}>
-                          <td>{employeeMap[r.userId]}</td>
-                          <td>{r.reqType.replace("_", " ")}</td>
-                          <td>
-                            <Badge pill className={getStatusClass(r.reqStatus)}>
-                              {r.reqStatus}
-                            </Badge>
-                          </td>
-                          <td>
-                            {new Date(r.createdAt).toLocaleString([], {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: false,
-                            })}
-                          </td>
+        {loading ? (
+          <div className="text-center py-5">
+            <Spinner animation="border" variant="primary" />
+          </div>
+        ) : (
+          <>
+            {/* ==== Statistics Title ==== */}
+            <motion.h2
+              className="fw-bold text-start mb-4 px-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              Statistics
+            </motion.h2>
+
+            {/* ==== Statistics Cards ==== */}
+            <Row className="row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 mb-5">
+              <StatCard
+                title="Employees"
+                value={totalEmployees}
+                icon={<MdPeople />}
+                delay={0.1}
+              />
+              <StatCard
+                title="Active Users"
+                value={activeUsers}
+                icon={<MdPeople />}
+                delay={0.2}
+              />
+              <StatCard
+                title="Badges"
+                value={totalBadges}
+                icon={<MdBadge />}
+                delay={0.3}
+              />
+              <StatCard
+                title="Expired Badges"
+                value={expiredBadges}
+                icon={<MdBadge />}
+                delay={0.4}
+              />
+              <StatCard
+                title="Airports"
+                value={totalAirports}
+                icon={<MdFlight />}
+                delay={0.5}
+              />
+              <StatCard
+                title="Companies"
+                value={totalCompanies}
+                icon={<MdBusiness />}
+                delay={0.6}
+              />
+            </Row>
+
+            {/* ==== Recent Requests ==== */}
+            <Card className="shadow-sm border-0">
+              <Card.Header className="card-header">Recent Requests</Card.Header>
+              <Card.Body className="p-0">
+                {requestsLoading ? (
+                  <div className="text-center py-4">
+                    <Spinner animation="border" variant="secondary" />
+                  </div>
+                ) : recentRequests.length === 0 ? (
+                  <p className="p-4 text-center text-muted">
+                    No recent requests.
+                  </p>
+                ) : (
+                  <div className="table-responsive">
+                    <Table hover bordered className="mb-0">
+                      <thead>
+                        <tr>
+                          <th>Employee</th>
+                          <th>Type</th>
+                          <th>Status</th>
+                          <th>Date</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </div>
-              )}
-            </Card.Body>
-          </Card>
-        </>
-      )}
-    </Container>
-  </div>
+                      </thead>
+                      <tbody>
+                        {recentRequests.map((r) => (
+                          <tr key={r.id}>
+                            <td>{employeeMap[r.userId]}</td>
+                            <td>{r.reqType.replace("_", " ")}</td>
+                            <td>
+                              <Badge
+                                pill
+                                className={getStatusClass(r.reqStatus)}
+                              >
+                                {r.reqStatus}
+                              </Badge>
+                            </td>
+                            <td>
+                              {new Date(r.createdAt).toLocaleString([], {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              })}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                )}
+              </Card.Body>
+            </Card>
+          </>
+        )}
+      </Container>
+    </div>
   );
 };
 
@@ -255,4 +315,3 @@ const StatCard: React.FC<{
 );
 
 export default Dashboard;
-

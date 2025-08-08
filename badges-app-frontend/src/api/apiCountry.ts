@@ -1,4 +1,6 @@
 import axios from "axios";
+import type { AxiosRequestHeaders } from 'axios';
+
 import type { CountryDTO } from "../types";
 
 const api = axios.create({
@@ -11,10 +13,9 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem("access_token");
   
   if (token) {
-    config.headers = {
-      ...config.headers,
-      Authorization: `Bearer ${token}`,
-    };
+config.headers = Object.assign({}, config.headers, {
+  Authorization: `Bearer ${token}`,
+}) as AxiosRequestHeaders;
   }
   
   return config;

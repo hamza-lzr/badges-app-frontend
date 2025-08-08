@@ -52,6 +52,7 @@ export interface BadgeDTO {
   companyId: number;
   userId: number;
   accessListIds: number[];
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface CityDTO {
@@ -80,3 +81,14 @@ export interface NotificationDTO {
   read: boolean;
   createdAt: string; 
 }
+
+export interface CongeDTO {
+  id: number;
+  startDate: string;
+  endDate: string;
+  userId: number;
+  createdAt: string;
+  description: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'; // assuming those are your enum values
+}
+

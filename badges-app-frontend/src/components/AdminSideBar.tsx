@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./AdminSidebar.css";
+import { FaSuitcase } from "react-icons/fa";
 
 const EXPANDED_WIDTH = 240;
 const COLLAPSED_WIDTH = 70;
@@ -66,15 +67,66 @@ const AdminSidebar: React.FC = () => {
 
       {/* Navigation */}
       <nav className="flex-grow-1 nav flex-column px-2">
-        <NavItem to="/admin/dashboard" icon="bi-house-door-fill" label="Dashboard" collapsed={collapsed} />
-        <NavItem to="/admin/requests" icon="bi-list-check" label="Requests" collapsed={collapsed} />
-        <NavItem to="/admin/employees" icon="bi-person-badge-fill" label="Employees" collapsed={collapsed} />
-        <NavItem to="/admin/airports" icon="bi-airplane-engines" label="Airports" collapsed={collapsed} />
-        <NavItem to="/admin/companies" icon="bi-building" label="Companies" collapsed={collapsed} />
-        <NavItem to="/admin/badges" icon="bi-credit-card" label="Badges" collapsed={collapsed} />
-        <NavItem to="/admin/locations" icon="bi-geo-alt-fill" label="Countries" collapsed={collapsed} />
-        <NavItem to="/admin/accesses" icon="bi-shield-check" label="Access" collapsed={collapsed} />
-        <NavItem to="/admin/notifications" icon="bi-bell-fill" label="Notifications" collapsed={collapsed} />
+        <NavItem
+          to="/admin/dashboard"
+          icon="bi-house-door-fill"
+          label="Dashboard"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/admin/requests"
+          icon="bi-list-check"
+          label="Requests"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/admin/employees"
+          icon="bi-person-badge-fill"
+          label="Employees"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/admin/airports"
+          icon="bi-airplane-engines"
+          label="Airports"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/admin/companies"
+          icon="bi-building"
+          label="Companies"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/admin/badges"
+          icon="bi-credit-card"
+          label="Badges"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/admin/locations"
+          icon="bi-geo-alt-fill"
+          label="Countries"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/admin/accesses"
+          icon="bi-shield-check"
+          label="Access"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/admin/notifications"
+          icon="bi-bell-fill"
+          label="Notifications"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/admin/conges"
+          icon={<FaSuitcase />}
+          label="Congés"
+          collapsed={collapsed}
+        />
       </nav>
 
       {/* Logout */}
@@ -93,7 +145,7 @@ const AdminSidebar: React.FC = () => {
 
 const NavItem: React.FC<{
   to: string;
-  icon: string;
+  icon: string | React.ReactNode;
   label: string;
   collapsed: boolean;
 }> = ({ to, icon, label, collapsed }) => {
@@ -110,11 +162,14 @@ const NavItem: React.FC<{
       }}
       title={collapsed ? label : ""}
     >
-      <i className={`bi ${icon} fs-5`}></i>
+      {typeof icon === "string" ? (
+        <i className={`bi ${icon} fs-6`}></i>
+      ) : (
+        <div className="fs-6">{icon}</div>
+      )}{" "}
       {!collapsed && <span>{label}</span>}
     </NavLink>
   );
 };
 
 export default AdminSidebar;
-

@@ -14,6 +14,17 @@ cad:
 *Politique d'auth employé
 
 
+------------->!! Ajouter une table congé pour vérifier si l'employé dépose son badge quand il est en congé
+-------------> Badge peut donc être: actif (en utilisation) / inactif (déposé)
+------------->badge n'a pas de code 
+------------->L'administrateur doit avoir ses propres notifications
+------------->Notifier l'admin s'il demande un congé par notif + email 
+------------->L'employé ne doit pas avoir un mot de passe par défaut: instead, make keycloak send him an email to create his own password 
+------------->L'employée créé son congé MAIS il reste pending tant que l'admin ne l'approuve pas.
+
+
+
+
 
 
 
