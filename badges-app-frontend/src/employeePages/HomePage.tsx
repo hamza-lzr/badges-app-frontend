@@ -59,7 +59,7 @@ const HomePage: React.FC = () => {
       >
         <Container className="text-center">
           <img 
-            src="/Logo_Royal_Air_Maroc.svg.png" 
+            src="/ram.png" 
             alt="RAM Logo" 
             className="mb-3" 
             height="150"
