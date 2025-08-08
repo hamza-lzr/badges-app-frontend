@@ -65,10 +65,6 @@ const CongeManagement: React.FC = () => {
     await loadData();
   };
 
-  const confirmDelete = (id: number) => {
-    setCongeToDelete(id);
-    setShowDeleteModal(true);
-  };
 
   const handleDelete = async () => {
     if (congeToDelete !== null) {
@@ -196,13 +192,7 @@ const CongeManagement: React.FC = () => {
                             </Button>
                           </>
                         )}
-                        <Button
-                          size="sm"
-                          variant="outline-danger"
-                          onClick={() => confirmDelete(c.id!)}
-                        >
-                          Supprimer
-                        </Button>
+
                       </div>
                     </td>
                   </tr>

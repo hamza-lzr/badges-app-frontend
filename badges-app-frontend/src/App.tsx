@@ -27,6 +27,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import EmployeeRequestsPage from "./employeePages/RequestsPage";
 import CongeManagement from "./pages/Conges";
 import CongePage from "./employeePages/CongesPage";
+import AdminNotifications from "./pages/AdminNotifications";
 import { ToastContainer } from "react-toastify";
 const App = () => {
   return (
@@ -48,8 +49,9 @@ const App = () => {
             <Route path="locations" element={<LocationManagement />} />
             <Route path="cities/:countryId" element={<CitiesPage />} />
             <Route path="accesses" element={<Accesses />} />
-            <Route path="notifications" element={<Notifications />} />
+            <Route path="notifhistory" element={<Notifications />} />
             <Route path="conges" element = {<CongeManagement />} />
+            <Route path="notifications" element={<AdminNotifications />} />
           </Route>
         </Route>
 

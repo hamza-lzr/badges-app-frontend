@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./AdminSidebar.css";
 import { FaSuitcase } from "react-icons/fa";
+import { FaHistory } from "react-icons/fa";
 
 const EXPANDED_WIDTH = 240;
 const COLLAPSED_WIDTH = 70;
@@ -125,6 +126,12 @@ const AdminSidebar: React.FC = () => {
           to="/admin/conges"
           icon={<FaSuitcase />}
           label="Congés"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/admin/notifhistory"
+          icon={<FaHistory />}
+          label="Histrorique des notifs"
           collapsed={collapsed}
         />
       </nav>

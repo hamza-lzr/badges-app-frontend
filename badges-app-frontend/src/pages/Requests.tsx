@@ -11,24 +11,11 @@ import {
   Badge,
   Spinner,
   Pagination,
-  OverlayTrigger,
-  Tooltip,
   Modal,
 } from "react-bootstrap";
-import {
-  BiSearch,
-  BiFilter,
-  BiCalendar,
-  BiCheckCircle,
-  BiXCircle,
-  BiTrash,
-} from "react-icons/bi";
+import { BiSearch, BiFilter, BiCalendar } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
-import {
-  fetchRequests,
-  updateRequestStatus,
-  deleteRequest,
-} from "../api/apiRequest";
+import { fetchRequests, updateRequestStatus } from "../api/apiRequest";
 import { fetchEmployees } from "../api/ApiEmployee";
 import type { Request, ReqStatus, UserDTO } from "../types";
 
@@ -56,8 +43,7 @@ const RequestsPage: React.FC = () => {
 
   // details modal
   const [showDetailModal, setShowDetailModal] = useState(false);
-const [detailRequest, setDetailRequest] = useState<Request | null>(null);
-
+  const [detailRequest, setDetailRequest] = useState<Request | null>(null);
 
   const navigate = useNavigate();
 
@@ -116,12 +102,6 @@ const [detailRequest, setDetailRequest] = useState<Request | null>(null);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete?")) return;
-    await deleteRequest(id);
-    setRequests(await fetchRequests());
-  };
-
   // filter & sort
   const filteredRequests = useMemo(() => {
     return requests
@@ -159,7 +139,9 @@ const [detailRequest, setDetailRequest] = useState<Request | null>(null);
 
   return (
     <Container fluid className="bg-light py-3">
-      <h4 className="mb-4 fs-2 display-5 text-black font-weight-bold">Request Management</h4>
+      <h4 className="mb-4 fs-2 display-5 text-black font-weight-bold">
+        Request Management
+      </h4>
 
       {/* Filters */}
       <Card className="mb-4 shadow-sm border-0">
@@ -255,17 +237,28 @@ const [detailRequest, setDetailRequest] = useState<Request | null>(null);
             responsive
             hover
             striped
-            className="mb-0"
-            style={{ borderRadius: "0 0 .375rem .375rem", overflow: "hidden" }}
+            className="mb-0 shadow-sm"
+            style={{
+              borderRadius: "0.5rem",
+              overflow: "hidden",
+              borderCollapse: "separate",
+              borderSpacing: 0,
+            }}
           >
-            <thead className="table-dark">
+            <thead style={{ backgroundColor: "#343a40", color: "#fff" }}>
               <tr>
-                <th>Description</th>
-                <th style={{ width: "8rem" }}>Type</th>
-                <th style={{ width: "8rem" }}>Status</th>
-                <th>Employee</th>
-                <th style={{ width: "8rem" }}>Created At</th>
-                <th style={{ width: "10rem" }} className="text-end">
+                <th className="px-4 py-3">Description</th>
+                <th className="px-4 py-3" style={{ width: "8rem" }}>
+                  Type
+                </th>
+                <th className="px-4 py-3" style={{ width: "8rem" }}>
+                  Status
+                </th>
+                <th className="px-4 py-3">Employee</th>
+                <th className="px-4 py-3" style={{ width: "10rem" }}>
+                  Created At
+                </th>
+                <th className="px-4 py-3 text-end" style={{ width: "12rem" }}>
                   Actions
                 </th>
               </tr>
@@ -279,75 +272,61 @@ const [detailRequest, setDetailRequest] = useState<Request | null>(null);
                 </tr>
               ) : (
                 pageData.map((r) => (
-                  <tr key={r.id} className="align-middle"
-                    style={{ cursor: 'pointer' }}
-  onClick={() => {
-    setDetailRequest(r);
-    setShowDetailModal(true);
-  }}
+                  <tr
+                    key={r.id}
+                    className="align-middle"
+                    style={{
+                      cursor: "pointer",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onClick={() => {
+                      setDetailRequest(r);
+                      setShowDetailModal(true);
+                    }}
                   >
-                    <td>{r.description}</td>
-                    <td className="text-capitalize">
+                    <td className="px-4 py-3">{r.description}</td>
+                    <td className="text-capitalize px-4 py-3">
                       {r.reqType.replace("_", " ").toLowerCase()}
                     </td>
-                    <td>
+                    <td className="px-4 py-3">
                       <Badge bg={badgeVariant(r.reqStatus)} pill>
                         {r.reqStatus}
                       </Badge>
                     </td>
-                    <td>{getEmployeeName(r.userId)}</td>
-                    <td>
+                    <td className="px-4 py-3">{getEmployeeName(r.userId)}</td>
+                    <td className="px-4 py-3">
                       {new Date(r.createdAt).toLocaleString([], {
                         day: "2-digit",
                         month: "2-digit",
                         year: "numeric",
                         hour: "2-digit",
                         minute: "2-digit",
-                        hour12: false, // or `true` if you prefer AM/PM
+                        hour12: false,
                       })}
                     </td>
-                    <td className="text-end">
-                      <OverlayTrigger
-                        placement="top"
-                        overlay={<Tooltip>Approve</Tooltip>}
-                      >
+                    <td className="px-4 py-3 text-end">
+                      <div className="d-flex justify-content-end gap-2">
                         <Button
                           size="sm"
-                          variant="link"
-                          onClick={() => handleStatusChange(r, "APPROVED")}
-                          disabled={r.reqStatus === "APPROVED"}
-                          className="text-success p-1"
+                          variant="success"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(r, "APPROVED");
+                          }}
                         >
-                          <BiCheckCircle size={20} />
+                          Approuver
                         </Button>
-                      </OverlayTrigger>
-                      <OverlayTrigger
-                        placement="top"
-                        overlay={<Tooltip>Reject</Tooltip>}
-                      >
                         <Button
                           size="sm"
-                          variant="link"
-                          onClick={() => handleStatusChange(r, "REJECTED")}
-                          disabled={r.reqStatus === "REJECTED"}
-                          className="text-warning p-1"
+                          variant="outline-danger"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(r, "REJECTED");
+                          }}
                         >
-                          <BiXCircle size={20} />
+                          Rejeter
                         </Button>
-                      </OverlayTrigger>
-                      <OverlayTrigger
-                        placement="top"
-                        overlay={<Tooltip>Delete</Tooltip>}
-                      >
-                        <Button
-                          size="sm"
-                          variant="link"
-                          onClick={() => handleDelete(r.id)}
-                          className="text-danger p-1"
-                        >
-                          <BiTrash size={20} />
-                        </Button>
-                      </OverlayTrigger>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -384,52 +363,54 @@ const [detailRequest, setDetailRequest] = useState<Request | null>(null);
         )}
       </Card>
       <Modal
-  show={showDetailModal}
-  onHide={() => setShowDetailModal(false)}
-  centered
->
-  <Modal.Header closeButton>
-    <Modal.Title>Request Details</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    <p>
-      <strong>Description:</strong><br/>
-      {detailRequest?.description}
-    </p>
-    <p>
-      <strong>Type:</strong> {detailRequest && detailRequest.reqType.replace('_', ' ')}
-    </p>
-    <p>
-      <strong>Status:</strong>{' '}
-      {detailRequest && (
-        <Badge bg={badgeVariant(detailRequest.reqStatus)} pill>
-          {detailRequest.reqStatus}
-        </Badge>
-      )}
-    </p>
-    <p>
-      <strong>Employee:</strong>{' '}
-      {detailRequest && getEmployeeName(detailRequest.userId)}
-    </p>
-    <p>
-      <strong>Created At:</strong>{' '}
-      {detailRequest && new Date(detailRequest.createdAt).toLocaleString([], {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      })}
-    </p>
-  </Modal.Body>
-  <Modal.Footer>
-    <Button variant="secondary" onClick={() => setShowDetailModal(false)}>
-      Close
-    </Button>
-  </Modal.Footer>
-</Modal>
-
+        show={showDetailModal}
+        onHide={() => setShowDetailModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Request Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            <strong>Description:</strong>
+            <br />
+            {detailRequest?.description}
+          </p>
+          <p>
+            <strong>Type:</strong>{" "}
+            {detailRequest && detailRequest.reqType.replace("_", " ")}
+          </p>
+          <p>
+            <strong>Status:</strong>{" "}
+            {detailRequest && (
+              <Badge bg={badgeVariant(detailRequest.reqStatus)} pill>
+                {detailRequest.reqStatus}
+              </Badge>
+            )}
+          </p>
+          <p>
+            <strong>Employee:</strong>{" "}
+            {detailRequest && getEmployeeName(detailRequest.userId)}
+          </p>
+          <p>
+            <strong>Created At:</strong>{" "}
+            {detailRequest &&
+              new Date(detailRequest.createdAt).toLocaleString([], {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })}
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDetailModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
