@@ -1,5 +1,6 @@
 import React from "react";
 import AdminSidebar from "./AdminSideBar";
+import AdminTopbar from "./AdminTopBar";
 import { Outlet } from "react-router-dom";
 
 const AdminLayout: React.FC = () => {
@@ -7,6 +8,7 @@ const AdminLayout: React.FC = () => {
     <>
       {/* Sidebar */}
       <AdminSidebar />
+      <AdminTopbar />
 
       {/* Main Content */}
       <div

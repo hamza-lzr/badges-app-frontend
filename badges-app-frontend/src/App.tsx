@@ -28,6 +28,7 @@ import EmployeeRequestsPage from "./employeePages/RequestsPage";
 import CongeManagement from "./pages/Conges";
 import CongePage from "./employeePages/CongesPage";
 import AdminNotifications from "./pages/AdminNotifications";
+import MyAdminProfilePage from "./pages/AdminProfile";
 import { ToastContainer } from "react-toastify";
 const App = () => {
   return (
@@ -50,8 +51,9 @@ const App = () => {
             <Route path="cities/:countryId" element={<CitiesPage />} />
             <Route path="accesses" element={<Accesses />} />
             <Route path="notifhistory" element={<Notifications />} />
-            <Route path="conges" element = {<CongeManagement />} />
+            <Route path="conges" element={<CongeManagement />} />
             <Route path="notifications" element={<AdminNotifications />} />
+            <Route path="profile" element={<MyAdminProfilePage />} />
           </Route>
         </Route>
 

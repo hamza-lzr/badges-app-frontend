@@ -11,12 +11,13 @@ interface SidebarProps {
 }
 
 const sidebarLinks = [
-    { to: "/employee/home", icon: "bi-house", label: "Home" },
-  { to: "/employee/profile", icon: "bi-person-circle", label: "My Profile" },
-  { to: "/employee/badges", icon: "bi-credit-card-2-front", label: "My Badges" },
-  { to: "/employee/accesses", icon: "bi-shield-check", label: "My Accesses" },
+    { to: "/employee/home", icon: "bi-house", label: "Accueil" },
+  { to: "/employee/profile", icon: "bi-person-circle", label: "Mon Profil" },
+  { to: "/employee/badges", icon: "bi-credit-card-2-front", label: "Mes Badges" },
+  { to: "/employee/accesses", icon: "bi-shield-check", label: "Mes Accès" },
   { to: "/employee/notifications", icon: "bi-bell", label: "Notifications" },
-  { to: "/employee/requests", icon: "bi-send", label: "Send a Request" },
+  { to: "/employee/requests", icon: "bi-send", label: "Envoyer une Demande" },
+  { to: "/employee/conges", icon: "bi-suitcase", label: "Mes Congés" },
 ];
 
 
@@ -77,7 +78,7 @@ const EmployeeSideBar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) =>
             className="fw-bold"
             style={{ fontSize: "1.1rem", color: "#f5f5f5" }}
           >
-            Employee Portal
+            E-portail Employé
           </span>
         )}
         <Button
@@ -139,10 +140,10 @@ const EmployeeSideBar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) =>
         <button
           className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2"
           onClick={() => setShowLogoutModal(true)}
-          title="Logout"
+          title="Déconnexion"
         >
           <i className="bi bi-box-arrow-right"></i>
-          {!collapsed && "Logout"}
+          {!collapsed && "Déconnexion"}
         </button>
       </div>
 
@@ -166,14 +167,14 @@ const EmployeeSideBar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) =>
   centered
 >
   <Modal.Header closeButton>
-    <Modal.Title>Confirm Logout</Modal.Title>
+    <Modal.Title>Confirmer la déconnexion</Modal.Title>
   </Modal.Header>
   <Modal.Body>
-    Are you sure you want to log out?
+    Êtes-vous sûr de vouloir vous déconnecter ?
   </Modal.Body>
   <Modal.Footer>
     <Button variant="secondary" onClick={() => setShowLogoutModal(false)}>
-      Cancel
+      Annuler
     </Button>
     <Button
       variant="danger"
@@ -182,7 +183,7 @@ const EmployeeSideBar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) =>
         handleLogout();
       }}
     >
-      Logout
+      Déconnexion
     </Button>
   </Modal.Footer>
 </Modal>

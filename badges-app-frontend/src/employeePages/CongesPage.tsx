@@ -96,6 +96,16 @@ const EmployeeCongesPage: React.FC = () => {
     }
   };
 
+  // Helper function
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   return (
     <Container className="py-5">
       <div className="text-center mb-5">
@@ -159,7 +169,7 @@ const EmployeeCongesPage: React.FC = () => {
                   <Card.Body>
                     <div className="d-flex justify-content-between align-items-center mb-2">
                       <Card.Title className="fw-bold text-primary">
-                        {conge.startDate} → {conge.endDate}
+                        {formatDate(conge.startDate)} → {formatDate(conge.endDate)}
                       </Card.Title>
                       {renderStatusBadge(conge.status)}
                     </div>
@@ -218,8 +228,8 @@ const EmployeeCongesPage: React.FC = () => {
           {selectedConge && (
             <>
               <p>
-                <strong>Date Range:</strong> {selectedConge.startDate} →{" "}
-                {selectedConge.endDate}
+                <strong>Date Range:</strong> {formatDate(selectedConge.startDate)} →{" "}
+                {formatDate(selectedConge.endDate)}
               </p>
               <p>
                 <strong>Status:</strong>{" "}
@@ -230,7 +240,7 @@ const EmployeeCongesPage: React.FC = () => {
                 {selectedConge.description || "N/A"}
               </p>
               <p>
-                <strong>Requested on:</strong> {selectedConge.createdAt}
+                <strong>Requested on:</strong> {formatDate(selectedConge.createdAt)}
               </p>
             </>
           )}
@@ -243,7 +253,11 @@ const EmployeeCongesPage: React.FC = () => {
       </Modal>
 
       {/* 📝 Modal for creating new conge */}
-      <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)} centered>
+      <Modal
+        show={showCreateModal}
+        onHide={() => setShowCreateModal(false)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Request a New Leave</Modal.Title>
         </Modal.Header>
@@ -318,4 +332,3 @@ const EmployeeCongesPage: React.FC = () => {
 };
 
 export default EmployeeCongesPage;
-

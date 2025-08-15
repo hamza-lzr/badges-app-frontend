@@ -1,17 +1,41 @@
+:root{
+  --topbar-height: 50px;        /* match AdminTopbar height */
+  --sidebar-width: 250px;       /* default expanded width */
+}
+
+/* ===== Topbar wrapper (keeps the navbar at the top) ===== */
+.admin-topbar-wrap{
+  position: sticky;             /* or 'fixed' if you prefer */
+  top: 0;
+  z-index: 1020;                /* above main, below modals */
+}
+
+/* If your <AdminTopbar /> uses Bootstrap's sticky/fixed classes,
+   the navbar itself might bring its own z-index; normalize: */
+.admin-topbar-wrap .navbar,
+.admin-topbar-wrap .navbar.sticky-top,
+.admin-topbar-wrap .navbar.fixed-top{
+  z-index: 1020 !important;
+}
+
+/* ===== Sidebar starts BELOW the topbar ===== */
 .admin-sidebar {
   background-color: #111827;
   color: white;
-  min-height: 100vh;
   position: fixed;
-  top: 0;
   left: 0;
+  top: var(--topbar-height);                /* <— key change */
+  width: var(--sidebar-width);
+  height: calc(100vh - var(--topbar-height)); /* instead of min-height:100vh */
   transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
   border-right: 1px solid #1f2937;
   z-index: 1000;
+  overflow-y: auto;                          /* allow scrolling inside */
 }
 
+/* ----- Your original sidebar styles (kept) ----- */
 .admin-sidebar .sidebar-header {
   display: flex;
   align-items: center;
@@ -50,4 +74,18 @@
 
 .admin-sidebar.collapsed .sidebar-link span {
   display: none;
+}
+
+/* ===== Main content respects topbar and sidebar ===== */
+.admin-main{
+  margin-top: var(--topbar-height);         /* don’t slide under the topbar */
+  margin-left: var(--sidebar-width);        /* don’t slide under the sidebar */
+  min-height: calc(100vh - var(--topbar-height));
+  transition: margin-left .3s ease;
+  overflow: hidden;
+}
+
+/* (Optional) Responsive topbar height if it shrinks on small screens */
+@media (max-width: 992px){
+  :root{ --topbar-height: 56px; }
 }

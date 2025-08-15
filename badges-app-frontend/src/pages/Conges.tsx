@@ -34,21 +34,28 @@ const CongeManagement: React.FC = () => {
     loadData();
   }, []);
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [congesData, employeesData] = await Promise.all([
-        fetchConges(),
-        fetchEmployees(),
-      ]);
-      setConges(congesData);
-      setEmployees(employeesData);
-    } catch (err) {
-      console.error("Error fetching congés or employees:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+const loadData = async () => {
+  try {
+    setLoading(true);
+    const [congesData, employeesData] = await Promise.all([
+      fetchConges(),
+      fetchEmployees(),
+    ]);
+
+    // Trier du plus récent au plus ancien
+    const sortedConges = congesData.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    setConges(sortedConges);
+    setEmployees(employeesData);
+  } catch (err) {
+    console.error("Error fetching congés or employees:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const getEmployeeName = (userId: number) => {
     const emp = employees.find((e) => e.id === userId);

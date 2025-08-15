@@ -4,52 +4,58 @@ import { Link } from "react-router-dom";
 
 const gridItems = [
   {
-    title: "My Profile",
+    title: "Mon Profil",
     icon: "bi-person-circle",
     link: "/employee/profile",
-    description: "View and edit your personal information.",
+    description: "Voir et modifier vos informations personnelles.",
   },
   {
-    title: "My Badges",
+    title: "Mes Badges",
     icon: "bi-credit-card-2-front",
     link: "/employee/badges",
-    description: "See your active and expired badges.",
+    description: "Voir vos badges actifs et expirés.",
   },
   {
-    title: "My Accesses",
+    title: "Mes Accès",
     icon: "bi-shield-check",
     link: "/employee/accesses",
-    description: "Review your airport and area accesses.",
+    description: "Voir vos accès aux aéroports et aux zones.",
   },
   {
     title: "Notifications",
     icon: "bi-bell",
     link: "/employee/notifications",
-    description: "Check your latest notifications.",
+    description: "Voir vos dernières notifications.",
   },
   {
-    title: "Send a Request",
+    title: "Envoyer une Demande",
     icon: "bi-send",
     link: "/employee/requests",
-    description: "Submit a new request to the admin.",
+    description: "Soumettre une nouvelle demande à l'administrateur.",
+  },
+  {
+    title: "Mes Congés",
+    icon: "bi-suitcase",
+    link: "/employee/conges",
+    description: "Gérer vos demandes de congé et votre historique.",
   },
 ];
 
 // RAM Brand Colors
 const colors = {
-  primary: "#C4122F",    // RAM Red
-  secondary: "#D4AF37",  // Gold accent
-  dark: "#333333",       // Dark grey
-  light: "#FFFFFF",      // White
-  lightGrey: "#F8F9FA",  // Background grey
-  textGrey: "#666666"    // Text grey
+  primary: "#C4122F", // RAM Red
+  secondary: "#D4AF37", // Gold accent
+  dark: "#333333", // Dark grey
+  light: "#FFFFFF", // White
+  lightGrey: "#F8F9FA", // Background grey
+  textGrey: "#666666", // Text grey
 };
 
 const HomePage: React.FC = () => {
   return (
     <>
       {/* Hero Section */}
-      <div 
+      <div
         className="position-relative"
         style={{
           background: colors.lightGrey,
@@ -58,17 +64,13 @@ const HomePage: React.FC = () => {
         }}
       >
         <Container className="text-center">
-          <img 
-            src="/ram.png" 
-            alt="RAM Logo" 
-            className="mb-3" 
-            height="150"
-          />
+          <img src="/ram.png" alt="RAM Logo" className="mb-3" height="150" />
           <h1 className="display-5 fw-bold mb-2" style={{ color: colors.dark }}>
-            Welcome to Your Employee Portal
+            Bienvenue à votre e-portail
           </h1>
           <p className="lead mb-0" style={{ color: colors.textGrey }}>
-            Access and manage your professional credentials with Royal Air Maroc
+            Accédez et gérez vos informations professionnelles avec Royal Air
+            Maroc
           </p>
         </Container>
       </div>
@@ -92,7 +94,10 @@ const HomePage: React.FC = () => {
                       <i className={`bi ${item.icon}`}></i>
                     </div>
 
-                    <Card.Title className="h5 mb-3" style={{ color: colors.dark }}>
+                    <Card.Title
+                      className="h5 mb-3"
+                      style={{ color: colors.dark }}
+                    >
                       {item.title}
                     </Card.Title>
                     <Card.Text className="text-muted small">
