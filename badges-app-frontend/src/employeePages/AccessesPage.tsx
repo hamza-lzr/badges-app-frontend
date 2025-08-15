@@ -144,7 +144,6 @@ const EmployeeAccessesPage: React.FC = () => {
         <Table bordered hover responsive className="shadow-sm align-middle rounded-4">
           <thead className="table-dark">
             <tr>
-              <th>#</th>
               <th>Access</th>
               <th>Badge</th>
               <th>Start Date</th>
@@ -153,13 +152,12 @@ const EmployeeAccessesPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {accesses.map((access, idx) => {
+            {accesses.map((access) => {
               const airportName = airportMap[access.airportId] || `Airport #${access.airportId}`;
               const badgeCode = badgeMap[access.badgeId] || `Badge #${access.badgeId}`;
 
               return (
                 <tr key={access.id} className="shadow-sm">
-                  <td>{idx + 1}</td>
                   <td>Access to <strong>{airportName}</strong></td>
                   <td>{badgeCode}</td>
                   <td>{new Date(access.startDate).toLocaleDateString()}</td>

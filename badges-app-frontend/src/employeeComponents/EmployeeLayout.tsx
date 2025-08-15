@@ -2,12 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import EmployeeSideBar from "./EmployeeSideBar";
-import {
-  Navbar,
-  Nav,
-  Dropdown,
-  Container,
-} from "react-bootstrap";
+import { Navbar, Nav, Dropdown, Container } from "react-bootstrap";
 import { fetchMyNotifications } from "../api/apiNotification";
 import type { NotificationDTO } from "../types";
 
@@ -18,17 +13,52 @@ const EmployeeLayout: React.FC = () => {
   const [notifications, setNotifications] = useState<NotificationDTO[]>([]);
   const navigate = useNavigate();
 
+  const [unreadCount, setUnreadCount] = useState(0);
+
   useEffect(() => {
-    fetchMyNotifications()
-      .then((data) => setNotifications(data.slice(0, 8)))
-      .catch((err) => console.error("Fetch notifications failed:", err));
+    let cancelled = false;
+
+    const tick = async () => {
+      try {
+        const data = await fetchMyNotifications();
+
+        if (cancelled) return;
+
+        // 1) sort newest → oldest by createdAt
+        const sorted = [...data].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
+        // 2) unread count from full list (not just preview)
+        setUnreadCount(sorted.filter((n) => !n.read).length);
+
+        // 3) only keep the most recent 8 for the dropdown
+        setNotifications(sorted.slice(0, 8));
+      } catch (e) {
+        console.error("Fetch notifications failed:", e);
+      }
+    };
+
+    tick(); // run immediately
+    const id = setInterval(tick, 3_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, []);
+
+  const truncateWords = (text: string, count = 7): string => {
+    if (!text) return "";
+    const words = text.trim().split(/\s+/);
+    return words.length <= count ? text : words.slice(0, count).join(" ") + "…";
+  };
 
   const handleNotificationClick = () => navigate("/employee/notifications");
   const handleLogout = () => {
     // your logout logic…
     navigate("/employee/login");
-        localStorage.removeItem("access_token");
+    localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
   };
 
@@ -49,9 +79,7 @@ const EmployeeLayout: React.FC = () => {
             as={Link}
             to="/employee"
             className="d-flex align-items-center"
-          >
-            
-          </Navbar.Brand>
+          ></Navbar.Brand>
 
           <Navbar.Toggle aria-controls="emp-navbar-nav" />
 
@@ -62,17 +90,30 @@ const EmployeeLayout: React.FC = () => {
                 <Dropdown.Toggle
                   variant="dark"
                   id="notifications-dropdown"
-                  className="position-relative"
+                  aria-label={`Notifications (${unreadCount} unread)`}
                 >
-                  <i
-                    className="bi bi-bell"
-                    style={{ fontSize: "1.4rem", color: accentRed }}
-                  />
-
+                  <span className="position-relative d-inline-block">
+                    <i
+                      className="bi bi-bell"
+                      style={{ fontSize: "1.4rem", color: accentRed }}
+                    />
+                    {unreadCount > 0 && (
+                      <span
+                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                        style={{ fontSize: "0.65rem", minWidth: 18 }}
+                      >
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                        <span className="visually-hidden">
+                          unread notifications
+                        </span>
+                      </span>
+                    )}
+                  </span>
                 </Dropdown.Toggle>
+
                 <Dropdown.Menu
                   className="p-2"
-                  style={{ width: 320, maxHeight: 360, overflowY: "auto" }}
+                  style={{ width: 460, maxHeight: 480, overflowY: "auto" }}
                 >
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <span className="fw-semibold" style={{ color: accentRed }}>
@@ -88,18 +129,54 @@ const EmployeeLayout: React.FC = () => {
                   </div>
                   <Dropdown.Divider />
                   {notifications.length ? (
-                    notifications.map((n) => (
-                      <Dropdown.Item
-                        key={n.id}
-                        className="d-flex flex-column py-2"
-                        onClick={handleNotificationClick}
-                      >
-                        <span>{n.message}</span>
-                        <small className="text-muted">
-                          {new Date(n.createdAt).toLocaleString()}
-                        </small>
-                      </Dropdown.Item>
-                    ))
+                    notifications.map((n) => {
+                      const isUnread = !n.read;
+                      return (
+                        <Dropdown.Item
+                          key={n.id}
+                          onClick={handleNotificationClick}
+                          className={`py-2 ${isUnread ? "bg-light" : ""}`}
+                        >
+                          <div className="d-flex">
+                            {/* unread dot */}
+                            {isUnread && (
+                              <span
+                                className="me-2 mt-1 rounded-circle"
+                                style={{
+                                  width: 8,
+                                  height: 8,
+                                  backgroundColor: accentRed,
+                                  display: "inline-block",
+                                  flex: "0 0 auto",
+                                }}
+                              />
+                            )}
+                            <div className="flex-grow-1">
+                              <span
+                                className={
+                                  isUnread
+                                    ? "fw-semibold text-dark"
+                                    : "text-body"
+                                }
+                                title={n.message}
+                              >
+                                {truncateWords(n.message, 10)}
+                              </span>
+                              <div className="small text-muted">
+                                {new Date(n.createdAt).toLocaleString("fr-FR", {
+                                  year: "numeric",
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        </Dropdown.Item>
+                      );
+                    })
                   ) : (
                     <Dropdown.Item className="text-center text-muted py-3">
                       No new notifications
