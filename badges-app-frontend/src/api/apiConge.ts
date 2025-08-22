@@ -59,3 +59,8 @@ export const rejectConge = async (id: number): Promise<CongeDTO> => {
   const response = await api.put<CongeDTO>(`reject/${id}`);
   return response.data;
 };
+
+export const fetchMyConges = async (): Promise<CongeDTO[]> => {
+  const response = await api.get<CongeDTO[]>("/my");
+  return response.data;
+};

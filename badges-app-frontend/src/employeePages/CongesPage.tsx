@@ -15,7 +15,7 @@ import {
   ButtonGroup,
   InputGroup,
 } from "react-bootstrap";
-import { fetchConges, createConge } from "../api/apiConge";
+import { fetchMyConges, createConge } from "../api/apiConge";
 import { fetchMyProfile } from "../api/ApiEmployee";
 import type { CongeDTO, UserDTO } from "../types";
 
@@ -46,7 +46,7 @@ const EmployeeCongesPage: React.FC = () => {
   const loadConges = async () => {
     try {
       setLoading(true);
-      const data = await fetchConges();
+      const data = await fetchMyConges();
       setConges(data || []);
     } catch (err) {
       console.error("Error loading congés:", err);
