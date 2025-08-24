@@ -30,7 +30,7 @@ const EmployeeLoginPage: React.FC = () => {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const ramLogo = "../../public/ram.png";
+  const ramLogo = "../../ram.png";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

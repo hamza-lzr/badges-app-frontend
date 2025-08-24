@@ -19,7 +19,7 @@ type BadgeMap = Record<number, BadgeDTO>;
 const Badges: React.FC = () => {
   const [employees, setEmployees] = useState<UserDTO[]>([]);
   const [companies, setCompanies] = useState<Record<number, string>>({});
-  const [badges, setBadges] = useState<BadgeMap>({}); // ✅ only ONE badges state with full BadgeDTO
+  const [badges, setBadges] = useState<BadgeMap>({});
   const [loading, setLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,7 +33,9 @@ const Badges: React.FC = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<UserDTO | null>(
     null
   );
-  const [selectedBadgeId, setSelectedBadgeId] = useState<number | null>(null);
+  const [selectedBadgeByUser, setSelectedBadgeByUser] = useState<
+    Record<number, number | "">
+  >({});
 
   // Badge creation data
   const [badgeData, setBadgeData] = useState<Partial<BadgeDTO>>({});
@@ -47,7 +49,6 @@ const Badges: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // ✅ Fetch all data initially
   useEffect(() => {
     const loadAll = async () => {
       await loadCompanies();
@@ -62,20 +63,18 @@ const Badges: React.FC = () => {
       openGenerateModalForUser?: number;
     };
 
-    // if the router told us to open for a specific user…
     if (state.openGenerateModalForUser != null && employees.length) {
       const user = employees.find(
         (e) => e.id === state.openGenerateModalForUser
       );
       if (user) {
         openGenerateBadgeModal(user);
-        // clear the router‐state so it doesn’t re‑fire
         navigate(location.pathname, { replace: true, state: {} });
       }
     }
   }, [
-    location.state, // watch for incoming router‐state
-    employees, // only fire once we actually have employees
+    location.state,
+    employees,
     navigate,
     location.pathname,
   ]);
@@ -92,7 +91,7 @@ const Badges: React.FC = () => {
 
   const loadBadges = async () => {
     try {
-      const data = await fetchBadges(); // returns full BadgeDTO[]
+      const data = await fetchBadges();
       const badgeMap: BadgeMap = {};
       data.forEach((b) => {
         if (b.id) badgeMap[b.id] = b;
@@ -115,7 +114,6 @@ const Badges: React.FC = () => {
     }
   };
 
-  /** ✅ Helper: Does this employee have at least one expired badge? */
   const employeeHasExpiredBadge = (emp: UserDTO) => {
     return emp.badgesIds.some((badgeId) => {
       const badge = badges[badgeId];
@@ -124,7 +122,6 @@ const Badges: React.FC = () => {
     });
   };
 
-  // Returns true only if every badge for the employee is expired
   const employeeAllBadgesExpired = (emp: UserDTO): boolean =>
     emp.badgesIds.every((badgeId) => {
       const badge = badges[badgeId];
@@ -132,7 +129,6 @@ const Badges: React.FC = () => {
       return new Date(badge.expiryDate) < new Date();
     });
 
-  /** ✅ Filtering logic */
   const filteredEmployees = employees.filter((emp) => {
     const companyName = companies[emp.companyId]?.toLowerCase() || "";
     const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
@@ -151,18 +147,17 @@ const Badges: React.FC = () => {
     const matchesCompany =
       companyFilter === "" || emp.companyId === companyFilter;
 
-    const matchesExpired = !showExpiredOnly || employeeHasExpiredBadge(emp); // ✅ only keep expired if checked
+    const matchesExpired = !showExpiredOnly || employeeHasExpiredBadge(emp);
 
     return matchesSearch && matchesCompany && matchesExpired;
   });
-  //Pagination
+
   const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
   const paginatedEmployees = filteredEmployees.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  /** ✅ Open Generate Badge Modal */
   const openGenerateBadgeModal = (employee: UserDTO) => {
     const now = new Date();
     const expiry = new Date();
@@ -184,7 +179,6 @@ const Badges: React.FC = () => {
     setBadgeData({});
   };
 
-  /** ✅ Handle Badge Creation */
   const handleBadgeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -207,7 +201,7 @@ const Badges: React.FC = () => {
         issuedDate: badgeData.issuedDate,
         expiryDate: badgeData.expiryDate,
         companyId: badgeData.companyId,
-        userId: selectedEmployee.id, // still required
+        userId: selectedEmployee.id,
         accessListIds: [],
         status: badgeData.status,
       });
@@ -221,7 +215,6 @@ const Badges: React.FC = () => {
     }
   };
 
-  /** ✅ Badge Details Modal */
   const openBadgeDetails = async (badgeId: number) => {
     try {
       const badge = await fetchBadgeById(badgeId);
@@ -235,7 +228,6 @@ const Badges: React.FC = () => {
   const closeBadgeDetailsModal = () => {
     setShowDetailsModal(false);
     setBadgeDetails(null);
-    setSelectedBadgeId(null);
   };
 
   const renderPagination = () => {
@@ -270,12 +262,11 @@ const Badges: React.FC = () => {
 
   return (
     <div className="container py-4">
-      {/* ✅ Header & Filters */}
+      {/* Header & Filters */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-semibold mb-0">Badges Management</h2>
 
         <div className="d-flex gap-3 align-items-center">
-          {/* Company filter */}
           <Form.Select
             value={companyFilter}
             onChange={(e) =>
@@ -293,7 +284,6 @@ const Badges: React.FC = () => {
             ))}
           </Form.Select>
 
-          {/* Search */}
           <Form.Control
             type="text"
             placeholder="Search employees, badges..."
@@ -302,7 +292,6 @@ const Badges: React.FC = () => {
             style={{ maxWidth: "250px" }}
           />
 
-          {/* ✅ Expired Badge Filter Toggle */}
           <div className="d-flex align-items-center">
             <Form.Check
               type="switch"
@@ -317,7 +306,7 @@ const Badges: React.FC = () => {
         </div>
       </div>
 
-      {/* ✅ Table Section */}
+      {/* Table Section */}
       {loading ? (
         <div className="text-center my-5">
           <Spinner animation="border" />
@@ -334,12 +323,12 @@ const Badges: React.FC = () => {
               <table className="table table-hover mb-0 custom-table">
                 <thead>
                   <tr className="table-dark">
-                    <th>Employee</th>
-                    <th>Matricule</th>
-                    <th>Email</th>
-                    <th>Company</th>
-                    <th>Badges</th>
-                    <th style={{ width: "22%" }}>Actions</th>
+                    <th style={{ width: "12%" }}>Employee</th>
+                    <th style={{ width: "10%" }}>Matricule</th>
+                    <th style={{ width: "18%" }}>Email</th>
+                    <th style={{ width: "15%" }}>Company</th>
+                    <th style={{ width: "8%" }}>Badges</th>
+                    <th style={{ width: "29%" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -350,53 +339,107 @@ const Badges: React.FC = () => {
                           {emp.firstName} {emp.lastName}
                         </strong>
                       </td>
-                      <td>{emp.matricule}</td>
-                      <td>{emp.email}</td>
-                      <td>{companies[emp.companyId] || "Unknown"}</td>
                       <td>
-                        {emp.badgesIds.length} badge
-                        {emp.badgesIds.length !== 1 ? "s" : ""}
-                        {emp.badgesIds.length > 0 &&
-                          employeeAllBadgesExpired(emp) && (
-                            <span className="ms-2 text-danger fw-bold">
-                              (Expired)
-                            </span>
-                          )}
+                        <span className="text-muted">
+                          {emp.matricule}
+                        </span>
                       </td>
                       <td>
-                        <div className="d-flex gap-2">
-                          {emp.badgesIds.length > 0 && (
-                            <Form.Select
-                              size="sm"
-                              value={selectedBadgeId || ""}
-                              onChange={(e) =>
-                                setSelectedBadgeId(Number(e.target.value))
-                              }
-                              style={{ width: "150px" }}
-                            >
-                              <option value="">Select Badge</option>
-                              {emp.badgesIds.map((id) => (
-                                <option key={id} value={id}>
-                                  {badges[id]?.code || `Badge ${id}`}
-                                </option>
-                              ))}
-                            </Form.Select>
-                          )}
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            onClick={() => openBadgeDetails(selectedBadgeId!)}
-                            disabled={!selectedBadgeId}
-                          >
-                            View
-                          </Button>
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => openGenerateBadgeModal(emp)}
-                          >
-                            Add Badge
-                          </Button>
+                        <span
+                          className="text-truncate d-inline-block"
+                          style={{ maxWidth: "150px" }}
+                        >
+                          {emp.email}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className="text-truncate d-inline-block"
+                          style={{ maxWidth: "120px" }}
+                        >
+                          {companies[emp.companyId] || "Unknown"}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="d-flex align-items-center">
+                          <span className="badge bg-secondary me-1">
+                            {emp.badgesIds.length}
+                          </span>
+                          {emp.badgesIds.length > 0 &&
+                            employeeAllBadgesExpired(emp) && (
+                              <span className="badge bg-danger">Expired</span>
+                            )}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="actions-container">
+                          {(() => {
+                            const empId = emp.id!;
+                            const badgeIds = emp.badgesIds ?? [];
+                            const hasBadges = badgeIds.length > 0;
+                            const selected = selectedBadgeByUser[empId] ?? "";
+
+                            return (
+                              <>
+                                <Form.Select
+                                  size="sm"
+                                  value={selected}
+                                  onChange={(e) =>
+                                    setSelectedBadgeByUser((prev) => ({
+                                      ...prev,
+                                      [empId]:
+                                        e.target.value === ""
+                                          ? ""
+                                          : Number(e.target.value),
+                                    }))
+                                  }
+                                  disabled={!hasBadges}
+                                  aria-disabled={!hasBadges}
+                                  title={
+                                    hasBadges
+                                      ? "Select a badge"
+                                      : "No badges for this employee"
+                                  }
+                                  className="action-select"
+                                >
+                                  {hasBadges ? (
+                                    <>
+                                      <option value="">Select Badge</option>
+                                      {badgeIds.map((id) => (
+                                        <option key={id} value={id}>
+                                          {badges[id]?.code || `Badge ${id}`}
+                                        </option>
+                                      ))}
+                                    </>
+                                  ) : (
+                                    <option value="">No badges</option>
+                                  )}
+                                </Form.Select>
+
+                                <Button
+                                  variant="outline-secondary"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (selected !== "")
+                                      openBadgeDetails(Number(selected));
+                                  }}
+                                  disabled={!hasBadges || selected === ""}
+                                  className="action-btn action-btn-view"
+                                >
+                                  Afficher
+                                </Button>
+
+                                <Button
+                                  variant="primary"
+                                  size="sm"
+                                  onClick={() => openGenerateBadgeModal(emp)}
+                                  className="action-btn action-btn-add"
+                                >
+                                  Ajouter
+                                </Button>
+                              </>
+                            );
+                          })()}
                         </div>
                       </td>
                     </tr>
@@ -408,10 +451,11 @@ const Badges: React.FC = () => {
           {renderPagination()}
         </div>
       )}
-      {/* Pagination */}
+
+      {/* Pagination Info */}
       <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
         <small className="text-muted">
-          Page {currentPage} of {totalPages}
+          Page {currentPage} of {totalPages} • Showing {paginatedEmployees.length} of {filteredEmployees.length} employees
         </small>
         <div className="pagination-buttons">
           <button
@@ -431,14 +475,13 @@ const Badges: React.FC = () => {
         </div>
       </div>
 
-      {/* ✅ Generate Badge Modal */}
+      {/* Generate Badge Modal */}
       <Modal show={showGenerateModal} onHide={closeGenerateModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Generate New Badge</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form id="generate-badge-form" onSubmit={handleBadgeSubmit}>
-            {/* Badge Code */}
             <Form.Group className="mb-3">
               <Form.Label>Badge Code</Form.Label>
               <Form.Control
@@ -451,7 +494,6 @@ const Badges: React.FC = () => {
               />
             </Form.Group>
 
-            {/* Issued / Expiry Dates */}
             <Row>
               <Col>
                 <Form.Group className="mb-3">
@@ -480,7 +522,6 @@ const Badges: React.FC = () => {
               </Col>
             </Row>
 
-            {/* Company Selector */}
             <Form.Group>
               <Form.Label>Company</Form.Label>
               <Form.Select
@@ -530,7 +571,7 @@ const Badges: React.FC = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* ✅ Badge Details Modal */}
+      {/* Badge Details Modal */}
       <Modal show={showDetailsModal} onHide={closeBadgeDetailsModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Badge Details</Modal.Title>
@@ -580,6 +621,85 @@ const Badges: React.FC = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* Consistent CSS Styles */}
+      <style>
+        {`
+          /* Actions container with consistent grid layout */
+          .actions-container {
+            display: grid;
+            grid-template-columns: 130px 80px 90px;
+            gap: 6px;
+            align-items: center;
+            width: 100%;
+            min-width: 306px; /* Prevents shrinking */
+          }
+
+          /* Consistent select field sizing */
+          .action-select {
+            width: 130px !important;
+            min-width: 130px !important;
+            max-width: 130px !important;
+            font-size: 1rem;
+          }
+
+          /* Consistent button sizing */
+          .action-btn {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 1rem;
+          }
+
+          .action-btn-view {
+            width: 80px !important;
+            min-width: 80px !important;
+            max-width: 80px !important;
+          }
+
+          .action-btn-add {
+            width: 90px !important;
+            min-width: 90px !important;
+            max-width: 90px !important;
+          }
+
+          /* Responsive behavior */
+          @media (max-width: 768px) {
+            .actions-container {
+              grid-template-columns: 1fr;
+              gap: 4px;
+              min-width: auto;
+            }
+            
+            .action-select,
+            .action-btn-view,
+            .action-btn-add {
+              width: 100% !important;
+              min-width: auto !important;
+              max-width: none !important;
+            }
+          }
+
+          /* Table improvements */
+          .custom-table th {
+            font-weight: 600;
+            font-size: 1rem;
+            border-bottom: 2px solid #dee2e6;
+          }
+
+          .custom-table td {
+            vertical-align: middle;
+            font-size: 1rem;
+            padding: 0.75rem 0.5rem;
+          }
+
+          /* Ensure table layout is stable */
+          .custom-table {
+            table-layout: fixed;
+            width: 100%;
+          }
+        `}
+      </style>
     </div>
   );
 };

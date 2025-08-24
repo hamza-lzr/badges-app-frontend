@@ -27,6 +27,9 @@ import {
   Spinner,
   Pagination,
 } from "react-bootstrap";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { formatDistanceToNow } from "date-fns";
+import { Typeahead } from "react-bootstrap-typeahead";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -45,9 +48,40 @@ const Notifications: React.FC = () => {
     to: "",
   });
 
+  const [viewOpen, setViewOpen] = useState(false);
+  const [selected, setSelected] = useState<NotificationDTO | null>(null);
+
+  type EmployeeOption = { id: number; label: string };
+
+  const employeeOptions = useMemo<EmployeeOption[]>(
+    () =>
+      employees.map((emp) => {
+        const company =
+          companies.find((c) => c.id === emp.companyId)?.name ?? "";
+        return {
+          id: emp.id!,
+          label: `${emp.firstName} ${emp.lastName} (${emp.matricule})${
+            company ? " • " + company : ""
+          }`,
+        };
+      }),
+    [employees, companies]
+  );
+
+  const openView = (n: NotificationDTO) => {
+    setSelected(n);
+    setViewOpen(true);
+  };
+  const closeView = () => {
+    setViewOpen(false);
+    setSelected(null);
+  };
+
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [newNotification, setNewNotification] = useState<Partial<NotificationDTO>>({
+  const [newNotification, setNewNotification] = useState<
+    Partial<NotificationDTO>
+  >({
     message: "",
     userId: 0,
     read: false,
@@ -76,7 +110,12 @@ const Notifications: React.FC = () => {
     if (!newNotification.message || !newNotification.userId) return;
     await createNotification(newNotification as NotificationDTO);
     setShowModal(false);
-    setNewNotification({ message: "", userId: 0, read: false, createdAt: new Date().toISOString() });
+    setNewNotification({
+      message: "",
+      userId: 0,
+      read: false,
+      createdAt: new Date().toISOString(),
+    });
     loadData();
   };
 
@@ -104,30 +143,44 @@ const Notifications: React.FC = () => {
 
         const user = employees.find((e) => e.id === n.userId);
         if (filters.user && user) {
-          const target = `${user.firstName} ${user.lastName} ${user.matricule}`.toLowerCase();
+          const target =
+            `${user.firstName} ${user.lastName} ${user.matricule}`.toLowerCase();
           if (!target.includes(filters.user.toLowerCase())) return false;
         }
 
         if (filters.company && user) {
           const company = companies.find((c) => c.id === user.companyId);
-          if (!company || !company.name.toLowerCase().includes(filters.company.toLowerCase()))
+          if (
+            !company ||
+            !company.name.toLowerCase().includes(filters.company.toLowerCase())
+          )
             return false;
         }
 
         return true;
       })
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
   }, [notifications, filters, employees, companies]);
 
-  const paginated = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const paginated = filtered.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
 
   return (
     <div className="container py-4">
       <Row className="align-items-center mb-3">
-        <Col><h2>Notifications History</h2></Col>
+        <Col>
+          <h2>Notifications History</h2>
+        </Col>
         <Col className="text-end">
-          <Button onClick={() => setShowModal(true)}>Add Notification</Button>
+          <Button onClick={() => setShowModal(true)}>
+            Envoyer une notification
+          </Button>
         </Col>
       </Row>
 
@@ -138,8 +191,19 @@ const Notifications: React.FC = () => {
             {[
               { label: "From", type: "date", value: filters.from, key: "from" },
               { label: "To", type: "date", value: filters.to, key: "to" },
-              { label: "Employee", type: "text", value: filters.user, key: "user", placeholder: "Name or matricule" },
-              { label: "Company", type: "text", value: filters.company, key: "company" },
+              {
+                label: "Employee",
+                type: "text",
+                value: filters.user,
+                key: "user",
+                placeholder: "Name or matricule",
+              },
+              {
+                label: "Company",
+                type: "text",
+                value: filters.company,
+                key: "company",
+              },
             ].map(({ label, type, value, key, placeholder }) => (
               <Col md key={key}>
                 <Form.Label>{label}</Form.Label>
@@ -159,7 +223,10 @@ const Notifications: React.FC = () => {
               <Form.Select
                 value={filters.status}
                 onChange={(e) => {
-                  setFilters({ ...filters, status: e.target.value as "all" | "read" | "unread" });
+                  setFilters({
+                    ...filters,
+                    status: e.target.value as "all" | "read" | "unread",
+                  });
                   setCurrentPage(1);
                 }}
               >
@@ -179,47 +246,104 @@ const Notifications: React.FC = () => {
         </div>
       ) : (
         <>
-          <Table hover responsive className="shadow-sm rounded">
-            <thead className="table-light">
+          <Table
+            hover
+            responsive
+            className="shadow-sm rounded custom-table"
+            style={{ tableLayout: "fixed" }}
+          >
+            {/* Stable widths */}
+            <colgroup>
+              <col style={{ width: "20%" }} /> {/* Message (narrower) */}
+              <col style={{ width: "20%" }} /> {/* User */}
+              <col style={{ width: "12%" }} /> {/* Status */}
+              <col style={{ width: "14%" }} /> {/* Created */}
+              <col style={{ width: "20%" }} /> {/* Actions */}
+            </colgroup>
+
+            <thead className="table-dark">
               <tr>
-                <th>Message</th>
-                <th>User</th>
-                <th>Status</th>
-                <th>Created At</th>
-                <th className="text-end">Actions</th>
+                <th className="py-2">Message</th>
+                <th className="py-2">User</th>
+                <th className="py-2">Status</th>
+                <th className="py-2">Created</th>
+                <th className="py-2 text-center">Actions</th>
               </tr>
             </thead>
+
             <tbody>
               {paginated.map((n) => {
                 const emp = employees.find((e) => e.id === n.userId);
+                const userLabel = emp
+                  ? `${emp.firstName} ${emp.lastName} (${emp.matricule})`
+                  : "—";
+                const createdDate = new Date(n.createdAt);
+
                 return (
                   <tr key={n.id}>
-                    <td>{n.message}</td>
-                    <td>{emp ? `${emp.firstName} ${emp.lastName} (${emp.matricule})` : "—"}</td>
+                    {/* Message (truncated) */}
                     <td>
-                      <Badge bg={n.read ? "success" : "warning"} text={n.read ? undefined : "dark"}>
+                      <OverlayTrigger
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`t-${n.id}`}>{n.message}</Tooltip>
+                        }
+                      >
+                        <div className="msg-truncate" title={n.message}>
+                          {n.message}
+                        </div>
+                      </OverlayTrigger>
+                    </td>
+
+                    {/* User */}
+                    <td className="text-muted">{userLabel}</td>
+
+                    {/* Status */}
+                    <td>
+                      <Badge
+                        bg={n.read ? "success" : "warning"}
+                        text={n.read ? undefined : "dark"}
+                      >
                         {n.read ? "Read" : "Unread"}
                       </Badge>
                     </td>
-                    <td>{new Date(n.createdAt).toLocaleString()}</td>
+
+                    {/* Created (clean, with relative time tooltip) */}
+                    <td title={createdDate.toLocaleString()}>
+                      {formatDistanceToNow(createdDate, { addSuffix: true })}
+                    </td>
+
+                    {/* Actions (fixed widths, symmetric) */}
                     <td className="text-end">
-                      {!n.read && (
+                      <div className="d-inline-grid actions-grid">
+                        <Button
+                          size="sm"
+                          variant="outline-primary"
+                          className="action-btn"
+                          onClick={() => openView(n)}
+                        >
+                          View
+                        </Button>
+
                         <Button
                           size="sm"
                           variant="outline-success"
+                          className="action-btn"
                           onClick={() => handleMarkAsRead(n.id)}
-                          className="me-2"
+                          disabled={!!n.read}
                         >
                           Mark as Read
                         </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="outline-danger"
-                        onClick={() => handleDelete(n.id)}
-                      >
-                        Delete
-                      </Button>
+
+                        <Button
+                          size="sm"
+                          variant="outline-danger"
+                          className="action-btn"
+                          onClick={() => handleDelete(n.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -251,7 +375,9 @@ const Notifications: React.FC = () => {
                 </Pagination.Item>
               ))}
               <Pagination.Next
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
               />
             </Pagination>
@@ -262,7 +388,7 @@ const Notifications: React.FC = () => {
       {/* Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Add Notification</Modal.Title>
+          <Modal.Title>Envoyer une notification</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleCreate}>
@@ -272,39 +398,127 @@ const Notifications: React.FC = () => {
                 type="text"
                 value={newNotification.message}
                 onChange={(e) =>
-                  setNewNotification({ ...newNotification, message: e.target.value })
+                  setNewNotification({
+                    ...newNotification,
+                    message: e.target.value,
+                  })
                 }
                 required
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>User</Form.Label>
-              <Form.Select
-                value={newNotification.userId || ""}
-                onChange={(e) =>
-                  setNewNotification({ ...newNotification, userId: Number(e.target.value) })
+              <Form.Label>Collaborateur</Form.Label>
+
+              <Typeahead
+                id="employee-typeahead"
+                labelKey="label"
+                options={employeeOptions}
+                placeholder="Rechercher par nom, matricule, société…"
+                clearButton
+                highlightOnlyResult
+                onChange={(sel) => {
+                  const picked =
+                    (sel[0] as EmployeeOption | undefined)?.id ?? 0;
+                  setNewNotification({ ...newNotification, userId: picked });
+                }}
+                selected={
+                  newNotification.userId
+                    ? employeeOptions.filter(
+                        (o) => o.id === newNotification.userId
+                      )
+                    : []
                 }
-                required
-              >
-                <option value="">Select user</option>
-                {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id}>
-                    {emp.firstName} {emp.lastName} ({emp.matricule})
-                  </option>
-                ))}
-              </Form.Select>
+              />
+              <Form.Text className="text-muted">
+                Tapez pour filtrer, puis sélectionnez.
+              </Form.Text>
             </Form.Group>
+
             <div className="text-end">
-              <Button variant="secondary" onClick={() => setShowModal(false)} className="me-2">
-                Cancel
+              <Button
+                variant="secondary"
+                onClick={() => setShowModal(false)}
+                className="me-2"
+              >
+                Annuler
               </Button>
               <Button type="submit" variant="primary">
-                Save
+                Envoyer
               </Button>
             </div>
           </Form>
         </Modal.Body>
       </Modal>
+      <Modal show={viewOpen} onHide={closeView} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Notification</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selected && (
+            <div className="d-flex flex-column gap-2">
+              <div>
+                <strong>Collaborateur:</strong>{" "}
+                {employees.find((e) => e.id === selected.userId)
+                  ? `${
+                      employees.find((e) => e.id === selected.userId)!.firstName
+                    } ${
+                      employees.find((e) => e.id === selected.userId)!.lastName
+                    }`
+                  : "—"}
+              </div>
+              <div>
+                <strong>StatuT:</strong> {selected.read ? "Read" : "Unread"}
+              </div>
+              <div>
+                <strong>Date:</strong>{" "}
+                {new Date(selected.createdAt).toLocaleString()}
+              </div>
+              <hr />
+              <div>
+                <strong>Message:</strong>
+              </div>
+              <div className="p-2 bg-light rounded">{selected.message}</div>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeView}>
+            Fermer
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <style>
+        {`
+  /* Single-line truncate for Message */
+  .custom-table .msg-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Keep rows airy but compact */
+  .custom-table tbody td, .custom-table thead th {
+    padding-top: .7rem;
+    padding-bottom: .7rem;
+    vertical-align: middle;
+  }
+
+  /* Symmetric actions: 3 fixed buttons */
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 80px); /* same width for all */
+    gap: 8px;
+    justify-content: end;
+  }
+  .action-btn { width: 100%; }
+
+  /* Slightly smaller message column on small screens */
+  @media (max-width: 992px) {
+    .actions-grid { grid-template-columns: repeat(3, 96px); }
+  }
+`}
+      </style>
     </div>
   );
 };

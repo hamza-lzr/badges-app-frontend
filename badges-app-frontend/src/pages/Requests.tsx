@@ -157,16 +157,26 @@ const RequestsPage: React.FC = () => {
     <Container fluid className="bg-light py-4" style={{ minHeight: "100vh" }}>
       {/* Header Section */}
       <div className="text-center mb-5">
-        <h1 className="display-4 fw-bold text-dark mb-2">Gestion des demandes</h1>
-        <p className="text-muted fs-5">Gérer et examiner les demandes des employés efficacement</p>
+        <h1 className="display-4 fw-bold text-dark mb-2">
+          Gestion des demandes
+        </h1>
+        <p className="text-muted fs-5">
+          Gérer et examiner les demandes des employés efficacement
+        </p>
       </div>
 
       {/* Filters Card */}
-      <Card className="mb-4 shadow-lg border-0" style={{ borderRadius: "15px" }}>
-        <Card.Header className="bg-gradient text-white py-3" style={{ 
-          background: "linear-gradient(135deg, #343a40 0%, #495057 100%)",
-          borderRadius: "15px 15px 0 0"
-        }}>
+      <Card
+        className="mb-4 shadow-lg border-0"
+        style={{ borderRadius: "15px" }}
+      >
+        <Card.Header
+          className="bg-gradient text-white py-3"
+          style={{
+            background: "linear-gradient(135deg, #343a40 0%, #495057 100%)",
+            borderRadius: "15px 15px 0 0",
+          }}
+        >
           <h5 className="mb-0 d-flex align-items-center">
             <BiFilter size={24} className="me-2" />
             Filtres et recherche
@@ -180,7 +190,10 @@ const RequestsPage: React.FC = () => {
                 Rechercher des demandes
               </Form.Label>
               <InputGroup className="shadow-sm">
-                <InputGroup.Text className="bg-white border-end-0 px-3" style={{ borderRadius: "10px 0 0 10px" }}>
+                <InputGroup.Text
+                  className="bg-white border-end-0 px-3"
+                  style={{ borderRadius: "10px 0 0 10px" }}
+                >
                   <BiSearch size={20} className="text-secondary" />
                 </InputGroup.Text>
                 <Form.Control
@@ -202,7 +215,10 @@ const RequestsPage: React.FC = () => {
                 Filtre de statut
               </Form.Label>
               <InputGroup className="shadow-sm">
-                <InputGroup.Text className="bg-white border-end-0 px-3" style={{ borderRadius: "10px 0 0 10px" }}>
+                <InputGroup.Text
+                  className="bg-white border-end-0 px-3"
+                  style={{ borderRadius: "10px 0 0 10px" }}
+                >
                   <BiFilter size={20} className="text-secondary" />
                 </InputGroup.Text>
                 <Form.Select
@@ -229,7 +245,10 @@ const RequestsPage: React.FC = () => {
                 Plage de dates
               </Form.Label>
               <InputGroup className="shadow-sm">
-                <InputGroup.Text className="bg-white border-end-0 px-3" style={{ borderRadius: "10px 0 0 0" }}>
+                <InputGroup.Text
+                  className="bg-white border-end-0 px-3"
+                  style={{ borderRadius: "10px 0 0 0" }}
+                >
                   <BiCalendar size={20} className="text-secondary" />
                 </InputGroup.Text>
                 <Form.Control
@@ -274,31 +293,59 @@ const RequestsPage: React.FC = () => {
       <Card className="shadow-lg border-0" style={{ borderRadius: "15px" }}>
         <div className="position-relative">
           {loading && (
-            <div className="position-absolute w-100 h-100 d-flex flex-column justify-content-center align-items-center bg-white bg-opacity-90 rounded-top" style={{ zIndex: 10, borderRadius: "15px" }}>
+            <div
+              className="position-absolute w-100 h-100 d-flex flex-column justify-content-center align-items-center bg-white bg-opacity-90 rounded-top"
+              style={{ zIndex: 10, borderRadius: "15px" }}
+            >
               <Spinner animation="border" variant="primary" size="sm" />
               <p className="text-muted mt-3 mb-0">Chargement des demandes...</p>
             </div>
           )}
 
-          <div className="table-responsive" style={{ borderRadius: "15px", overflow: "hidden" }}>
+          <div
+            className="table-responsive"
+            style={{ borderRadius: "15px", overflow: "hidden" }}
+          >
             <Table hover className="mb-0 align-middle">
-              <thead style={{ 
-                background: "linear-gradient(135deg, #343a40 0%, #495057 100%)", 
-                color: "#fff" 
-              }}>
+<thead
+  style={
+    {
+      // Bootstrap table vars
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ["--bs-table-bg" as any]: "#111827",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ["--bs-table-color" as any]: "#fff",
+    } as React.CSSProperties
+  }
+>
+
                 <tr>
-                  <th className="px-4 py-3 fw-semibold border-0">Description</th>
-                  <th className="px-4 py-3 fw-semibold border-0 text-center" style={{ width: "120px" }}>
+                  <th className="px-4 py-3 fw-semibold border-0">
+                    Description
+                  </th>
+                  <th
+                    className="px-4 py-3 fw-semibold border-0 text-center"
+                    style={{ width: "120px" }}
+                  >
                     Type
                   </th>
-                  <th className="px-4 py-3 fw-semibold border-0 text-center" style={{ width: "120px" }}>
+                  <th
+                    className="px-4 py-3 fw-semibold border-0 text-center"
+                    style={{ width: "120px" }}
+                  >
                     Statut
                   </th>
                   <th className="px-4 py-3 fw-semibold border-0">Employé</th>
-                  <th className="px-4 py-3 fw-semibold border-0 text-center" style={{ width: "160px" }}>
+                  <th
+                    className="px-4 py-3 fw-semibold border-0 text-center"
+                    style={{ width: "160px" }}
+                  >
                     Créée le
                   </th>
-                  <th className="px-4 py-3 fw-semibold border-0 text-center" style={{ width: "180px" }}>
+                  <th
+                    className="px-4 py-3 fw-semibold border-0 text-center"
+                    style={{ width: "180px" }}
+                  >
                     Actions
                   </th>
                 </tr>
@@ -318,7 +365,9 @@ const RequestsPage: React.FC = () => {
                   pageData.map((r, index) => (
                     <tr
                       key={r.id}
-                      className={`${index % 2 === 0 ? 'bg-white' : 'bg-light'} border-0`}
+                      className={`${
+                        index % 2 === 0 ? "bg-white" : "bg-light"
+                      } border-0`}
                       style={{
                         cursor: "pointer",
                         transition: "all 0.2s ease",
@@ -330,16 +379,22 @@ const RequestsPage: React.FC = () => {
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = "#f8f9fa";
                         e.currentTarget.style.transform = "translateY(-1px)";
-                        e.currentTarget.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
+                        e.currentTarget.style.boxShadow =
+                          "0 4px 8px rgba(0,0,0,0.1)";
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = index % 2 === 0 ? '#fff' : '#f8f9fa';
+                        e.currentTarget.style.backgroundColor =
+                          index % 2 === 0 ? "#fff" : "#f8f9fa";
                         e.currentTarget.style.transform = "translateY(0)";
                         e.currentTarget.style.boxShadow = "none";
                       }}
                     >
                       <td className="px-4 py-3">
-                        <div className="text-truncate" style={{ maxWidth: "300px" }} title={r.description}>
+                        <div
+                          className="text-truncate"
+                          style={{ maxWidth: "300px" }}
+                          title={r.description}
+                        >
                           {r.description}
                         </div>
                       </td>
@@ -349,7 +404,10 @@ const RequestsPage: React.FC = () => {
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <Badge bg={badgeVariant(r.reqStatus)} className="px-3 py-2 fw-semibold">
+                        <Badge
+                          bg={badgeVariant(r.reqStatus)}
+                          className="px-3 py-2 fw-semibold"
+                        >
                           {translateStatus(r.reqStatus)}
                         </Badge>
                       </td>
@@ -400,7 +458,9 @@ const RequestsPage: React.FC = () => {
                           </div>
                         ) : (
                           <span className="text-muted small">
-                            {r.reqStatus === "APPROVED" ? "✓ Traité" : "✗ Rejeté"}
+                            {r.reqStatus === "APPROVED"
+                              ? "✓ Traité"
+                              : "✗ Rejeté"}
                           </span>
                         )}
                       </td>
@@ -414,7 +474,10 @@ const RequestsPage: React.FC = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <Card.Footer className="bg-white border-0 py-3" style={{ borderRadius: "0 0 15px 15px" }}>
+          <Card.Footer
+            className="bg-white border-0 py-3"
+            style={{ borderRadius: "0 0 15px 15px" }}
+          >
             <div className="d-flex justify-content-center">
               <Pagination className="mb-0">
                 <Pagination.Prev
@@ -432,7 +495,7 @@ const RequestsPage: React.FC = () => {
                   } else {
                     pageNum = currentPage - 2 + i;
                   }
-                  
+
                   return (
                     <Pagination.Item
                       key={pageNum}
@@ -462,11 +525,11 @@ const RequestsPage: React.FC = () => {
         centered
         size="lg"
       >
-        <Modal.Header 
-          closeButton 
+        <Modal.Header
+          closeButton
           className="bg-gradient text-white"
-          style={{ 
-            background: "linear-gradient(135deg, #343a40 0%, #495057 100%)"
+          style={{
+            background: "linear-gradient(135deg, #343a40 0%, #495057 100%)",
           }}
         >
           <Modal.Title className="fw-bold">Détails de la demande</Modal.Title>
@@ -493,7 +556,10 @@ const RequestsPage: React.FC = () => {
               <Col md={6}>
                 <div>
                   <h6 className="text-secondary mb-2">Statut</h6>
-                  <Badge bg={badgeVariant(detailRequest.reqStatus)} className="px-3 py-2 fw-semibold">
+                  <Badge
+                    bg={badgeVariant(detailRequest.reqStatus)}
+                    className="px-3 py-2 fw-semibold"
+                  >
                     {translateStatus(detailRequest.reqStatus)}
                   </Badge>
                 </div>
@@ -501,7 +567,9 @@ const RequestsPage: React.FC = () => {
               <Col md={6}>
                 <div>
                   <h6 className="text-secondary mb-2">Employé</h6>
-                  <p className="mb-0 fw-semibold">{getEmployeeName(detailRequest.userId)}</p>
+                  <p className="mb-0 fw-semibold">
+                    {getEmployeeName(detailRequest.userId)}
+                  </p>
                 </div>
               </Col>
               <Col md={6}>

@@ -30,6 +30,7 @@ import CongePage from "./employeePages/CongesPage";
 import AdminNotifications from "./pages/AdminNotifications";
 import MyAdminProfilePage from "./pages/AdminProfile";
 import { ToastContainer } from "react-toastify";
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 const App = () => {
   return (
     <div style={{ fontFamily: "Roboto, sans-serif" }}>
