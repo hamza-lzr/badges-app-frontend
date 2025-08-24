@@ -25,7 +25,7 @@ const accentRed = "#b11e2f";
 const AdminTopbar: React.FC<AdminTopbarProps> = ({
   title = "Badges App Admin",
   onLogout,
-  pollMs = 60000,
+  pollMs = 3000,
 }) => {
   const navigate = useNavigate();
 
