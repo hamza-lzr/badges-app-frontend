@@ -25,11 +25,20 @@ const TYPE_OPTIONS: ReqType[] = [
   "OTHER",
 ];
 
-const formatEnum = (text: string) =>
-  text
-    .split("_")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(" ");
+const STATUS_LABELS: Record<ReqStatus, string> = {
+  PENDING: "En attente",
+  APPROVED: "Approuvée",
+  REJECTED: "Rejetée",
+};
+
+const TYPE_LABELS: Record<ReqType, string> = {
+  AIRPORT_ACCESS: "Accès aéroport",
+  PROFILE: "Profil",
+  NEW_BADGE: "Nouveau badge",
+  COMPANY: "Société",
+  OTHER: "Autre",
+};
+
 
 const EmployeeRequestsPage: React.FC = () => {
   const [requests, setRequests] = useState<Request[]>([]);
@@ -50,7 +59,10 @@ const EmployeeRequestsPage: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserDTO | null>(null);
 
   const location = useLocation();
-  const state = location.state as { openRequestModal?: boolean; reqType?: ReqType };
+  const state = location.state as {
+    openRequestModal?: boolean;
+    reqType?: ReqType;
+  };
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -100,13 +112,13 @@ const EmployeeRequestsPage: React.FC = () => {
       case "PENDING":
         return (
           <Badge bg="warning" text="dark">
-            Pending
+            En attente
           </Badge>
         );
       case "APPROVED":
-        return <Badge bg="success">Approved</Badge>;
+        return <Badge bg="success">Approuvée</Badge>;
       case "REJECTED":
-        return <Badge bg="danger">Rejected</Badge>;
+        return <Badge bg="danger">Rejetée</Badge>;
     }
   };
 
@@ -153,13 +165,16 @@ const EmployeeRequestsPage: React.FC = () => {
     <div className="container py-4" style={{ maxWidth: "800px" }}>
       {/* HEADER */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="fw-bold" style={{ color: "#333333" }}>My Requests</h3>
+        <h3 className="fw-bold" style={{ color: "#333333" }}>
+          Mes Demandes
+        </h3>
         <Button
           variant="success"
           className="rounded-pill shadow-sm"
           onClick={() => setShowModal(true)}
         >
-          <i className="bi bi-plus-circle" style={{ fontSize: "1.2rem" }}></i> New Request
+          <i className="bi bi-plus-circle" style={{ fontSize: "1.2rem" }}></i>{" "}
+          Nouvelle Demande
         </Button>
       </div>
 
@@ -173,7 +188,7 @@ const EmployeeRequestsPage: React.FC = () => {
               className="rounded-pill shadow-sm"
               onClick={() => setFilterStatus("ALL")}
             >
-              All
+              Tous
             </Button>
             {STATUS_OPTIONS.map((s) => (
               <Button
@@ -183,7 +198,7 @@ const EmployeeRequestsPage: React.FC = () => {
                 className="rounded-pill shadow-sm"
                 onClick={() => setFilterStatus(s)}
               >
-                {formatEnum(s)}
+                {STATUS_LABELS[s]}
               </Button>
             ))}
           </div>
@@ -194,11 +209,14 @@ const EmployeeRequestsPage: React.FC = () => {
       {loading ? (
         <div className="text-center my-5">
           <Spinner animation="border" variant="primary" />
-          <p className="mt-2">Loading your requests...</p>
+          <p className="mt-2">Chargement de vos demandes...</p>
         </div>
       ) : currentRequests.length === 0 ? (
         <Alert variant="info" className="text-center shadow-sm">
-          No requests {filterStatus !== "ALL" && `with status ${filterStatus.toLowerCase()}`}.
+          Aucune demande{" "}
+          {filterStatus !== "ALL" &&
+            `avec le statut ${STATUS_LABELS[filterStatus as ReqStatus]}`}
+          .
         </Alert>
       ) : (
         <div className="d-flex flex-column gap-3">
@@ -211,7 +229,7 @@ const EmployeeRequestsPage: React.FC = () => {
               {/* Header */}
               <div className="d-flex justify-content-between align-items-center mb-2">
                 <h6 className="mb-0 text-dark fw-bold">
-                  {formatEnum(req.reqType)}
+                  {TYPE_LABELS[req.reqType]}
                 </h6>
                 {getStatusBadge(req.reqStatus)}
               </div>
@@ -236,7 +254,9 @@ const EmployeeRequestsPage: React.FC = () => {
       {filteredRequests.length > 0 && (
         <div className="d-flex justify-content-center mt-4">
           <Pagination className="shadow-sm rounded-pill">
-            {[...Array(Math.ceil(filteredRequests.length / requestsPerPage))].map((_, index) => (
+            {[
+              ...Array(Math.ceil(filteredRequests.length / requestsPerPage)),
+            ].map((_, index) => (
               <Pagination.Item
                 key={index}
                 active={index + 1 === currentPage}
@@ -260,7 +280,7 @@ const EmployeeRequestsPage: React.FC = () => {
       >
         <Modal.Header closeButton className="border-0">
           <Modal.Title className="fw-bold" style={{ color: "#333333" }}>
-            Create New Request
+            Envoyer une nouvelle demande
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -268,7 +288,7 @@ const EmployeeRequestsPage: React.FC = () => {
             {/* Request Type */}
             <Form.Group className="mb-3">
               <Form.Label className="fw-bold" style={{ color: "#333333" }}>
-                Request Type
+                Type de Demande
               </Form.Label>
               <Form.Select
                 value={newRequest.reqType}
@@ -282,7 +302,7 @@ const EmployeeRequestsPage: React.FC = () => {
               >
                 {TYPE_OPTIONS.map((t) => (
                   <option key={t} value={t}>
-                    {formatEnum(t)}
+                    {TYPE_LABELS[t]}
                   </option>
                 ))}
               </Form.Select>
@@ -303,7 +323,7 @@ const EmployeeRequestsPage: React.FC = () => {
                     description: e.target.value,
                   })
                 }
-                placeholder="Explain your request..."
+                placeholder="Expliquez votre demande..."
                 required
                 className="shadow-sm rounded-4"
               />
@@ -315,14 +335,14 @@ const EmployeeRequestsPage: React.FC = () => {
                 onClick={() => setShowModal(false)}
                 className="rounded-pill shadow-sm me-2"
               >
-                Cancel
+                Annuler
               </Button>
               <Button
                 type="submit"
                 variant="success"
                 className="rounded-pill shadow-sm"
               >
-                Submit Request
+                Soumettre
               </Button>
             </div>
           </Form>
@@ -359,4 +379,3 @@ const EmployeeRequestsPage: React.FC = () => {
 };
 
 export default EmployeeRequestsPage;
-

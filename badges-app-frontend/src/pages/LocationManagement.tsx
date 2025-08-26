@@ -81,13 +81,13 @@ const LocationManagement: React.FC = () => {
   return (
     <div className="container py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-semibold mb-0">Location Management</h2>
+        <h2 className="fw-semibold mb-0">Gestion des régions</h2>
 
         {/* Small stats */}
         {!loadingCountries && (
           <span className="text-muted">
-            <strong>{countries.length}</strong> Registered Countr
-            {countries.length !== 1 ? "ies" : "y"}
+            <strong>{countries.length}</strong> Pays enregistré
+            {countries.length !== 1 ? "s" : "."}
           </span>
         )}
       </div>
@@ -95,23 +95,23 @@ const LocationManagement: React.FC = () => {
       {/* Add Country Button / Form */}
       {!showAddForm ? (
         <Button variant="primary" className="mb-3" onClick={() => setShowAddForm(true)}>
-          Add a New Country
+          Ajouter un pays
         </Button>
       ) : (
         <Form className="d-flex gap-2 mb-3" onSubmit={handleAddCountry}>
           <Form.Control
             type="text"
-            placeholder="Enter country name"
+            placeholder="Entrez le nom du pays"
             value={newCountry.name}
             onChange={(e) => setNewCountry({ name: e.target.value })}
             required
             autoFocus
           />
           <Button type="submit" variant="success">
-            Save
+            Enregistrer
           </Button>
           <Button variant="secondary" onClick={() => setShowAddForm(false)}>
-            Cancel
+            Annuler
           </Button>
         </Form>
       )}
@@ -120,7 +120,7 @@ const LocationManagement: React.FC = () => {
       <div className="d-flex gap-3 mb-3 align-items-center">
         <Form.Control
           type="text"
-          placeholder="Search countries..."
+          placeholder="Rechercher des pays..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{ maxWidth: "250px" }}
@@ -130,28 +130,27 @@ const LocationManagement: React.FC = () => {
           variant="outline-secondary"
           onClick={() => setSortAsc(!sortAsc)}
         >
-          Sort {sortAsc ? "A → Z" : "Z → A"}
+          Trier {sortAsc ? "A → Z" : "Z → A"}
         </Button>
       </div>
 
       <hr />
 
       {/* Country List */}
-      <h5 className="mb-3">Registered Countries</h5>
 
       {loadingCountries ? (
         <div className="text-center my-4">
           <Spinner animation="border" />
-          <p className="text-muted mt-2">Loading countries...</p>
+          <p className="text-muted mt-2">Chargement des pays...</p>
         </div>
       ) : filteredCountries.length === 0 ? (
-        <p className="text-muted">No countries found. Try another search.</p>
+        <p className="text-muted">Aucun pays trouvé. Essayez une autre recherche.</p>
       ) : (
         <div className="table-responsive shadow-sm rounded">
           <table className="table table-hover align-middle">
             <thead className="table-dark">
               <tr>
-                <th>Country</th>
+                <th>Pays</th>
                 <th style={{ width: "200px" }}>Actions</th>
               </tr>
             </thead>
@@ -168,14 +167,14 @@ const LocationManagement: React.FC = () => {
                         variant="info"
                         onClick={() => goToCities(country.id!, country.name)}
                       >
-                        Go to Cities
+                        Voir villes
                       </Button>
                       <Button
                         size="sm"
                         variant="danger"
                         onClick={() => handleDeleteCountry(country.id!)}
                       >
-                        Delete
+                        Supprimer
                       </Button>
                     </div>
                   </td>
@@ -188,7 +187,7 @@ const LocationManagement: React.FC = () => {
       {/* Pagination */}
           <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
             <small className="text-muted">
-              Page {currentPage} of {totalPages}
+              Page {currentPage} sur {totalPages}
             </small>
             <div className="pagination-buttons">
               <button
@@ -196,14 +195,14 @@ const LocationManagement: React.FC = () => {
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => p - 1)}
               >
-                Previous
+                Précédent
               </button>
               <button
                 className="btn btn-sm btn-outline-secondary"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((p) => p + 1)}
               >
-                Next
+                Suivant
               </button>
             </div>
           </div>

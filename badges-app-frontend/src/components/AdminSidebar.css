@@ -1,6 +1,6 @@
 :root{
   --topbar-height: 50px;        /* match AdminTopbar height */
-  --sidebar-width: 250px;       /* default expanded width */
+  --sidebar-width: 280px;       /* default expanded width */
 }
 
 /* ===== Topbar wrapper (keeps the navbar at the top) ===== */

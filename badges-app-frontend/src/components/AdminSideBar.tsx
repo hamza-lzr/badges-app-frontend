@@ -55,7 +55,7 @@ const AdminSidebar: React.FC = () => {
       <div className="sidebar-header">
         {!collapsed && (
           <span className="fs-5 fw-bold d-flex align-items-center gap-2">
-            <i className="bi bi-shield-lock-fill"></i> Admin Panel
+            <i className="bi bi-shield-lock-fill"></i> Admin 
           </span>
         )}
         <button
@@ -77,25 +77,25 @@ const AdminSidebar: React.FC = () => {
         <NavItem
           to="/admin/requests"
           icon="bi-list-check"
-          label="Requests"
+          label="Demandes"
           collapsed={collapsed}
         />
         <NavItem
           to="/admin/employees"
           icon="bi-person-badge-fill"
-          label="Employees"
+          label="Collaborateurs"
           collapsed={collapsed}
         />
         <NavItem
           to="/admin/airports"
           icon="bi-airplane-engines"
-          label="Airports"
+          label="Aéroports"
           collapsed={collapsed}
         />
         <NavItem
           to="/admin/companies"
           icon="bi-building"
-          label="Companies"
+          label="Entreprises"
           collapsed={collapsed}
         />
         <NavItem
@@ -107,19 +107,19 @@ const AdminSidebar: React.FC = () => {
         <NavItem
           to="/admin/locations"
           icon="bi-geo-alt-fill"
-          label="Countries"
+          label="Pays"
           collapsed={collapsed}
         />
         <NavItem
           to="/admin/accesses"
           icon="bi-shield-check"
-          label="Access"
+          label="Accès"
           collapsed={collapsed}
         />
         <NavItem
           to="/admin/notifications"
           icon="bi-bell-fill"
-          label="Notifications"
+          label="Mes notifications"
           collapsed={collapsed}
         />
         <NavItem
@@ -131,7 +131,7 @@ const AdminSidebar: React.FC = () => {
         <NavItem
           to="/admin/notifhistory"
           icon={<FaHistory />}
-          label="Histrorique des notifs"
+          label="Historique des notifs"
           collapsed={collapsed}
         />
       </nav>
@@ -143,7 +143,7 @@ const AdminSidebar: React.FC = () => {
           onClick={handleLogout}
         >
           <i className="bi bi-box-arrow-right"></i>
-          {!collapsed && <span>Logout</span>}
+          {!collapsed && <span>Déconnexion</span>}
         </button>
       </div>
     </div>

@@ -287,10 +287,10 @@ const Employees: React.FC = () => {
       {/* Header */}
       <div className="text-center mb-5">
         <h1 className="display-4 fw-bold text-dark mb-2">
-          Gestion des employés
+          Gestion des Collaborateurs
         </h1>
         <p className="text-muted fs-5">
-          Rechercher, filtrer et gérer les employés de manière fluide
+          Rechercher, filtrer et gérer les collaborateurs
         </p>
       </div>
       <div className="d-flex justify-content-end mt-4 mb-2">
@@ -299,7 +299,7 @@ const Employees: React.FC = () => {
           className="px-3 py-2 fw-semibold"
         >
           <BiPlus size={18} className="me-2" />
-          Ajouter un employé
+          Ajouter un collaborateur
         </Button>
       </div>
 
@@ -325,7 +325,7 @@ const Employees: React.FC = () => {
             {/* Recherche */}
             <Col xl={4} lg={6} md={12}>
               <Form.Label className="text-secondary fw-semibold mb-2">
-                Rechercher des employés
+                Rechercher des collaborateurs
               </Form.Label>
               <InputGroup className="shadow-sm">
                 <InputGroup.Text
@@ -416,7 +416,7 @@ const Employees: React.FC = () => {
       {/* Résumé */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h6 className="text-muted mb-0">
-          Affichage de {pageData.length} sur {filteredEmployees.length} employés
+          Affichage de {pageData.length} sur {filteredEmployees.length} collaborateurs
         </h6>
         <Badge bg="secondary" className="fs-6 px-3 py-2">
           Page {currentPage} sur {totalPages}
@@ -432,7 +432,7 @@ const Employees: React.FC = () => {
               style={{ zIndex: 10, borderRadius: "15px" }}
             >
               <Spinner animation="border" variant="primary" size="sm" />
-              <p className="text-muted mt-3 mb-0">Chargement des employés...</p>
+              <p className="text-muted mt-3 mb-0">Chargement des collaborateurs...</p>
             </div>
           )}
 
@@ -474,7 +474,7 @@ const Employees: React.FC = () => {
                     onClick={() => handleSort("firstName")}
                     title="Trier par nom"
                   >
-                    Employé {sortKey === "firstName" && (sortAsc ? "▲" : "▼")}
+                    Nom Complet {sortKey === "firstName" && (sortAsc ? "▲" : "▼")}
                   </th>
                   <th className="px-4 py-3 fw-semibold border-0 text-truncate">
                     Email
@@ -509,7 +509,7 @@ const Employees: React.FC = () => {
                     <td colSpan={8} className="text-center py-5">
                       <div className="text-muted">
                         <BiSearch size={48} className="mb-3 opacity-50" />
-                        <p className="fs-5 mb-0">Aucun employé trouvé</p>
+                        <p className="fs-5 mb-0">Aucun collaborateur trouvé</p>
                         <small>Essayez d’ajuster vos filtres</small>
                       </div>
                     </td>
@@ -706,7 +706,7 @@ const Employees: React.FC = () => {
             background: "linear-gradient(135deg, #343a40 0%, #495057 100%)",
           }}
         >
-          <Modal.Title className="fw-bold">Détails de l’employé</Modal.Title>
+          <Modal.Title className="fw-bold">Détails du collaborateur</Modal.Title>
         </Modal.Header>
         <Modal.Body className="p-4">
           {detailEmployee && (
@@ -783,7 +783,7 @@ const Employees: React.FC = () => {
             background: "linear-gradient(135deg, #343a40 0%, #495057 100%)",
           }}
         >
-          <Modal.Title>Ajouter un employé</Modal.Title>
+          <Modal.Title>Ajouter un collaborateur</Modal.Title>
         </Modal.Header>
         <Modal.Body className="p-4">
           <form id="add-employee-form" onSubmit={handleCreateEmployee}>
@@ -894,7 +894,7 @@ const Employees: React.FC = () => {
             background: "linear-gradient(135deg, #343a40 0%, #495057 100%)",
           }}
         >
-          <Modal.Title>Modifier l’employé</Modal.Title>
+          <Modal.Title>Modifier le collaborateur</Modal.Title>
         </Modal.Header>
         <Modal.Body className="p-4">
           {editingEmployee && (

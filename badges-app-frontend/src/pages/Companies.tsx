@@ -91,10 +91,10 @@ const Companies: React.FC = () => {
     try {
       if (isEditing && selectedCompanyId) {
         await updateCompany(selectedCompanyId, newCompany);
-        showSuccessToast("Company updated successfully!");
+        showSuccessToast("Entreprise modifiée avec succès !");
       } else {
         await createCompany(newCompany);
-        showSuccessToast("Company created successfully!");
+        showSuccessToast("Entreprise ajoutée avec succès !");
       }
 
       await loadCompanies();
@@ -108,12 +108,12 @@ const Companies: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this company?"))
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette entreprise ?"))
       return;
     try {
       await deleteCompany(id);
       await loadCompanies();
-      showSuccessToast("Company deleted successfully!");
+      showSuccessToast("Entreprise supprimée avec succès !");
     } catch (error) {
       console.error(`Error deleting company ${id}:`, error);
     }
@@ -175,10 +175,10 @@ const Companies: React.FC = () => {
     <div className="container py-4">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">Companies</h2>
+        <h2 className="fw-semibold mb-0">Entreprises</h2>
         <button className="btn btn-primary" onClick={openAddModal}>
           <i className="bi bi-plus-lg me-1" />
-          Add Company
+          Ajouter une Entreprise
         </button>
       </div>
 
@@ -187,7 +187,7 @@ const Companies: React.FC = () => {
         <input
           type="text"
           className="form-control"
-          placeholder="Search by name, address or phone..."
+          placeholder="Rechercher par nom, adresse ou téléphone..."
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
@@ -200,13 +200,13 @@ const Companies: React.FC = () => {
       {loading ? (
         <div className="text-center my-5">
           <div className="spinner-border text-primary" role="status" />
-          <p className="mt-2">Loading companies...</p>
+          <p className="mt-2">Chargement des entreprises...</p>
         </div>
       ) : sortedCompanies.length === 0 ? (
         <div className="alert alert-info text-center">
           {companies.length === 0
-            ? `No companies found. Click "Add Company" to create one.`
-            : `No results for "${searchTerm}".`}
+            ? `Aucune entreprise trouvée. Cliquez sur "Ajouter une Entreprise" pour en créer une.`
+            : `Aucun résultat pour "${searchTerm}".`}
         </div>
       ) : (
         <>
@@ -218,7 +218,7 @@ const Companies: React.FC = () => {
                     style={{ cursor: "pointer" }}
                     onClick={() => handleSort("name")}
                   >
-                    Name{"      "}
+                    Nom{"      "}
                     {sortKey === "name" &&
                       (sortAsc ? (
                         <i className="bi bi-caret-up-fill text-primary"></i>
@@ -230,7 +230,7 @@ const Companies: React.FC = () => {
                     style={{ cursor: "pointer" }}
                     onClick={() => handleSort("address")}
                   >
-                    Address{"     "}
+                    Adresse{"     "}
                     {sortKey === "address" &&
                       (sortAsc ? (
                         <i className="bi bi-caret-up-fill text-primary"></i>
@@ -242,7 +242,7 @@ const Companies: React.FC = () => {
                     style={{ cursor: "pointer" }}
                     onClick={() => handleSort("phone")}
                   >
-                    Phone {"     "}
+                    Téléphone {"     "}
                     {sortKey === "phone" &&
                       (sortAsc ? (
                         <i className="bi bi-caret-up-fill text-primary"></i>
@@ -250,7 +250,7 @@ const Companies: React.FC = () => {
                         <i className="bi bi-caret-down-fill text-primary"></i>
                       ))}
                   </th>
-                  <th>Description</th>
+                  <th>Descriptif</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -271,7 +271,7 @@ const Companies: React.FC = () => {
                           title="Edit"
                         >
                           <i className="bi bi-pencil" />
-                          Edit
+                          Modifier
                         </button>
                         <button
                           className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
@@ -279,7 +279,7 @@ const Companies: React.FC = () => {
                           title="Delete"
                         >
                           <i className="bi bi-trash" />
-                          Delete
+                          Supprimer
                         </button>
                       </div>
                     </td>
@@ -292,7 +292,7 @@ const Companies: React.FC = () => {
           {/* Pagination */}
           <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
             <small className="text-muted">
-              Page {currentPage} of {totalPages}
+              Page {currentPage} sur {totalPages}
             </small>
             <div className="pagination-buttons">
               <button
@@ -300,14 +300,14 @@ const Companies: React.FC = () => {
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => p - 1)}
               >
-                Previous
+                Précédent
               </button>
               <button
                 className="btn btn-sm btn-outline-secondary"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((p) => p + 1)}
               >
-                Next
+                Suivant
               </button>
             </div>
           </div>
@@ -318,14 +318,14 @@ const Companies: React.FC = () => {
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>
-            {isEditing ? "Edit Company" : "Add Company"}
+            {isEditing ? "Modifier l'entreprise" : "Ajouter une entreprise"}
           </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
           <form id="company-form" onSubmit={handleSaveCompany}>
             <div className="mb-3">
-              <label className="form-label">Company Name</label>
+              <label className="form-label">Nom de l'entreprise</label>
               <input
                 type="text"
                 className="form-control"
@@ -338,7 +338,7 @@ const Companies: React.FC = () => {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Address</label>
+              <label className="form-label">Adresse</label>
               <input
                 type="text"
                 className="form-control"
@@ -349,7 +349,7 @@ const Companies: React.FC = () => {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Phone</label>
+              <label className="form-label">Téléphone</label>
               <input
                 type="text"
                 className="form-control"
@@ -360,7 +360,7 @@ const Companies: React.FC = () => {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Description</label>
+              <label className="form-label">Descriptif</label>
               <textarea
                 className="form-control"
                 rows={2}
@@ -375,7 +375,7 @@ const Companies: React.FC = () => {
 
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancel
+            Annuler
           </Button>
           <Button
             variant="success"
@@ -383,7 +383,7 @@ const Companies: React.FC = () => {
             form="company-form"
             disabled={submitting}
           >
-            {submitting ? "Saving..." : isEditing ? "Update" : "Save"}
+            {submitting ? "Enregistrement..." : isEditing ? "Modifier" : "Ajouter"}
           </Button>
         </Modal.Footer>
       </Modal>

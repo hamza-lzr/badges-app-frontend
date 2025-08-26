@@ -65,7 +65,7 @@ const goToAirports = (cityId: number, cityName: string) => {
 
   return (
     <div className="container">
-      <h2 className="my-4">Cities in {countryName}</h2>
+      <h2 className="fw-semibold my-4">Villes du pays: {countryName}</h2>
 
 {/* Buttons Row */}
 <div className="d-flex align-items-center gap-2 mb-3">
@@ -74,7 +74,7 @@ const goToAirports = (cityId: number, cityName: string) => {
     className="btn btn-secondary" 
     onClick={() => navigate('/admin/locations')}
   >
-    Back to Countries
+    Retour aux pays
   </button>
 
   {/* Add City Button */}
@@ -83,7 +83,7 @@ const goToAirports = (cityId: number, cityName: string) => {
       className="btn btn-primary"
       onClick={() => setShowAddForm(true)}
     >
-      Add a New City
+      Ajouter une ville
     </button>
   ) : (
     <form className="d-flex gap-2 flex-grow-1" onSubmit={handleAddCity}>
@@ -97,14 +97,14 @@ const goToAirports = (cityId: number, cityName: string) => {
         autoFocus
       />
       <button type="submit" className="btn btn-success">
-        Save
+        Enregistrer
       </button>
       <button
         type="button"
         className="btn btn-secondary"
         onClick={() => setShowAddForm(false)}
       >
-        Cancel
+        Annuler
       </button>
     </form>
   )}
@@ -114,12 +114,12 @@ const goToAirports = (cityId: number, cityName: string) => {
       <hr />
 
       {/* List of Cities */}
-      <h4>Registered Cities</h4>
+      <h4>Villes enregistrées</h4>
 
       {loadingCities ? (
-        <p>Loading cities...</p>
+        <p>Chargement des villes...</p>
       ) : cities.length === 0 ? (
-        <p className="text-muted">No cities found. Add one above.</p>
+        <p className="text-muted">Aucune ville trouvée. Ajoutez-en une ci-dessus.</p>
       ) : (
         <ul className="list-group">
           {cities.map((city) => (
@@ -136,14 +136,14 @@ const goToAirports = (cityId: number, cityName: string) => {
                   className="btn btn-sm btn-info"
                   onClick={() => goToAirports(city.id!, city.name)}
                 >
-                Go to Airports
+                Voir les aéroports
                 </button>
                 {/* Delete button */}
                 <button
                   className="btn btn-sm btn-danger"
                   onClick={() => handleDeleteCity(city.id!)}
                 >
-                Delete
+                Supprimer
                 </button>
               </div>
             </li>

@@ -264,7 +264,7 @@ const Badges: React.FC = () => {
     <div className="container py-4">
       {/* Header & Filters */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-semibold mb-0">Badges Management</h2>
+        <h2 className="fw-semibold mb-0">Gestion des Badges</h2>
 
         <div className="d-flex gap-3 align-items-center">
           <Form.Select
@@ -276,7 +276,7 @@ const Badges: React.FC = () => {
             }
             style={{ maxWidth: "200px" }}
           >
-            <option value="">All Companies</option>
+            <option value="">Toutes les entreprises</option>
             {Object.entries(companies).map(([id, name]) => (
               <option key={id} value={id}>
                 {name}
@@ -286,7 +286,7 @@ const Badges: React.FC = () => {
 
           <Form.Control
             type="text"
-            placeholder="Search employees, badges..."
+            placeholder="Rechercher des collaborateurs, des badges..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ maxWidth: "250px" }}
@@ -300,7 +300,7 @@ const Badges: React.FC = () => {
               onChange={(e) => setShowExpiredOnly(e.target.checked)}
             />
             <small className="ms-2 text-muted" style={{ whiteSpace: "nowrap" }}>
-              Only expired badges
+              Badges expirés uniquement
             </small>
           </div>
         </div>
@@ -310,11 +310,11 @@ const Badges: React.FC = () => {
       {loading ? (
         <div className="text-center my-5">
           <Spinner animation="border" />
-          <p className="mt-2 text-muted">Loading employees...</p>
+          <p className="mt-2 text-muted">Chargement des collaborateurs...</p>
         </div>
       ) : filteredEmployees.length === 0 ? (
         <div className="alert alert-light text-center border">
-          No employees found matching your search/filter.
+          Aucun collaborateur trouvé correspondant à votre recherche/filtre.
         </div>
       ) : (
         <div className="card shadow-sm mb-4">
@@ -323,10 +323,10 @@ const Badges: React.FC = () => {
               <table className="table table-hover mb-0 custom-table">
                 <thead>
                   <tr className="table-dark">
-                    <th style={{ width: "12%" }}>Employee</th>
+                    <th style={{ width: "12%" }}>Collaborateur</th>
                     <th style={{ width: "10%" }}>Matricule</th>
                     <th style={{ width: "18%" }}>Email</th>
-                    <th style={{ width: "15%" }}>Company</th>
+                    <th style={{ width: "15%" }}>Entreprise</th>
                     <th style={{ width: "8%" }}>Badges</th>
                     <th style={{ width: "29%" }}>Actions</th>
                   </tr>
@@ -367,7 +367,7 @@ const Badges: React.FC = () => {
                           </span>
                           {emp.badgesIds.length > 0 &&
                             employeeAllBadgesExpired(emp) && (
-                              <span className="badge bg-danger">Expired</span>
+                              <span className="badge bg-danger">Expiré</span>
                             )}
                         </div>
                       </td>
@@ -397,14 +397,14 @@ const Badges: React.FC = () => {
                                   aria-disabled={!hasBadges}
                                   title={
                                     hasBadges
-                                      ? "Select a badge"
-                                      : "No badges for this employee"
+                                      ? "Sélectionner un badge"
+                                      : "Aucun badge pour cet employé"
                                   }
                                   className="action-select"
                                 >
                                   {hasBadges ? (
                                     <>
-                                      <option value="">Select Badge</option>
+                                      <option value="">Badge(s)</option>
                                       {badgeIds.map((id) => (
                                         <option key={id} value={id}>
                                           {badges[id]?.code || `Badge ${id}`}
@@ -412,7 +412,7 @@ const Badges: React.FC = () => {
                                       ))}
                                     </>
                                   ) : (
-                                    <option value="">No badges</option>
+                                    <option value="">Aucun badge</option>
                                   )}
                                 </Form.Select>
 
@@ -455,7 +455,7 @@ const Badges: React.FC = () => {
       {/* Pagination Info */}
       <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
         <small className="text-muted">
-          Page {currentPage} of {totalPages} • Showing {paginatedEmployees.length} of {filteredEmployees.length} employees
+          Page {currentPage} sur {totalPages} • Affichage de {paginatedEmployees.length} sur {filteredEmployees.length} collaborateurs
         </small>
         <div className="pagination-buttons">
           <button
@@ -463,14 +463,14 @@ const Badges: React.FC = () => {
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((p) => p - 1)}
           >
-            Previous
+            Précédent
           </button>
           <button
             className="btn btn-sm btn-outline-secondary"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((p) => p + 1)}
           >
-            Next
+            Suivant
           </button>
         </div>
       </div>
@@ -478,12 +478,12 @@ const Badges: React.FC = () => {
       {/* Generate Badge Modal */}
       <Modal show={showGenerateModal} onHide={closeGenerateModal} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Generate New Badge</Modal.Title>
+          <Modal.Title>Générer un Nouveau Badge</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form id="generate-badge-form" onSubmit={handleBadgeSubmit}>
             <Form.Group className="mb-3">
-              <Form.Label>Badge Code</Form.Label>
+              <Form.Label>Code du Badge</Form.Label>
               <Form.Control
                 type="text"
                 value={badgeData.code || ""}
@@ -497,7 +497,7 @@ const Badges: React.FC = () => {
             <Row>
               <Col>
                 <Form.Group className="mb-3">
-                  <Form.Label>Issued Date</Form.Label>
+                  <Form.Label>Date d'Emission</Form.Label>
                   <Form.Control
                     type="text"
                     readOnly
@@ -507,7 +507,7 @@ const Badges: React.FC = () => {
               </Col>
               <Col>
                 <Form.Group className="mb-3">
-                  <Form.Label>Expiry Date</Form.Label>
+                  <Form.Label>Date d'Expiration</Form.Label>
                   <Form.Control
                     type="date"
                     value={badgeData.expiryDate || ""}
@@ -523,7 +523,7 @@ const Badges: React.FC = () => {
             </Row>
 
             <Form.Group>
-              <Form.Label>Company</Form.Label>
+              <Form.Label>Entreprise</Form.Label>
               <Form.Select
                 value={badgeData.companyId || ""}
                 onChange={(e) =>
@@ -551,22 +551,22 @@ const Badges: React.FC = () => {
                   })
                 }
               >
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
+                <option value="ACTIVE">Actif</option>
+                <option value="INACTIVE">Inactif</option>
               </Form.Select>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={closeGenerateModal}>
-            Cancel
+            Annuler
           </Button>
           <Button
             type="submit"
             form="generate-badge-form"
             disabled={submitting}
           >
-            {submitting ? "Generating..." : "Generate"}
+            {submitting ? "Génération en cours..." : "Générer"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -574,7 +574,7 @@ const Badges: React.FC = () => {
       {/* Badge Details Modal */}
       <Modal show={showDetailsModal} onHide={closeBadgeDetailsModal} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Badge Details</Modal.Title>
+          <Modal.Title>Détails du Badge</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {badgeDetails ? (
@@ -592,32 +592,32 @@ const Badges: React.FC = () => {
                 <div className="p-3 border rounded bg-light">
                   <h5 className="fw-bold">{badgeDetails.code}</h5>
                   <p>
-                    <strong>Full Name:</strong> {employeeName}
+                    <strong>Nom complet:</strong> {employeeName}
                   </p>
                   <p>
-                    <strong>Issued:</strong> {badgeDetails.issuedDate}
+                    <strong>Date d'Emission:</strong> {badgeDetails.issuedDate}
                   </p>
                   <p className={isExpired ? "text-danger fw-bold" : ""}>
-                    <strong>Expiry:</strong> {badgeDetails.expiryDate}{" "}
-                    {isExpired && "(Expired)"}
+                    <strong>Date d'Expiration:</strong> {badgeDetails.expiryDate}{" "}
+                    {isExpired && "(Expiré)"}
                   </p>
                   <p>
-                    <strong>Company:</strong>{" "}
+                    <strong>Entreprise:</strong>{" "}
                     {companies[badgeDetails.companyId]}
                   </p>
                   <p>
-                    <strong>Status:</strong> {badgeDetails.status}
+                    <strong>Statut:</strong> {badgeDetails.status}
                   </p>
                 </div>
               );
             })()
           ) : (
-            <p className="text-muted">No badge selected.</p>
+            <p className="text-muted">Aucun badge sélectionné</p>
           )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={closeBadgeDetailsModal}>
-            Close
+            Fermer
           </Button>
         </Modal.Footer>
       </Modal>

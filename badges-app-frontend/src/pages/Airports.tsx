@@ -205,18 +205,18 @@ const filteredAirports = airports.filter((airport) => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         {/* Left side */}
-        <h2 className="fw-semibold mb-0">Airports Management</h2>
+        <h2 className="fw-semibold mb-0">Gestion des Aéroports</h2>
 
         {/* Right side */}
         <div className="d-flex align-items-center gap-3">
           {!loading && (
             <span className="text-muted">
-              <strong>{filteredAirports.length}</strong> Registered Airport
+              <strong>{filteredAirports.length}</strong> Aéroports affiché
               {filteredAirports.length !== 1 ? "s" : ""}
             </span>
           )}
           <Button variant="primary" onClick={() => setShowModal(true)}>
-            Add Airport
+            Ajouter un Aéroport
           </Button>
         </div>
       </div>
@@ -228,7 +228,7 @@ const filteredAirports = airports.filter((airport) => {
           onChange={(e) => setCountryFilter(e.target.value)}
           style={{ maxWidth: "200px" }}
         >
-          <option value="">All Countries</option>
+          <option value="">Tous les pays</option>
           {allCountries.map((country) => (
             <option key={country} value={country!}>
               {country}
@@ -238,7 +238,7 @@ const filteredAirports = airports.filter((airport) => {
 
         <Form.Control
           type="text"
-          placeholder="Search airport, city, country..."
+          placeholder="Rechercher un aéroport, une ville, un pays..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{ maxWidth: "300px" }}
@@ -249,11 +249,11 @@ const filteredAirports = airports.filter((airport) => {
       {loading ? (
         <div className="text-center my-5">
           <Spinner animation="border" variant="secondary" />
-          <p className="mt-3 text-muted">Loading airports...</p>
+          <p className="mt-3 text-muted">Chargement des aéroports...</p>
         </div>
       ) : sortedAirports.length === 0 ? (
         <div className="alert alert-light border text-center">
-          No airports found. Try a different filter.
+          Aucun aéroport trouvé. Essayez un autre filtre.
         </div>
       ) : (
         <div className="table-responsive shadow-sm rounded">
@@ -270,19 +270,19 @@ const filteredAirports = airports.filter((airport) => {
                   onClick={() => handleSort("name")}
                   style={{ cursor: "pointer" }}
                 >
-                  Name {sortKey === "name" && (sortAsc ? "▲" : "▼")}
+                  Nom {sortKey === "name" && (sortAsc ? "▲" : "▼")}
                 </th>
                 <th
                   onClick={() => handleSort("city")}
                   style={{ cursor: "pointer" }}
                 >
-                  City {sortKey === "city" && (sortAsc ? "▲" : "▼")}
+                  Ville {sortKey === "city" && (sortAsc ? "▲" : "▼")}
                 </th>
                 <th
                   onClick={() => handleSort("country")}
                   style={{ cursor: "pointer" }}
                 >
-                  Country {sortKey === "country" && (sortAsc ? "▲" : "▼")}
+                  Pays {sortKey === "country" && (sortAsc ? "▲" : "▼")}
                 </th>
                 <th>Actions</th>
               </tr>
@@ -301,14 +301,14 @@ const filteredAirports = airports.filter((airport) => {
                       size="sm"
                       onClick={() => handleEditAirport(airport)}
                     >
-                      <i className="bi bi-pencil"></i> Edit
+                      <i className="bi bi-pencil"></i> Modifier
                     </Button>
                     <Button
                       variant="outline-danger"
                       size="sm"
                       onClick={() => handleDeleteAirport(airport.id!)}
                     >
-                      <i className="bi bi-trash"></i> Delete
+                      <i className="bi bi-trash"></i> Supprimer
                     </Button>
                   </td>
                 </tr>
@@ -321,12 +321,12 @@ const filteredAirports = airports.filter((airport) => {
       {/* Add Airport Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Add Airport</Modal.Title>
+          <Modal.Title>Ajouter un Aéroport</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form id="add-airport-form" onSubmit={handleCreateAirport}>
             <div className="mb-3">
-              <label className="form-label">IATA Code</label>
+              <label className="form-label">Code IATA</label>
               <input
                 type="text"
                 className="form-control"
@@ -338,7 +338,7 @@ const filteredAirports = airports.filter((airport) => {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Airport Name</label>
+              <label className="form-label">Nom de l'Aéroport</label>
               <input
                 type="text"
                 className="form-control"
@@ -350,7 +350,7 @@ const filteredAirports = airports.filter((airport) => {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">City</label>
+              <label className="form-label">Ville</label>
               <select
                 className="form-select"
                 value={newAirport.cityId || ""}
@@ -362,7 +362,7 @@ const filteredAirports = airports.filter((airport) => {
                 }
                 required
               >
-                <option value="">Select City</option>
+                <option value="">Sélectionner une ville</option>
                 {cities.map((city) => {
                   const countryName =
                     countries.find((c) => c.id === city.countryId)?.name || "";
@@ -378,7 +378,7 @@ const filteredAirports = airports.filter((airport) => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancel
+            Annuler
           </Button>
           <Button
             variant="success"
@@ -398,13 +398,13 @@ const filteredAirports = airports.filter((airport) => {
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Edit Airport</Modal.Title>
+          <Modal.Title>Modifier un Aéroport</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {editingAirport && (
             <form id="edit-airport-form" onSubmit={handleUpdateAirport}>
               <div className="mb-3">
-                <label className="form-label">IATA Code</label>
+                <label className="form-label">Code IATA</label>
                 <input
                   type="text"
                   className="form-control"
@@ -419,7 +419,7 @@ const filteredAirports = airports.filter((airport) => {
                 />
               </div>
               <div className="mb-3">
-                <label className="form-label">Airport Name</label>
+                <label className="form-label">Nom de l'Aéroport</label>
                 <input
                   type="text"
                   className="form-control"
@@ -434,7 +434,7 @@ const filteredAirports = airports.filter((airport) => {
                 />
               </div>
               <div className="mb-3">
-                <label className="form-label">City</label>
+                <label className="form-label">Ville</label>
                 <select
                   className="form-select"
                   value={editingAirport.cityId || ""}
@@ -446,7 +446,7 @@ const filteredAirports = airports.filter((airport) => {
                   }
                   required
                 >
-                  <option value="">Select City</option>
+                  <option value="">Sélectionner une ville</option>
                   {cities.map((city) => {
                     const countryName =
                       countries.find((c) => c.id === city.countryId)?.name ||
@@ -464,7 +464,7 @@ const filteredAirports = airports.filter((airport) => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-            Cancel
+            Annuler
           </Button>
           <Button
             variant="success"

@@ -55,7 +55,7 @@ const MyProfilePage: React.FC = () => {
     e.preventDefault();
 
     if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match.");
+      toast.error("Les mots de passe ne sont pas identiques");
       return;
     }
 
@@ -63,7 +63,7 @@ const MyProfilePage: React.FC = () => {
 
     try {
       await changeMyPassword(newPassword);
-      toast.success("Password changed successfully.");
+      toast.success("Le mot de passe a été mis à jour avec succès.");
       setShowPasswordModal(false);
       setNewPassword("");
       setConfirmPassword("");
@@ -82,7 +82,7 @@ const MyProfilePage: React.FC = () => {
     return (
       <div className="d-flex flex-column align-items-center mt-5">
         <Spinner animation="border" variant="secondary" />
-        <p className="text-muted mt-3">Loading your profile...</p>
+        <p className="text-muted mt-3">Chargement de votre profil...</p>
       </div>
     );
   }
@@ -91,7 +91,7 @@ const MyProfilePage: React.FC = () => {
     return (
       <div className="container text-center mt-4">
         <p className="text-muted">
-          Could not load your profile. Please try again later.
+          Impossible de charger votre profil. Veuillez réessayer plus tard.
         </p>
       </div>
     );
@@ -112,10 +112,10 @@ const MyProfilePage: React.FC = () => {
     <Container className="py-5" style={{ maxWidth: "850px" }}>
       <div className="text-center mb-5">
         <h1 className="fw-bold" style={{ color: "#333333" }}>
-          My Profile
+          Mon Profil
         </h1>
         <p className="text-muted">
-          Manage your personal information and credentials
+          Gérez vos informations personnelles et vos identifiants
         </p>
       </div>
 
@@ -165,7 +165,7 @@ const MyProfilePage: React.FC = () => {
               </div>
             </Col>
             <Col md={6} className="mb-3">
-              <div className="text-muted small mb-1">Phone</div>
+              <div className="text-muted small mb-1">Téléphone</div>
               <div className="fw-semibold" style={{ color: "#333333" }}>
                 {phone}
               </div>
@@ -174,13 +174,13 @@ const MyProfilePage: React.FC = () => {
 
           <Row className="mb-3">
             <Col md={6} className="mb-3">
-              <div className="text-muted small mb-1">Company</div>
+              <div className="text-muted small mb-1">Entreprise</div>
               <div className="fw-semibold" style={{ color: "#333333" }}>
                 {companyName}
               </div>
             </Col>
             <Col md={6} className="mb-3">
-              <div className="text-muted small mb-1">Linked Badges</div>
+              <div className="text-muted small mb-1">Badges Associés</div>
               <div className="fw-semibold" style={{ color: "#333333" }}>
                 {badgesIds?.length ?? 0} badge(s)
               </div>
@@ -193,14 +193,14 @@ const MyProfilePage: React.FC = () => {
               className="rounded-pill px-4 py-2 shadow-sm me-3"
               onClick={() => navigate("/employee/requests?type=profile_update")}
             >
-              Request Profile Update
+              Demander une mise à jour du profil
             </Button>
             <Button
               variant="outline-danger"
               className="rounded-pill px-4 py-2 shadow-sm"
               onClick={() => setShowPasswordModal(true)}
             >
-              Change Password
+              Changer le mot de passe
             </Button>
           </div>
 
@@ -214,20 +214,20 @@ const MyProfilePage: React.FC = () => {
           >
             <Modal.Header closeButton className="border-0">
               <Modal.Title className="fw-bold" style={{ color: "#333333" }}>
-                Change Password
+                Changer le mot de passe
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Form onSubmit={handleChangePassword}>
                 <Form.Group className="mb-3" style={{ position: "relative" }}>
                   <Form.Label className="fw-bold" style={{ color: "#333333" }}>
-                    New Password
+                    Nouveau Mot de Passe
                   </Form.Label>
                   <Form.Control
                     type={showPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter your new password"
+                    placeholder="Entrez votre nouveau mot de passe"
                     required
                     className="shadow-sm rounded-4 pe-5"
                   />
@@ -247,13 +247,13 @@ const MyProfilePage: React.FC = () => {
 
                 <Form.Group className="mb-3" style={{ position: "relative" }}>
                   <Form.Label className="fw-bold" style={{ color: "#333333" }}>
-                    Confirm Password
+                    Confirmer le Mot de Passe
                   </Form.Label>
                   <Form.Control
                     type={showPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm your new password"
+                    placeholder="Confirmez votre nouveau mot de passe"
                     required
                     className="shadow-sm rounded-4 pe-5"
                   />
@@ -266,7 +266,7 @@ const MyProfilePage: React.FC = () => {
                     className="rounded-pill shadow-sm me-2"
                     disabled={changing}
                   >
-                    Cancel
+                    Annuler
                   </Button>
                   <Button
                     type="submit"
@@ -274,7 +274,7 @@ const MyProfilePage: React.FC = () => {
                     className="rounded-pill shadow-sm"
                     disabled={changing}
                   >
-                    {changing ? "Changing..." : "Change Password"}
+                    {changing ? "En cours de changement..." : "Changer le mot de passe"}
                   </Button>
                 </div>
               </Form>

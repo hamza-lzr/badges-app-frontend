@@ -467,7 +467,7 @@ const Notifications: React.FC = () => {
                   : "—"}
               </div>
               <div>
-                <strong>StatuT:</strong> {selected.read ? "Read" : "Unread"}
+                <strong>Statut:</strong> {selected.read ? "Lu" : "Non lu"}
               </div>
               <div>
                 <strong>Date:</strong>{" "}

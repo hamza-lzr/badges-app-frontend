@@ -53,23 +53,23 @@ const Dashboard: React.FC = () => {
       label: "Employees",
       icon: <MdPeople size={32} />,
     },
-    { to: "/admin/requests", label: "Requests", icon: <MdWork size={32} /> },
-    { to: "/admin/airports", label: "Airports", icon: <MdFlight size={32} /> },
+    { to: "/admin/requests", label: "Demandes", icon: <MdWork size={32} /> },
+    { to: "/admin/airports", label: "Aéroports", icon: <MdFlight size={32} /> },
     {
       to: "/admin/companies",
-      label: "Companies",
+      label: "Entreprises",
       icon: <MdBusiness size={32} />,
     },
     { to: "/admin/badges", label: "Badges", icon: <MdBadge size={32} /> },
     {
       to: "/admin/locations",
-      label: "Locations",
+      label: "Régions",
       icon: <MdLocationOn size={32} />,
     },
-    { to: "/admin/accesses", label: "Accesses", icon: <MdLock size={32} /> },
+    { to: "/admin/accesses", label: "Accès", icon: <MdLock size={32} /> },
     {
       to: "/admin/notifications",
-      label: "Notifications",
+      label: "Mes notifications",
       icon: <MdNotifications size={32} />,
     },
     { to: "/admin/conges", label: "Congés", icon: <FaSuitcase size={32} /> }, // Assuming MdWork for Congés
@@ -142,7 +142,7 @@ const Dashboard: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          Badges Management Dashboard
+          E-badges Back-office
         </motion.h1>
 
         {/* ==== Navigation Cards ==== */}
@@ -186,19 +186,19 @@ const Dashboard: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              Statistics
+              Statistiques
             </motion.h2>
 
             {/* ==== Statistics Cards ==== */}
             <Row className="row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 mb-5">
               <StatCard
-                title="Employees"
+                title="Collaborateurs"
                 value={totalEmployees}
                 icon={<MdPeople />}
                 delay={0.1}
               />
               <StatCard
-                title="Active Users"
+                title="Collaborateurs actifs"
                 value={activeUsers}
                 icon={<MdPeople />}
                 delay={0.2}
@@ -210,19 +210,19 @@ const Dashboard: React.FC = () => {
                 delay={0.3}
               />
               <StatCard
-                title="Expired Badges"
+                title="Badges expirés"
                 value={expiredBadges}
                 icon={<MdBadge />}
                 delay={0.4}
               />
               <StatCard
-                title="Airports"
+                title="Aéroports"
                 value={totalAirports}
                 icon={<MdFlight />}
                 delay={0.5}
               />
               <StatCard
-                title="Companies"
+                title="Entreprises"
                 value={totalCompanies}
                 icon={<MdBusiness />}
                 delay={0.6}
@@ -231,7 +231,7 @@ const Dashboard: React.FC = () => {
 
             {/* ==== Recent Requests ==== */}
             <Card className="shadow-sm border-0">
-              <Card.Header className="card-header">Recent Requests</Card.Header>
+              <Card.Header className="card-header">Demandes récentes</Card.Header>
               <Card.Body className="p-0">
                 {requestsLoading ? (
                   <div className="text-center py-4">
@@ -239,16 +239,16 @@ const Dashboard: React.FC = () => {
                   </div>
                 ) : recentRequests.length === 0 ? (
                   <p className="p-4 text-center text-muted">
-                    No recent requests.
+                    Aucune demande récente.
                   </p>
                 ) : (
                   <div className="table-responsive">
                     <Table hover bordered className="mb-0">
                       <thead>
                         <tr>
-                          <th>Employee</th>
+                          <th>Collaborateur</th>
                           <th>Type</th>
-                          <th>Status</th>
+                          <th>Statut</th>
                           <th>Date</th>
                         </tr>
                       </thead>

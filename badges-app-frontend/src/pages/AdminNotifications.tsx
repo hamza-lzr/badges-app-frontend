@@ -105,11 +105,11 @@ const AdminNotificationsPage: React.FC = () => {
   return (
     <div className="container py-4" style={{ maxWidth: "700px" }}>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="fw-bold" style={{ color: "#333333" }}>My Notifications</h3>
+        <h3 className="fw-bold" style={{ color: "#333333" }}>Mes Notifications</h3>
       </div>
 
       {notifications.length === 0 ? (
-        <p className="text-center text-muted">✅ You have no notifications.</p>
+        <p className="text-center text-muted">✅ Vous n'avez pas de notifications.</p>
       ) : (
         <>
           <div className="d-flex flex-column gap-3">
