@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   fetchMyNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "../api/apiNotification";
 import { fetchEmployees } from "../api/ApiEmployee";
-import type { NotificationDTO, UserDTO } from "../types";
+import type { NotificationDTO } from "../types";
 import { Spinner, Pagination, Modal, Button } from "react-bootstrap";
 import { formatDistanceToNow, format } from "date-fns";
 
@@ -14,24 +14,7 @@ const AdminNotificationsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   // Employees → to map userId to full name
-  const [employees, setEmployees] = useState<UserDTO[]>([]);
-  const userNameById = useMemo(() => {
-    const map: Record<number, string> = {};
-    for (const u of employees) {
-      const full =
 
-        // fallback to firstName + lastName if available
-        [u.firstName, u.lastName]
-          .filter(Boolean)
-          .join(" ")
-          .trim() ||
-        // other safe fallbacks
-        u.email ||
-        (u.id != null ? `User #${u.id}` : "—");
-      if (typeof u.id === "number") map[u.id] = full;
-    }
-    return map;
-  }, [employees]);
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
@@ -44,7 +27,7 @@ const AdminNotificationsPage: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [notifs, emps] = await Promise.all([
+        const [notifs] = await Promise.all([
           fetchMyNotifications(),
           fetchEmployees(),
         ]);
@@ -53,7 +36,6 @@ const AdminNotificationsPage: React.FC = () => {
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         setNotifications(sorted);
-        setEmployees(emps);
 
         // Optional: mark all as read on load. Remove if you want unread dots to persist.
         await markAllNotificationsAsRead();
@@ -208,21 +190,15 @@ const AdminNotificationsPage: React.FC = () => {
                 <div className="mt-1">{selectedNotif.message}</div>
               </div>
 
-              <div>
-                <strong>Nom Complet:</strong>{" "}
-                {selectedNotif.userId != null
-                  ? userNameById[selectedNotif.userId] ?? "—"
-                  : "—"}
-              </div>
 
               {/* Keep ID if useful for debugging; hide if not needed */}
               {/* <div><strong>ID:</strong> {selectedNotif.id ?? "—"}</div> */}
 
               <div>
-                <strong>Status:</strong> {selectedNotif.read ? "Read" : "Unread"}
+                <strong>Statut:</strong> {selectedNotif.read ? "Lu" : "Non lu"}
               </div>
               <div>
-                <strong>Created:</strong>{" "}
+                <strong>Créé:</strong>{" "}
                 {format(new Date(selectedNotif.createdAt), "PPpp")} (
                 {formatDistanceToNow(new Date(selectedNotif.createdAt), { addSuffix: true })})
               </div>
@@ -231,7 +207,7 @@ const AdminNotificationsPage: React.FC = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>
-            Close
+            Fermer
           </Button>
         </Modal.Footer>
       </Modal>

@@ -15,9 +15,10 @@ const sidebarLinks = [
   { to: "/employee/profile", icon: "bi-person-circle", label: "Mon Profil" },
   { to: "/employee/badges", icon: "bi-credit-card-2-front", label: "Mes Badges" },
   { to: "/employee/accesses", icon: "bi-shield-check", label: "Mes Accès" },
-  { to: "/employee/notifications", icon: "bi-bell", label: "Notifications" },
   { to: "/employee/requests", icon: "bi-send", label: "Envoyer une Demande" },
   { to: "/employee/conges", icon: "bi-suitcase", label: "Mes Congés" },
+    { to: "/employee/notifications", icon: "bi-bell", label: "Mes Notifications" },
+
 ];
 
 
@@ -57,7 +58,7 @@ const EmployeeSideBar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) =>
     <div
       className={`d-flex flex-column`}
       style={{
-        width: collapsed ? 70 : 220,
+        width: collapsed ? 70 : 240,
         minHeight: "100vh",
         background: "#212529", // ✅ Dark background
         color: "#ffffff",

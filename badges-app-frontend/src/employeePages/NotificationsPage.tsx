@@ -63,7 +63,7 @@ const EmployeeNotificationsPage: React.FC = () => {
   return (
     <div className="container py-4" style={{ maxWidth: "700px" }}>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="fw-bold" style={{ color: "#333333" }}>My Notifications</h3>
+        <h3 className="fw-bold" style={{ color: "#333333" }}>Mes Notifications</h3>
       </div>
 
       {notifications.length === 0 ? (

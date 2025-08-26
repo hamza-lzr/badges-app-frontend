@@ -28,8 +28,22 @@ import { fetchAirports } from "../api/apiAirport";
 import { fetchCompanies } from "../api/apiCompany";
 import { fetchRequests } from "../api/apiRequest";
 
-import type { Request, ReqStatus } from "../types";
+import type { Request, ReqStatus, ReqType } from "../types";
 import "./Dashboard.css";
+
+const STATUS_LABELS: Record<ReqStatus, string> = {
+  PENDING: "En attente",
+  APPROVED: "Approuvée",
+  REJECTED: "Rejetée",
+};
+
+const TYPE_LABELS: Record<ReqType, string> = {
+  AIRPORT_ACCESS: "Accès aéroport",
+  PROFILE: "Profil",
+  NEW_BADGE: "Nouveau badge",
+  COMPANY: "Société",
+  OTHER: "Autre",
+};
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -230,8 +244,10 @@ const Dashboard: React.FC = () => {
             </Row>
 
             {/* ==== Recent Requests ==== */}
-            <Card className="shadow-sm border-0">
-              <Card.Header className="card-header">Demandes récentes</Card.Header>
+            <Card className="shadow-sm border-0 ">
+              <Card.Header className="card-header">
+                Demandes récentes
+              </Card.Header>
               <Card.Body className="p-0">
                 {requestsLoading ? (
                   <div className="text-center py-4">
@@ -244,7 +260,7 @@ const Dashboard: React.FC = () => {
                 ) : (
                   <div className="table-responsive">
                     <Table hover bordered className="mb-0">
-                      <thead>
+                      <thead className="table-dark">
                         <tr>
                           <th>Collaborateur</th>
                           <th>Type</th>
@@ -255,14 +271,14 @@ const Dashboard: React.FC = () => {
                       <tbody>
                         {recentRequests.map((r) => (
                           <tr key={r.id}>
-                            <td>{employeeMap[r.userId]}</td>
-                            <td>{r.reqType.replace("_", " ")}</td>
+                            <td>{employeeMap[r.userId]}</td>{" "}
+                            <td>{TYPE_LABELS[r.reqType]}</td>{" "}
                             <td>
                               <Badge
                                 pill
                                 className={getStatusClass(r.reqStatus)}
                               >
-                                {r.reqStatus}
+                                {STATUS_LABELS[r.reqStatus]}
                               </Badge>
                             </td>
                             <td>

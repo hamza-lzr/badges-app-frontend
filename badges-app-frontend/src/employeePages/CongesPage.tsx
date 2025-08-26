@@ -81,13 +81,13 @@ const EmployeeCongesPage: React.FC = () => {
   const renderStatusBadge = (status?: string) => {
     switch (status) {
       case "APPROVED":
-        return <BsBadge bg="success">Approved</BsBadge>;
+        return <BsBadge bg="success">Approuvé</BsBadge>;
       case "REJECTED":
-        return <BsBadge bg="danger">Rejected</BsBadge>;
+        return <BsBadge bg="danger">Rejeté</BsBadge>;
       default:
         return (
           <BsBadge bg="warning" text="dark">
-            Pending
+            En attente
           </BsBadge>
         );
     }
@@ -132,85 +132,87 @@ const EmployeeCongesPage: React.FC = () => {
       {/* Header (centered) */}
       <div className="text-center mb-3">
         <h1 className="fw-bold mb-1" style={{ color: "#333" }}>
-          My Leave Requests
+          Mes Demandes de Congé
         </h1>
-        <div className="text-muted">Track and manage your submitted leaves</div>
+        <div className="text-muted">Suivez et gérez vos congés soumis</div>
       </div>
 
-{/* Toolbar: search + status + view toggle + CTA */}
-<div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-2 gap-md-3 px-3 py-2 mb-4">
-  {/* Left: Search + Filter with spacing */}
-  <div className="d-flex align-items-center gap-2">
-    <InputGroup className="flex-grow-1" style={{ minWidth: 390, maxWidth: 600 }}>
-      <InputGroup.Text>
-        <i className="bi bi-search"></i>
-      </InputGroup.Text>
-      <Form.Control
-        placeholder="Search by description or dates..."
-        value={searchTerm}
-        onChange={(e) => {
-          setSearchTerm(e.target.value);
-          setCurrentPage(1);
-        }}
-      />
-    </InputGroup>
+      {/* Toolbar: search + status + view toggle + CTA */}
+      <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-2 gap-md-3 px-3 py-2 mb-4">
+        {/* Left: Search + Filter with spacing */}
+        <div className="d-flex align-items-center gap-2">
+          <InputGroup
+            className="flex-grow-1"
+            style={{ minWidth: 390, maxWidth: 600 }}
+          >
+            <InputGroup.Text>
+              <i className="bi bi-search"></i>
+            </InputGroup.Text>
+            <Form.Control
+              placeholder="Rechercher par description ou dates..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </InputGroup>
 
-    {/* add a little spacing to the left on top of gap */}
-    <Form.Select
-      value={statusFilter}
-      onChange={(e) => {
-        setStatusFilter(e.target.value);
-        setCurrentPage(1);
-      }}
-      className="w-auto ms-1 ms-md-2"
-      style={{ minWidth: 140, maxWidth: 220 }}
-    >
-      <option value="all">All Status</option>
-      <option value="PENDING">Pending</option>
-      <option value="APPROVED">Approved</option>
-      <option value="REJECTED">Rejected</option>
-    </Form.Select>
-  </div>
+          {/* add a little spacing to the left on top of gap */}
+          <Form.Select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-auto ms-1 ms-md-2"
+            style={{ minWidth: 140, maxWidth: 220 }}
+          >
+            <option value="all">Tous</option>
+            <option value="PENDING">En attente</option>
+            <option value="APPROVED">Approuvé</option>
+            <option value="REJECTED">Rejeté</option>
+          </Form.Select>
+        </div>
 
-  {/* Right: View toggle + CTA */}
-  <div className="d-flex align-items-center justify-content-end gap-2">
-    <ButtonGroup aria-label="View mode">
-      <Button
-        variant={viewMode === "cards" ? "primary" : "outline-primary"}
-        onClick={() => setViewMode("cards")}
-        title="Cards view"
-      >
-        <i className="bi bi-grid-3x3-gap-fill" />
-      </Button>
-      <Button
-        variant={viewMode === "table" ? "primary" : "outline-primary"}
-        onClick={() => setViewMode("table")}
-        title="List view"
-      >
-        <i className="bi bi-list" />
-      </Button>
-    </ButtonGroup>
+        {/* Right: View toggle + CTA */}
+        <div className="d-flex align-items-center justify-content-end gap-2">
+          <ButtonGroup aria-label="View mode">
+            <Button
+              variant={viewMode === "cards" ? "primary" : "outline-primary"}
+              onClick={() => setViewMode("cards")}
+              title="Mode Fenêtre"
+            >
+              <i className="bi bi-grid-3x3-gap-fill" />
+            </Button>
+            <Button
+              variant={viewMode === "table" ? "primary" : "outline-primary"}
+              onClick={() => setViewMode("table")}
+              title="Mode Liste"
+            >
+              <i className="bi bi-list" />
+            </Button>
+          </ButtonGroup>
 
-    <Button
-      variant="outline-success"
-      className="rounded-pill px-3"
-      onClick={() => setShowCreateModal(true)}
-    >
-      <i className="bi bi-plus-circle me-2"></i>Request a Leave
-    </Button>
-  </div>
-</div>
-
+          <Button
+            variant="outline-success"
+            className="rounded-pill px-3"
+            onClick={() => setShowCreateModal(true)}
+          >
+            <i className="bi bi-plus-circle me-2"></i>Demander un Congé
+          </Button>
+        </div>
+      </div>
 
       {/* Content */}
       {loading ? (
         <div className="d-flex flex-column align-items-center mt-5">
           <Spinner animation="border" variant="primary" />
-          <p className="text-muted mt-3">Loading your leaves...</p>
+          <p className="text-muted mt-3">Chargement de vos congés...</p>
         </div>
       ) : filteredSorted.length === 0 ? (
         <Alert variant="light" className="text-center border">
-          No leave requests found.
+          Aucune demande de congé trouvée.
         </Alert>
       ) : viewMode === "cards" ? (
         <>
@@ -234,14 +236,14 @@ const EmployeeCongesPage: React.FC = () => {
                       {renderStatusBadge(conge.status)}
                     </div>
                     <div className="small text-muted mb-2">
-                      Requested: {formatDate(conge.createdAt)}
+                      Soumise le: {formatDate(conge.createdAt)}
                     </div>
                     <Card.Text
                       className="text-secondary"
                       style={{ minHeight: 48 }}
                     >
                       {conge.description || (
-                        <span className="text-muted">No description</span>
+                        <span className="text-muted">Aucune description</span>
                       )}
                     </Card.Text>
                     <div className="mt-auto d-flex justify-content-end">
@@ -260,10 +262,10 @@ const EmployeeCongesPage: React.FC = () => {
               <Table hover className="mb-0 align-middle">
                 <thead className="table-dark">
                   <tr>
-                    <th>Date Range</th>
-                    <th>Status</th>
+                    <th>Durée</th>
+                    <th>Statut</th>
                     <th>Description</th>
-                    <th>Requested on</th>
+                    <th>Soumise le</th>
                     <th style={{ width: 60 }}></th>
                   </tr>
                 </thead>
@@ -271,12 +273,12 @@ const EmployeeCongesPage: React.FC = () => {
                   {paginatedConges.map((c) => (
                     <tr key={c.id}>
                       <td className="fw-semibold">
-                        {formatDate(c.startDate)} → {formatDate(c.endDate)}
+                        du {formatDate(c.startDate)} au {formatDate(c.endDate)}
                       </td>
                       <td>{renderStatusBadge(c.status)}</td>
                       <td className="text-secondary">
                         {c.description || (
-                          <span className="text-muted">No description</span>
+                          <span className="text-muted">Aucune description</span>
                         )}
                       </td>
                       <td className="text-muted">{formatDate(c.createdAt)}</td>
@@ -289,7 +291,7 @@ const EmployeeCongesPage: React.FC = () => {
                             setShowModal(true);
                           }}
                         >
-                          View
+                          Voir
                         </Button>
                       </td>
                     </tr>
@@ -327,18 +329,17 @@ const EmployeeCongesPage: React.FC = () => {
       {/* View Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Leave Details</Modal.Title>
+          <Modal.Title>Détails du Congé</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedConge && (
             <>
               <p className="mb-2">
-                <strong>Date Range:</strong>{" "}
-                {formatDate(selectedConge.startDate)} →{" "}
-                {formatDate(selectedConge.endDate)}
+                <strong>Durée:</strong> du {formatDate(selectedConge.startDate)}{" "}
+                au {formatDate(selectedConge.endDate)}
               </p>
               <p className="mb-2">
-                <strong>Status:</strong>{" "}
+                <strong>Statut:</strong>{" "}
                 {renderStatusBadge(selectedConge.status)}
               </p>
               <p className="mb-2">
@@ -346,7 +347,7 @@ const EmployeeCongesPage: React.FC = () => {
                 {selectedConge.description || "N/A"}
               </p>
               <p className="mb-0">
-                <strong>Requested on:</strong>{" "}
+                <strong>Soumise le:</strong>{" "}
                 {formatDate(selectedConge.createdAt)}
               </p>
             </>
@@ -354,7 +355,7 @@ const EmployeeCongesPage: React.FC = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
+            Fermer
           </Button>
         </Modal.Footer>
       </Modal>
@@ -366,12 +367,12 @@ const EmployeeCongesPage: React.FC = () => {
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Request a New Leave</Modal.Title>
+          <Modal.Title>Demander un Congé</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group className="mb-3">
-              <Form.Label>Start Date</Form.Label>
+              <Form.Label>Date de début</Form.Label>
               <Form.Control
                 type="date"
                 value={startDate}
@@ -380,12 +381,12 @@ const EmployeeCongesPage: React.FC = () => {
                 onChange={(e) => setStartDate(e.target.value)}
               />
               <Form.Control.Feedback type="invalid">
-                Start date cannot be after end date.
+                La date de début ne peut pas être après la date de fin.
               </Form.Control.Feedback>
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>End Date</Form.Label>
+              <Form.Label>Date de fin</Form.Label>
               <Form.Control
                 type="date"
                 value={endDate}
@@ -394,18 +395,18 @@ const EmployeeCongesPage: React.FC = () => {
                 onChange={(e) => setEndDate(e.target.value)}
               />
               <Form.Control.Feedback type="invalid">
-                End date must be on or after start date.
+                La date de fin doit être le ou après la date de début.
               </Form.Control.Feedback>
             </Form.Group>
 
             <Form.Group className="mb-1">
-              <Form.Label>Description (optional)</Form.Label>
+              <Form.Label>Description (optionnelle)</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Briefly describe your leave"
+                placeholder="Décrivez brièvement votre congé"
               />
             </Form.Group>
           </Form>
@@ -415,7 +416,7 @@ const EmployeeCongesPage: React.FC = () => {
             variant="outline-secondary"
             onClick={() => setShowCreateModal(false)}
           >
-            Cancel
+            Annuler
           </Button>
           <Button
             variant="primary"
@@ -447,7 +448,7 @@ const EmployeeCongesPage: React.FC = () => {
               }
             }}
           >
-            {submitting ? "Submitting..." : "Submit"}
+            {submitting ? "Soumission..." : "Soumettre"}
           </Button>
         </Modal.Footer>
       </Modal>

@@ -150,15 +150,15 @@ const EmployeeBadgesPage: React.FC = () => {
   return (
     <Container className="py-5">
       <div className="text-center mb-5">
-        <h1 className="fw-bold" style={{ color: "#333333" }}>My Badges</h1>
-        <p className="text-muted">Manage your badge information and requests</p>
+        <h1 className="fw-bold" style={{ color: "#333333" }}>Mes Badges</h1>
+        <p className="text-muted">Gérez vos badges</p>
       </div>
 
       <Row className="mb-4">
         <Col md={6} className="mb-2">
           <Form.Control
             type="text"
-            placeholder="Search by badge code or company..."
+            placeholder="Rechercher par code de badge ou société..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -174,17 +174,17 @@ const EmployeeBadgesPage: React.FC = () => {
               setCurrentPage(1);
             }}
           >
-            <option value="all">All Status</option>
-            <option value="active"> Active</option>
-            <option value="expiring"> Expiring Soon</option>
-            <option value="expired"> Expired</option>
+            <option value="all">Tous</option>
+            <option value="active"> Actif</option>
+            <option value="expiring"> Expirant Bientôt</option>
+            <option value="expired"> Expiré</option>
           </Form.Select>
         </Col>
       </Row>
 
       {filteredBadges.length === 0 ? (
         <Alert variant="info" className="text-center shadow-sm">
-          No badges found matching your criteria.
+          Aucun badge trouvé correspondant à vos critères.
         </Alert>
       ) : (
         <>
@@ -197,19 +197,19 @@ const EmployeeBadgesPage: React.FC = () => {
               if (expired) {
                 statusBadge = (
                   <BsBadge bg="danger" className="px-2 py-1">
-                    Expired
+                    Expiré
                   </BsBadge>
                 );
               } else if (expSoon) {
                 statusBadge = (
                   <BsBadge bg="warning" text="dark" className="px-2 py-1">
-                    Expiring Soon
+                    Expire Bientôt
                   </BsBadge>
                 );
               } else {
                 statusBadge = (
                   <BsBadge bg="success" className="px-2 py-1">
-                    Active
+                    Actif
                   </BsBadge>
                 );
               }
@@ -234,7 +234,7 @@ const EmployeeBadgesPage: React.FC = () => {
                       </Card.Text>
 
                       <Card.Text className="small text-muted">
-                        <i className="bi bi-calendar-x"></i> Expires: <strong>{new Date(badge.expiryDate).toLocaleDateString()}</strong>
+                        <i className="bi bi-calendar-x"></i> Expire le: <strong>{new Date(badge.expiryDate).toLocaleDateString()}</strong>
                       </Card.Text>
                     </Card.Body>
                   </Card>
@@ -257,7 +257,7 @@ const EmployeeBadgesPage: React.FC = () => {
             })
           }
         >
-          <i className="bi bi-plus-circle"></i> Request a New Badge
+          <i className="bi bi-plus-circle"></i> Demander un Nouveau Badge
         </Button>
       </div>
 
@@ -271,7 +271,7 @@ const EmployeeBadgesPage: React.FC = () => {
         >
           <Modal.Header closeButton className="border-0">
             <Modal.Title className="text-center w-100">
-              <strong style={{ color: "#333333" }}>Badge Details</strong>
+              <strong style={{ color: "#333333" }}>Détails du Badge</strong>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body className="d-flex flex-column align-items-center">
@@ -286,26 +286,26 @@ const EmployeeBadgesPage: React.FC = () => {
               }}
             >
               <h5 className="fw-bold mb-3" style={{ color: "#333333" }}>
-                Badge Code: {selectedBadge.code}
+                Code du Badge: {selectedBadge.code}
               </h5>
               <p className="text-muted mb-2">
-                <i className="bi bi-building"></i> Company: {getCompanyName(selectedBadge.companyId)}
+                <i className="bi bi-building"></i> Société: {getCompanyName(selectedBadge.companyId)}
               </p>
               <p className="text-muted mb-2">
-                <i className="bi bi-calendar"></i> Issued Date: {new Date(selectedBadge.issuedDate).toLocaleDateString()}
+                <i className="bi bi-calendar"></i> Date d'Emission: {new Date(selectedBadge.issuedDate).toLocaleDateString()}
               </p>
               <p className="text-muted mb-2">
-                <i className="bi bi-calendar-x"></i> Expiry Date: {new Date(selectedBadge.expiryDate).toLocaleDateString()}
+                <i className="bi bi-calendar-x"></i> Date d'Expiration: {new Date(selectedBadge.expiryDate).toLocaleDateString()}
               </p>
               <BsBadge
                 bg={isExpired(selectedBadge.expiryDate) ? "danger" : isExpiringSoon(selectedBadge.expiryDate) ? "warning" : "success"}
                 className="px-3 py-2 mt-3"
               >
                 {isExpired(selectedBadge.expiryDate)
-                  ? "Expired"
+                  ? "Expiré"
                   : isExpiringSoon(selectedBadge.expiryDate)
-                  ? "Expiring Soon"
-                  : "Active"}
+                  ? "Expire Bientôt"
+                  : "Actif"}
               </BsBadge>
             </div>
           </Modal.Body>
@@ -318,14 +318,14 @@ const EmployeeBadgesPage: React.FC = () => {
                 setShowModal(false);
               }}
             >
-              <i className="bi bi-send"></i> Request Modification
+              <i className="bi bi-send"></i> Demander une Modification
             </Button>
             <Button
               variant="secondary"
               className="rounded-pill px-4 py-2 shadow-sm"
               onClick={() => setShowModal(false)}
             >
-              Close
+              Fermer
             </Button>
           </Modal.Footer>
         </Modal>

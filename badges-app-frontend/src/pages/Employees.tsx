@@ -3,6 +3,7 @@ import type { UserDTO, Status, CompanyDTO } from "../types";
 import {
   fetchEmployees,
   updateEmployeeStatus,
+  updateEmployee,
   createEmployee,
 } from "../api/ApiEmployee";
 import { fetchCompanies } from "../api/apiCompany";
@@ -216,7 +217,7 @@ const Employees: React.FC = () => {
     if (!editingEmployee) return;
     try {
       setSavingEdit(true);
-      await updateEmployeeStatus(editingEmployee.id, editingEmployee);
+      await updateEmployee(editingEmployee.id, editingEmployee);
       toast.success("Employé mis à jour");
       setShowEditModal(false);
 

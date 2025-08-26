@@ -104,7 +104,7 @@ const EmployeeLayout: React.FC = () => {
                       >
                         {unreadCount > 99 ? "99+" : unreadCount}
                         <span className="visually-hidden">
-                          unread notifications
+                          notifications non lues
                         </span>
                       </span>
                     )}
@@ -124,7 +124,7 @@ const EmployeeLayout: React.FC = () => {
                       style={{ cursor: "pointer" }}
                       onClick={handleNotificationClick}
                     >
-                      View all
+                      Voir tout
                     </span>
                   </div>
                   <Dropdown.Divider />
@@ -179,7 +179,7 @@ const EmployeeLayout: React.FC = () => {
                     })
                   ) : (
                     <Dropdown.Item className="text-center text-muted py-3">
-                      No new notifications
+                      Aucune nouvelle notification
                     </Dropdown.Item>
                   )}
                 </Dropdown.Menu>
@@ -217,14 +217,14 @@ const EmployeeLayout: React.FC = () => {
                 </Dropdown.Toggle>
                 <Dropdown.Menu align="end">
                   <Dropdown.Item as={Link} to="/employee/profile">
-                    <i className="bi bi-person me-2"></i>My Profile
+                    <i className="bi bi-person me-2"></i>Mon Profil
                   </Dropdown.Item>
                   <Dropdown.Item as={Link} to="/employee/badges">
-                    <i className="bi bi-credit-card-2-front me-2"></i>My Badges
+                    <i className="bi bi-credit-card-2-front me-2"></i>Mes Badges
                   </Dropdown.Item>
                   <Dropdown.Divider />
                   <Dropdown.Item onClick={handleLogout}>
-                    <i className="bi bi-box-arrow-right me-2"></i>Logout
+                    <i className="bi bi-box-arrow-right me-2"></i>Déconnexion
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>

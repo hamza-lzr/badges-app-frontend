@@ -61,16 +61,16 @@ const EmployeeAccessesPage: React.FC = () => {
       new Date(endDate).getTime() - new Date().getTime() <=
         7 * 24 * 60 * 60 * 1000; // 7 days
 
-    if (expired) return <span className="badge bg-danger">Expired</span>;
-    if (expiringSoon) return <span className="badge bg-warning text-dark">Expiring Soon</span>;
-    return <span className="badge bg-success">Active</span>;
+    if (expired) return <span className="badge bg-danger">Expiré</span>;
+    if (expiringSoon) return <span className="badge bg-warning text-dark">Expire Bientôt</span>;
+    return <span className="badge bg-success">Actif</span>;
   };
 
   if (loading) {
     return (
       <div className="text-center mt-5">
         <Spinner animation="border" variant="primary" />
-        <p className="mt-2">Loading your accesses...</p>
+        <p className="mt-2">Chargement de vos accès...</p>
       </div>
     );
   }
@@ -78,7 +78,7 @@ const EmployeeAccessesPage: React.FC = () => {
   if (accesses.length === 0) {
     return (
       <Alert variant="info" className="text-center mt-5">
-        You have no airport accesses.{" "}
+        Vous n'avez pas encore d'autorisations d'accès.{" "}
         <Button
           variant="primary"
           onClick={() =>
@@ -87,7 +87,7 @@ const EmployeeAccessesPage: React.FC = () => {
             })
           }
         >
-          Request Access
+          Demander un accès
         </Button>
       </Alert>
     );
@@ -97,7 +97,7 @@ const EmployeeAccessesPage: React.FC = () => {
     <div className="container py-4">
       {/* ✅ Header with view mode toggle */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-bold" style={{ color: "#333333" }}>My Airport Accesses</h2>
+        <h2 className="fw-bold" style={{ color: "#333333" }}>Mes Autorisations d'Accès</h2>
 
         <div className="d-flex gap-2">
           {/* Table view icon */}
@@ -132,9 +132,9 @@ const EmployeeAccessesPage: React.FC = () => {
                 state: { openRequestModal: true, reqType: "AIRPORT_ACCESS" },
               })
             }
-            title="Request New Access"
+            title="Demander un accès"
           >
-            <i className="bi bi-plus-circle" style={{ fontSize: "1.2rem" }}></i> Request Access
+            <i className="bi bi-plus-circle" style={{ fontSize: "1.2rem" }}></i> Demander un accès
           </Button>
         </div>
       </div>
@@ -144,11 +144,11 @@ const EmployeeAccessesPage: React.FC = () => {
         <Table bordered hover responsive className="shadow-sm align-middle rounded-4">
           <thead className="table-dark">
             <tr>
-              <th>Access</th>
+              <th>Accès</th>
               <th>Badge</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Status</th>
+              <th>Date de Début</th>
+              <th>Date de Fin</th>
+              <th>Statut</th>
             </tr>
           </thead>
           <tbody>
@@ -158,7 +158,7 @@ const EmployeeAccessesPage: React.FC = () => {
 
               return (
                 <tr key={access.id} className="shadow-sm">
-                  <td>Access to <strong>{airportName}</strong></td>
+                  <td>Accès à <strong>{airportName}</strong></td>
                   <td>{badgeCode}</td>
                   <td>{new Date(access.startDate).toLocaleDateString()}</td>
                   <td>{new Date(access.endDate).toLocaleDateString()}</td>
@@ -182,14 +182,14 @@ const EmployeeAccessesPage: React.FC = () => {
                 <Card className="shadow-sm h-100 border-0 hover-shadow rounded-4">
                   <Card.Body>
                     <Card.Title className="fw-bold text-primary">
-                      Access to {airportName}
+                      Accès à {airportName}
                     </Card.Title>
                     <Card.Text className="text-muted small">
                       Badge: {badgeCode}
                     </Card.Text>
                     <Card.Text>
-                      <strong>Start:</strong> {new Date(access.startDate).toLocaleDateString()}<br />
-                      <strong>End:</strong> {new Date(access.endDate).toLocaleDateString()}
+                      <strong>Début:</strong> {new Date(access.startDate).toLocaleDateString()}<br />
+                      <strong>Fin:</strong> {new Date(access.endDate).toLocaleDateString()}
                     </Card.Text>
                     <div>
                       <AccessStatusBadge endDate={access.endDate} />
