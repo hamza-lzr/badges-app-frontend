@@ -10,23 +10,27 @@ import { Modal, Button, Toast, ToastContainer } from "react-bootstrap";
 
 type SortKey = "name" | "phone" | "address";
 
+const DESC_COL_WIDTH = 260; // largeur fixe du descriptif (px)
+
 const Companies: React.FC = () => {
   const [companies, setCompanies] = useState<CompanyDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Modal states
+  // Modal Add/Edit
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Toast states
+  // Modal Readonly (Details)
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [detailsCompany, setDetailsCompany] = useState<CompanyDTO | null>(null);
+
+  // Toast
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
   // Add/Edit states
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(
-    null
-  );
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
 
   const [newCompany, setNewCompany] = useState<Omit<CompanyDTO, "id">>({
     name: "",
@@ -35,14 +39,10 @@ const Companies: React.FC = () => {
     description: "",
   });
 
-  // Search filter
+  // Search / Pagination / Sort
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
-
-  // Sorting states
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortAsc, setSortAsc] = useState(true);
 
@@ -62,7 +62,7 @@ const Companies: React.FC = () => {
     }
   };
 
-  // ✅ Open modal in Add mode
+  // Add
   const openAddModal = () => {
     setIsEditing(false);
     setSelectedCompanyId(null);
@@ -70,8 +70,9 @@ const Companies: React.FC = () => {
     setShowModal(true);
   };
 
-  // ✅ Open modal in Edit mode
-  const openEditModal = (company: CompanyDTO) => {
+  // Edit
+  const openEditModal = (company: CompanyDTO, e?: React.MouseEvent) => {
+    e?.stopPropagation(); // ne pas déclencher l'ouverture du modal de détails
     setIsEditing(true);
     setSelectedCompanyId(company.id!);
     setNewCompany({
@@ -83,7 +84,17 @@ const Companies: React.FC = () => {
     setShowModal(true);
   };
 
-  // ✅ Save handler (both add & edit)
+  // Readonly Details
+  const openDetailsModal = (company: CompanyDTO) => {
+    setDetailsCompany(company);
+    setShowDetailsModal(true);
+  };
+  const closeDetailsModal = () => {
+    setShowDetailsModal(false);
+    setDetailsCompany(null);
+  };
+
+  // Save
   const handleSaveCompany = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -96,7 +107,6 @@ const Companies: React.FC = () => {
         await createCompany(newCompany);
         showSuccessToast("Entreprise ajoutée avec succès !");
       }
-
       await loadCompanies();
       resetForm();
       setShowModal(false);
@@ -107,9 +117,9 @@ const Companies: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette entreprise ?"))
-      return;
+  const handleDelete = async (id: number, e?: React.MouseEvent) => {
+    e?.stopPropagation(); // ne pas ouvrir le modal de détails
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette entreprise ?")) return;
     try {
       await deleteCompany(id);
       await loadCompanies();
@@ -120,12 +130,7 @@ const Companies: React.FC = () => {
   };
 
   const resetForm = () => {
-    setNewCompany({
-      name: "",
-      address: "",
-      phone: "",
-      description: "",
-    });
+    setNewCompany({ name: "", address: "", phone: "", description: "" });
   };
 
   const showSuccessToast = (message: string) => {
@@ -134,15 +139,17 @@ const Companies: React.FC = () => {
     setTimeout(() => setShowToast(false), 3000);
   };
 
-  // ✅ Filter + Sort + Pagination logic
-  const filteredCompanies = useMemo(() => {
-    return companies.filter(
-      (c) =>
-        c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.address || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.phone || "").includes(searchTerm)
-    );
-  }, [companies, searchTerm]);
+  // Filter + Sort + Pagination
+  const filteredCompanies = useMemo(
+    () =>
+      companies.filter(
+        (c) =>
+          c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (c.address || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (c.phone || "").includes(searchTerm)
+      ),
+    [companies, searchTerm]
+  );
 
   const sortedCompanies = useMemo(() => {
     const sorted = [...filteredCompanies].sort((a, b) => {
@@ -161,11 +168,9 @@ const Companies: React.FC = () => {
     currentPage * pageSize
   );
 
-  // ✅ Sort handler
   const handleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortAsc(!sortAsc); // toggle asc/desc
-    } else {
+    if (sortKey === key) setSortAsc(!sortAsc);
+    else {
       setSortKey(key);
       setSortAsc(true);
     }
@@ -182,12 +187,13 @@ const Companies: React.FC = () => {
         </button>
       </div>
 
-      {/* Search bar */}
+      {/* Search */}
       <div className="mb-3">
         <input
           type="text"
           className="form-control"
           placeholder="Rechercher par nom, adresse ou téléphone..."
+          style={{ width: 400 }}
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
@@ -196,7 +202,7 @@ const Companies: React.FC = () => {
         />
       </div>
 
-      {/* Companies Table */}
+      {/* Table */}
       {loading ? (
         <div className="text-center my-5">
           <div className="spinner-border text-primary" role="status" />
@@ -214,11 +220,8 @@ const Companies: React.FC = () => {
             <table className="table table-hover align-middle">
               <thead className="table-dark">
                 <tr>
-                  <th
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleSort("name")}
-                  >
-                    Nom{"      "}
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSort("name")}>
+                    Nom{" "}
                     {sortKey === "name" &&
                       (sortAsc ? (
                         <i className="bi bi-caret-up-fill text-primary"></i>
@@ -226,11 +229,8 @@ const Companies: React.FC = () => {
                         <i className="bi bi-caret-down-fill text-primary"></i>
                       ))}
                   </th>
-                  <th
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleSort("address")}
-                  >
-                    Adresse{"     "}
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSort("address")}>
+                    Adresse{" "}
                     {sortKey === "address" &&
                       (sortAsc ? (
                         <i className="bi bi-caret-up-fill text-primary"></i>
@@ -238,11 +238,8 @@ const Companies: React.FC = () => {
                         <i className="bi bi-caret-down-fill text-primary"></i>
                       ))}
                   </th>
-                  <th
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleSort("phone")}
-                  >
-                    Téléphone {"     "}
+                  <th style={{ cursor: "pointer" }} onClick={() => handleSort("phone")}>
+                    Téléphone{" "}
                     {sortKey === "phone" &&
                       (sortAsc ? (
                         <i className="bi bi-caret-up-fill text-primary"></i>
@@ -250,33 +247,56 @@ const Companies: React.FC = () => {
                         <i className="bi bi-caret-down-fill text-primary"></i>
                       ))}
                   </th>
-                  <th>Descriptif</th>
+                  {/* largeur fixe pour la colonne Descriptif */}
+                  <th style={{ width: DESC_COL_WIDTH, maxWidth: DESC_COL_WIDTH }}>
+                    Descriptif
+                  </th>
                   <th>Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {paginatedCompanies.map((company) => (
-                  <tr key={company.id}>
+                  <tr
+                    key={company.id}
+                    onClick={() => openDetailsModal(company)}
+                    style={{ cursor: "pointer" }}
+                    title="Voir les détails"
+                  >
                     <td>
                       <strong>{company.name}</strong>
                     </td>
                     <td>{company.address || "—"}</td>
                     <td>{company.phone || "—"}</td>
-                    <td>{company.description || "—"}</td>
+                    <td>
+                      {/* Wrapper avec largeur fixe + ellipsis */}
+                      <div
+                        style={{
+                          width: DESC_COL_WIDTH,
+                          maxWidth: DESC_COL_WIDTH,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                        title={company.description || "—"}
+                      >
+                        {company.description || "—"}
+                      </div>
+                    </td>
                     <td>
                       <div className="d-flex gap-2">
                         <button
                           className="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
-                          onClick={() => openEditModal(company)}
-                          title="Edit"
+                          onClick={(e) => openEditModal(company, e)}
+                          title="Modifier"
                         >
                           <i className="bi bi-pencil" />
                           Modifier
                         </button>
                         <button
                           className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
-                          onClick={() => handleDelete(company.id!)}
-                          title="Delete"
+                          onClick={(e) => handleDelete(company.id!, e)}
+                          title="Supprimer"
                         >
                           <i className="bi bi-trash" />
                           Supprimer
@@ -314,14 +334,13 @@ const Companies: React.FC = () => {
         </>
       )}
 
-      {/* ✅ Modal for Add/Edit Company */}
+      {/* Modal Add/Edit Company */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>
             {isEditing ? "Modifier l'entreprise" : "Ajouter une entreprise"}
           </Modal.Title>
         </Modal.Header>
-
         <Modal.Body>
           <form id="company-form" onSubmit={handleSaveCompany}>
             <div className="mb-3">
@@ -330,9 +349,7 @@ const Companies: React.FC = () => {
                 type="text"
                 className="form-control"
                 value={newCompany.name}
-                onChange={(e) =>
-                  setNewCompany({ ...newCompany, name: e.target.value })
-                }
+                onChange={(e) => setNewCompany({ ...newCompany, name: e.target.value })}
                 required
                 autoFocus
               />
@@ -343,9 +360,7 @@ const Companies: React.FC = () => {
                 type="text"
                 className="form-control"
                 value={newCompany.address}
-                onChange={(e) =>
-                  setNewCompany({ ...newCompany, address: e.target.value })
-                }
+                onChange={(e) => setNewCompany({ ...newCompany, address: e.target.value })}
               />
             </div>
             <div className="mb-3">
@@ -354,9 +369,7 @@ const Companies: React.FC = () => {
                 type="text"
                 className="form-control"
                 value={newCompany.phone}
-                onChange={(e) =>
-                  setNewCompany({ ...newCompany, phone: e.target.value })
-                }
+                onChange={(e) => setNewCompany({ ...newCompany, phone: e.target.value })}
               />
             </div>
             <div className="mb-3">
@@ -372,23 +385,55 @@ const Companies: React.FC = () => {
             </div>
           </form>
         </Modal.Body>
-
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Annuler
           </Button>
-          <Button
-            variant="success"
-            type="submit"
-            form="company-form"
-            disabled={submitting}
-          >
+          <Button variant="success" type="submit" form="company-form" disabled={submitting}>
             {submitting ? "Enregistrement..." : isEditing ? "Modifier" : "Ajouter"}
           </Button>
         </Modal.Footer>
       </Modal>
 
-      {/* ✅ Success Toast */}
+      {/* Modal Readonly Details */}
+      <Modal show={showDetailsModal} onHide={closeDetailsModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Détails de l'entreprise</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {detailsCompany ? (
+            <div className="vstack gap-2">
+              <div>
+                <small className="text-muted d-block">Nom</small>
+                <div className="fw-semibold">{detailsCompany.name}</div>
+              </div>
+              <div>
+                <small className="text-muted d-block">Adresse</small>
+                <div>{detailsCompany.address || "—"}</div>
+              </div>
+              <div>
+                <small className="text-muted d-block">Téléphone</small>
+                <div>{detailsCompany.phone || "—"}</div>
+              </div>
+              <div>
+                <small className="text-muted d-block">Descriptif</small>
+                <div style={{ whiteSpace: "pre-wrap" }}>
+                  {detailsCompany.description || "—"}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-muted">Aucune entreprise sélectionnée.</div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeDetailsModal}>
+            Fermer
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Success Toast */}
       <ToastContainer position="top-end" className="p-3">
         <Toast
           bg="success"
@@ -405,3 +450,4 @@ const Companies: React.FC = () => {
 };
 
 export default Companies;
+

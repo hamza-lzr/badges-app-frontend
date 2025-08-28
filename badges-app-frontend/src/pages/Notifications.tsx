@@ -395,7 +395,8 @@ const Notifications: React.FC = () => {
             <Form.Group className="mb-3">
               <Form.Label>Message</Form.Label>
               <Form.Control
-                type="text"
+                as="textarea" // instead of type="text"
+                rows={3} // initial height (~3 lines)
                 value={newNotification.message}
                 onChange={(e) =>
                   setNewNotification({
@@ -403,6 +404,7 @@ const Notifications: React.FC = () => {
                     message: e.target.value,
                   })
                 }
+                style={{ resize: "vertical" }} // let the user drag to resize
                 required
               />
             </Form.Group>

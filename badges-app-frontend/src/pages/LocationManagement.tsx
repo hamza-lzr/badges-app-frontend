@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { fetchCountries, createCountry, deleteCountry } from "../api/apiCountry";
+import {
+  fetchCountries,
+  createCountry,
+  deleteCountry,
+  updateCountry,
+} from "../api/apiCountry";
 import type { CountryDTO } from "../types";
 import { useNavigate } from "react-router-dom";
-import { Form, Button, Spinner } from "react-bootstrap";
+import { Form, Button, Spinner, Modal } from "react-bootstrap";
 
 const LocationManagement: React.FC = () => {
   const [countries, setCountries] = useState<CountryDTO[]>([]);
@@ -11,12 +16,14 @@ const LocationManagement: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newCountry, setNewCountry] = useState<CountryDTO>({ name: "" });
 
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingCountry, setEditingCountry] = useState<CountryDTO | null>(null);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const navigate = useNavigate();
 
@@ -58,6 +65,17 @@ const LocationManagement: React.FC = () => {
     }
   };
 
+  const handleEditCountry = async (id: number, updatedCountry: CountryDTO) => {
+    try {
+      await updateCountry(id, updatedCountry);
+      setShowEditForm(false);
+      setEditingCountry(null);
+      loadCountries();
+    } catch (error) {
+      console.error("Error editing country:", error);
+    }
+  };
+
   const goToCities = (countryId: number, countryName: string) => {
     navigate(`/admin/cities/${countryId}`, { state: { countryName } });
   };
@@ -66,13 +84,11 @@ const LocationManagement: React.FC = () => {
   const filteredCountries = countries
     .filter((c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) =>
-      sortAsc
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
+      sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
     );
 
-    //Pagination
-    const totalPages = Math.ceil(filteredCountries.length / itemsPerPage);
+  //Pagination
+  const totalPages = Math.ceil(filteredCountries.length / itemsPerPage);
   const paginatedCountries = filteredCountries.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -94,7 +110,11 @@ const LocationManagement: React.FC = () => {
 
       {/* Add Country Button / Form */}
       {!showAddForm ? (
-        <Button variant="primary" className="mb-3" onClick={() => setShowAddForm(true)}>
+        <Button
+          variant="primary"
+          className="mb-3"
+          onClick={() => setShowAddForm(true)}
+        >
           Ajouter un pays
         </Button>
       ) : (
@@ -144,7 +164,9 @@ const LocationManagement: React.FC = () => {
           <p className="text-muted mt-2">Chargement des pays...</p>
         </div>
       ) : filteredCountries.length === 0 ? (
-        <p className="text-muted">Aucun pays trouvé. Essayez une autre recherche.</p>
+        <p className="text-muted">
+          Aucun pays trouvé. Essayez une autre recherche.
+        </p>
       ) : (
         <div className="table-responsive shadow-sm rounded">
           <table className="table table-hover align-middle">
@@ -166,15 +188,26 @@ const LocationManagement: React.FC = () => {
                         size="sm"
                         variant="info"
                         onClick={() => goToCities(country.id!, country.name)}
+                        title="Voir les villes"
                       >
                         Voir villes
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => {
+                          setEditingCountry(country);
+                          setShowEditForm(true);
+                        }}
+                      >
+                        <i className="bi bi-pencil"></i>
                       </Button>
                       <Button
                         size="sm"
                         variant="danger"
                         onClick={() => handleDeleteCountry(country.id!)}
                       >
-                        Supprimer
+                        <i className="bi bi-trash"></i>
                       </Button>
                     </div>
                   </td>
@@ -185,27 +218,67 @@ const LocationManagement: React.FC = () => {
         </div>
       )}
       {/* Pagination */}
-          <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
-            <small className="text-muted">
-              Page {currentPage} sur {totalPages}
-            </small>
-            <div className="pagination-buttons">
-              <button
-                className="btn btn-sm btn-outline-secondary me-2"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                Précédent
-              </button>
-              <button
-                className="btn btn-sm btn-outline-secondary"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                Suivant
-              </button>
-            </div>
-          </div>
+      <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+        <small className="text-muted">
+          Page {currentPage} sur {totalPages}
+        </small>
+        <div className="pagination-buttons">
+          <button
+            className="btn btn-sm btn-outline-secondary me-2"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+          >
+            Précédent
+          </button>
+          <button
+            className="btn btn-sm btn-outline-secondary"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+          >
+            Suivant
+          </button>
+        </div>
+      </div>
+      {/* Edit Country Modal */}
+      <Modal show={showEditForm} onHide={() => setShowEditForm(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Modifier le pays</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {editingCountry && (
+            <Form onSubmit={(e) => e.preventDefault()}>
+              <Form.Group className="mb-3">
+                <Form.Label>Nom du pays</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editingCountry.name}
+                  onChange={(e) =>
+                    setEditingCountry({
+                      ...editingCountry,
+                      name: e.target.value,
+                    })
+                  }
+                />
+              </Form.Group>
+            </Form>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowEditForm(false)}>
+            Annuler
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              if (editingCountry) {
+                handleEditCountry(editingCountry.id!, editingCountry);
+              }
+            }}
+          >
+            Enregistrer
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
