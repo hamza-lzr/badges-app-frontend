@@ -22,7 +22,7 @@ const AdminNotificationsPage: React.FC = () => {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 9;
 
   useEffect(() => {
     const load = async () => {

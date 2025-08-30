@@ -11,7 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import {
   MdPeople,
-  MdWork,
+  MdChecklistRtl  as MdWork,
   MdLocationOn,
   MdBusiness,
   MdBadge,
@@ -64,7 +64,7 @@ const Dashboard: React.FC = () => {
   const adminLinks = [
     {
       to: "/admin/employees",
-      label: "Employees",
+      label: "Collaborateurs",
       icon: <MdPeople size={32} />,
     },
     { to: "/admin/requests", label: "Demandes", icon: <MdWork size={32} /> },
