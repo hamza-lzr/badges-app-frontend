@@ -1,0 +1,17 @@
+.conges-title {
+    color: #333;
+}
+
+.conges-search-group {
+    min-width: 390px;
+    max-width: 600px;
+}
+
+.conges-status-filter {
+    min-width: 140px;
+    max-width: 220px;
+}
+
+.conge-card-description {
+    min-height: 48px;
+}

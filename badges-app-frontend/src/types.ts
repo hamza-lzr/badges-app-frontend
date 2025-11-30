@@ -94,4 +94,7 @@ export interface CongeDTO {
 
 export type CreateEmployeeDTO = Omit<UserDTO, "id" | "badgesIds">;
 
+export type ViewMode = "table" | "grid";
+export type OwnerInfo = { fullName: string; firstName: string; lastName: string; matricule?: string; };
+
 
