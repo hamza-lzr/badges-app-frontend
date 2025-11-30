@@ -1,0 +1,27 @@
+/* Single-line truncate for Message */
+.custom-table .msg-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Keep rows airy but compact */
+.custom-table tbody td, .custom-table thead th {
+  padding-top: .7rem;
+  padding-bottom: .7rem;
+  vertical-align: middle;
+}
+
+/* Symmetric actions: 3 fixed buttons */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 80px); /* same width for all */
+  gap: 8px;
+  justify-content: end;
+}
+.action-btn { width: 100%; }
+
+/* Slightly smaller message column on small screens */
+@media (max-width: 992px) {
+  .actions-grid { grid-template-columns: repeat(3, 96px); }
+}

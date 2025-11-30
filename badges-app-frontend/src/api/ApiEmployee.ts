@@ -1,6 +1,6 @@
 // src/api/ApiEmployee.ts
 import axios from "axios";
-import type { UserDTO } from "../types";
+import type { UserDTO, CreateEmployeeDTO } from "../types";
 
 const api = axios.create({
   baseURL: "http://localhost:8080/users",
@@ -41,7 +41,7 @@ export const fetchEmployeeById = async (id: number): Promise<UserDTO> => {
 };
 
 // ✔️ Create employee
-export const createEmployee = async (employee: UserDTO): Promise<UserDTO> => {
+export const createEmployee = async (employee: CreateEmployeeDTO): Promise<UserDTO> => {
   const { data } = await api.post<UserDTO>("", employee);
   return data;
 };

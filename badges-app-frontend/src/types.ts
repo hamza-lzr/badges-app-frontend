@@ -92,3 +92,6 @@ export interface CongeDTO {
   status: 'PENDING' | 'APPROVED' | 'REJECTED'; // assuming those are your enum values
 }
 
+export type CreateEmployeeDTO = Omit<UserDTO, "id" | "badgesIds">;
+
+

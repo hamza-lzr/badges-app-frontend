@@ -1,0 +1,73 @@
+/* Actions container with consistent grid layout */
+.actions-container {
+  display: grid;
+  grid-template-columns: 130px 80px 90px;
+  gap: 6px;
+  align-items: center;
+  width: 100%;
+  min-width: 306px; /* Prevents shrinking */
+}
+
+/* Consistent select field sizing */
+.action-select {
+  width: 130px !important;
+  min-width: 130px !important;
+  max-width: 130px !important;
+  font-size: 1rem;
+}
+
+/* Consistent button sizing */
+.action-btn {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1rem;
+}
+
+.action-btn-view {
+  width: 80px !important;
+  min-width: 80px !important;
+  max-width: 80px !important;
+}
+
+.action-btn-add {
+  width: 90px !important;
+  min-width: 90px !important;
+  max-width: 90px !important;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .actions-container {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    min-width: auto;
+  }
+  
+  .action-select,
+  .action-btn-view,
+  .action-btn-add {
+    width: 100% !important;
+    min-width: auto !important;
+    max-width: none !important;
+  }
+}
+
+/* Table improvements */
+.custom-table th {
+  font-weight: 600;
+  font-size: 1rem;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.custom-table td {
+  vertical-align: middle;
+  font-size: 1rem;
+  padding: 0.75rem 0.5rem;
+}
+
+/* Ensure table layout is stable */
+.custom-table {
+  table-layout: fixed;
+  width: 100%;
+}
