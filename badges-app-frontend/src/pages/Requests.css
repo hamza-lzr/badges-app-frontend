@@ -1,0 +1,51 @@
+.request-filters-card {
+    border-radius: 15px;
+}
+.request-filters-header {
+    background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+    border-radius: 15px 15px 0 0;
+}
+.input-group-text-start {
+    border-radius: 10px 0 0 10px;
+}
+.form-control.border-start-0 {
+    border-radius: 0 10px 10px 0;
+}
+.requests-table-card {
+    border-radius: 15px;
+}
+.table-loading-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 10;
+    border-radius: 15px;
+}
+.requests-table-responsive {
+    border-radius: 15px;
+    overflow: hidden;
+}
+.requests-table-header {
+    --bs-table-bg: #111827;
+    --bs-table-color: #fff;
+}
+.request-table-row:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.action-btn {
+    border-radius: 8px;
+    min-width: 70px;
+}
+.requests-table-footer {
+    border-radius: 0 0 15px 15px;
+}
+.modal-header-custom {
+    background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+}

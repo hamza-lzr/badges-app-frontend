@@ -1,0 +1,69 @@
+/* Global styles that should be in a more global file, but are here for now */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* Apply font to the container of this page, not the whole body */
+.profile-container {
+  font-family: 'Roboto', sans-serif;
+}
+
+.profile-container h1, .profile-container h5 {
+  font-weight: 700;
+}
+.profile-container p, .profile-container .card-text {
+  font-weight: 400;
+}
+
+/* Page specific styles */
+.profile-title {
+  color: #333333;
+}
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #495057;
+  margin-right: 1rem;
+}
+.profile-name {
+  color: #333333;
+}
+.profile-info-value {
+  color: #333333;
+}
+.rounded-pill {
+  border-radius: 50px;
+}
+.rounded-4 {
+  border-radius: 1rem;
+}
+.modal-title-custom {
+  color: #333333;
+}
+.form-section-divider {
+  border-bottom: 1px solid #f0f1f2;
+}
+.label-custom {
+  color: #333333;
+}
+.password-toggle-icon {
+  position: absolute;
+  top: 38px;
+  right: 15px;
+  cursor: pointer;
+  color: #6c757d;
+}
+.modal-content {
+  border-radius: 1rem;
+}
+.form-control::placeholder {
+  color: #adb5bd;
+}
+.form-label {
+  margin-bottom: .35rem;
+}
