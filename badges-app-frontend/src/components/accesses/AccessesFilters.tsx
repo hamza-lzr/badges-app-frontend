@@ -3,22 +3,22 @@ import { Form } from "react-bootstrap";
 
 interface AccessesFiltersProps {
   airportFilter: number | "";
-  setAirportFilter: (value: number | "") => void;
-  airportsMap: Map<number, string>;
+  onAirportFilterChange: (value: number | "") => void;
   searchQuery: string;
-  setSearchQuery: (value: string) => void;
+  onSearchQueryChange: (value: string) => void;
   nameFilter: string;
-  setNameFilter: (value: string) => void;
+  onNameFilterChange: (value: string) => void;
+  airportsMap: Record<number, string>;
 }
 
 const AccessesFilters: React.FC<AccessesFiltersProps> = ({
   airportFilter,
-  setAirportFilter,
-  airportsMap,
+  onAirportFilterChange,
   searchQuery,
-  setSearchQuery,
+  onSearchQueryChange,
   nameFilter,
-  setNameFilter,
+  onNameFilterChange,
+  airportsMap,
 }) => {
   return (
     <div className="d-flex flex-wrap gap-3 mb-4">
@@ -26,13 +26,13 @@ const AccessesFilters: React.FC<AccessesFiltersProps> = ({
         style={{ maxWidth: 200 }}
         value={airportFilter}
         onChange={(e) =>
-          setAirportFilter(
+          onAirportFilterChange(
             e.target.value === "" ? "" : Number(e.target.value)
           )
         }
       >
         <option value="">Tous les aéroports</option>
-        {Array.from(airportsMap.entries()).map(([id, name]) => (
+        {Object.entries(airportsMap).map(([id, name]) => (
           <option key={id} value={id}>
             {name}
           </option>
@@ -43,14 +43,14 @@ const AccessesFilters: React.FC<AccessesFiltersProps> = ({
         placeholder="Rechercher un badge ou un aéroport…"
         style={{ maxWidth: 250 }}
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={(e) => onSearchQueryChange(e.target.value)}
       />
       <Form.Control
         type="text"
         placeholder="Filtrer par nom ou prénom…"
         style={{ maxWidth: 250 }}
         value={nameFilter}
-        onChange={(e) => setNameFilter(e.target.value)}
+        onChange={(e) => onNameFilterChange(e.target.value)}
       />
     </div>
   );

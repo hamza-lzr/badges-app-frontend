@@ -1,50 +1,62 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Form } from "react-bootstrap";
-import type { AccessDTO, AirportDTO, BadgeDTO } from "../../types";
+import { Modal, Form, Button } from "react-bootstrap";
+import type { AccessDTO } from "../../types";
 
 interface AccessFormModalProps {
   show: boolean;
   onHide: () => void;
+  onSave: (formData: AccessDTO) => void;
   editingAccess: AccessDTO | null;
-  airportsMap: Map<number, string>;
-  badges: BadgeDTO[];
-  onSave: (formData: AccessDTO, editingId: number | null) => void;
+  airportsMap: Record<number, string>;
+  badgesMap: Record<number, string>;
 }
 
 const AccessFormModal: React.FC<AccessFormModalProps> = ({
   show,
   onHide,
+  onSave,
   editingAccess,
   airportsMap,
-  badges,
-  onSave,
+  badgesMap,
 }) => {
-  const [formData, setFormData] = useState<AccessDTO>({ startDate: "", endDate: "", airportId: 0, badgeId: 0 });
+  const [formData, setFormData] = useState<AccessDTO>({
+    startDate: "",
+    endDate: "",
+    airportId: 0,
+    badgeId: 0,
+  });
   const [badgeSearchQuery, setBadgeSearchQuery] = useState("");
 
   useEffect(() => {
-    if (show) {
-      if (editingAccess) {
-        setFormData(editingAccess);
-      } else {
-        setFormData({ startDate: "", endDate: "", airportId: 0, badgeId: 0 });
-      }
-      setBadgeSearchQuery("");
+    if (editingAccess) {
+      setFormData(editingAccess);
+    } else {
+      setFormData({
+        startDate: "",
+        endDate: "",
+        airportId: 0,
+        badgeId: 0,
+      });
     }
-  }, [show, editingAccess]);
+  }, [editingAccess, show]);
 
-  const filteredBadges = badges.filter(b => 
-    b.code.toLowerCase().includes(badgeSearchQuery.toLowerCase())
-  );
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData, editingAccess ? editingAccess.id! : null);
+    onSave(formData);
   };
+
+  const filteredBadges = Object.entries(badgesMap)
+    .filter(([, code]) =>
+      code.toLowerCase().includes(badgeSearchQuery.toLowerCase())
+    )
+    .reduce(
+      (acc, [id, code]) => ({ ...acc, [Number(id)]: code }),
+      {} as Record<number, string>
+    );
 
   return (
     <Modal show={show} onHide={onHide} centered>
-      <Form onSubmit={handleSubmit}>
+      <Form onSubmit={handleSave}>
         <Modal.Header closeButton>
           <Modal.Title>
             {editingAccess ? "Modifier l'accès" : "Ajouter un nouvel accès"}
@@ -56,11 +68,18 @@ const AccessFormModal: React.FC<AccessFormModalProps> = ({
             <Form.Select
               required
               value={formData.airportId}
-              onChange={(e) => setFormData({ ...formData, airportId: Number(e.target.value) })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  airportId: Number(e.target.value),
+                })
+              }
             >
               <option value={0}>Sélectionner un aéroport</option>
-              {Array.from(airportsMap.entries()).map(([id, name]) => (
-                <option key={id} value={id}>{name}</option>
+              {Object.entries(airportsMap).map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
               ))}
             </Form.Select>
           </Form.Group>
@@ -75,11 +94,15 @@ const AccessFormModal: React.FC<AccessFormModalProps> = ({
             <Form.Select
               required
               value={formData.badgeId}
-              onChange={(e) => setFormData({ ...formData, badgeId: Number(e.target.value) })}
+              onChange={(e) =>
+                setFormData({ ...formData, badgeId: Number(e.target.value) })
+              }
             >
               <option value={0}>Sélectionner un badge</option>
-              {filteredBadges.map((b) => (
-                <option key={b.id} value={b.id}>{b.code}</option>
+              {Object.entries(filteredBadges).map(([id, code]) => (
+                <option key={id} value={id}>
+                  {code}
+                </option>
               ))}
             </Form.Select>
           </Form.Group>
@@ -89,7 +112,9 @@ const AccessFormModal: React.FC<AccessFormModalProps> = ({
               type="date"
               required
               value={formData.startDate}
-              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, startDate: e.target.value })
+              }
             />
           </Form.Group>
           <Form.Group className="mb-3">
@@ -98,12 +123,16 @@ const AccessFormModal: React.FC<AccessFormModalProps> = ({
               type="date"
               required
               value={formData.endDate}
-              onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, endDate: e.target.value })
+              }
             />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer className="justify-content-end">
-          <Button variant="secondary" onClick={onHide}>Annuler</Button>
+          <Button variant="secondary" onClick={onHide}>
+            Annuler
+          </Button>
           <Button type="submit" variant="success">
             {editingAccess ? "Mettre à jour" : "Enregistrer"}
           </Button>

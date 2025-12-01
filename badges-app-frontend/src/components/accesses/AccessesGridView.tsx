@@ -1,21 +1,28 @@
 import React from "react";
 import { Row, Col, Card, Button } from "react-bootstrap";
-import type { AccessDTO, OwnerInfo } from "../../types";
+import type { AccessDTO } from "../../types";
+
+type OwnerInfo = {
+  fullName: string;
+  firstName: string;
+  lastName: string;
+  matricule?: string;
+};
 
 interface AccessesGridViewProps {
   accesses: AccessDTO[];
-  badgesMap: Map<number, string>;
-  badgeOwnerMap: Map<number, OwnerInfo>;
-  airportsMap: Map<number, string>;
+  airportsMap: Record<number, string>;
+  badgesMap: Record<number, string>;
+  badgeOwnerMap: Record<number, OwnerInfo>;
   onEdit: (access: AccessDTO) => void;
   onDelete: (id: number) => void;
 }
 
 const AccessesGridView: React.FC<AccessesGridViewProps> = ({
   accesses,
+  airportsMap,
   badgesMap,
   badgeOwnerMap,
-  airportsMap,
   onEdit,
   onDelete,
 }) => {
@@ -26,7 +33,8 @@ const AccessesGridView: React.FC<AccessesGridViewProps> = ({
           <Card className="shadow-sm h-100 rounded-4 hover-shadow border-0">
             <Card.Body>
               <Card.Title className="fw-bold text-primary">
-                {badgeOwnerMap.get(a.badgeId)?.fullName || 'N/A'} ({badgesMap.get(a.badgeId) || 'N/A'}) @ {airportsMap.get(a.airportId) || 'N/A'}
+                Collaborateur {badgeOwnerMap[a.badgeId]?.fullName} (
+                {badgesMap[a.badgeId]}) @ {airportsMap[a.airportId]}
               </Card.Title>
               <Card.Text>
                 <strong>Début:</strong> {a.startDate}
@@ -46,7 +54,7 @@ const AccessesGridView: React.FC<AccessesGridViewProps> = ({
                   size="sm"
                   variant="outline-danger"
                   className="rounded-pill"
-                  onClick={() => onDelete(a.id!)}
+                  onClick={() => a.id && onDelete(a.id)}
                 >
                   Supprimer
                 </Button>

@@ -2,28 +2,37 @@ import React from "react";
 import { Table, Button } from "react-bootstrap";
 import type { AccessDTO } from "../../types";
 
-// Temporarily define OwnerInfo here if not in global types yet
-type OwnerInfo = { fullName: string; firstName: string; lastName: string; matricule?: string; };
+type OwnerInfo = {
+  fullName: string;
+  firstName: string;
+  lastName: string;
+  matricule?: string;
+};
 
 interface AccessesTableViewProps {
   accesses: AccessDTO[];
-  badgesMap: Map<number, string>;
-  badgeOwnerMap: Map<number, OwnerInfo>;
-  airportsMap: Map<number, string>;
+  airportsMap: Record<number, string>;
+  badgesMap: Record<number, string>;
+  badgeOwnerMap: Record<number, OwnerInfo>;
   onEdit: (access: AccessDTO) => void;
   onDelete: (id: number) => void;
 }
 
 const AccessesTableView: React.FC<AccessesTableViewProps> = ({
   accesses,
+  airportsMap,
   badgesMap,
   badgeOwnerMap,
-  airportsMap,
   onEdit,
   onDelete,
 }) => {
   return (
-    <Table bordered hover responsive className="shadow-sm rounded-4 align-middle">
+    <Table
+      bordered
+      hover
+      responsive
+      className="shadow-sm rounded-4 align-middle"
+    >
       <thead className="table-dark">
         <tr>
           <th>Badge (Collaborateur)</th>
@@ -38,10 +47,11 @@ const AccessesTableView: React.FC<AccessesTableViewProps> = ({
           <tr key={a.id}>
             <td>
               <strong>
-                {badgesMap.get(a.badgeId) || 'N/A'} ({badgeOwnerMap.get(a.badgeId)?.fullName || 'N/A'})
+                {badgesMap[a.badgeId]} (
+                {badgeOwnerMap[a.badgeId]?.fullName})
               </strong>
             </td>
-            <td>{airportsMap.get(a.airportId) || 'N/A'}</td>
+            <td>{airportsMap[a.airportId]}</td>
             <td>{a.startDate}</td>
             <td>{a.endDate}</td>
             <td>
@@ -58,7 +68,7 @@ const AccessesTableView: React.FC<AccessesTableViewProps> = ({
                   size="sm"
                   variant="outline-danger"
                   className="rounded-pill"
-                  onClick={() => onDelete(a.id!)}
+                  onClick={() => a.id && onDelete(a.id)}
                 >
                   <i className="bi bi-trash" />
                 </Button>

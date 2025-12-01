@@ -1,16 +1,17 @@
 import React from "react";
 import { Button } from "react-bootstrap";
-import type { ViewMode } from "../../types";
+
+type ViewMode = "table" | "grid";
 
 interface AccessesHeaderProps {
   viewMode: ViewMode;
-  setViewMode: (mode: ViewMode) => void;
+  onViewModeChange: (mode: ViewMode) => void;
   onAdd: () => void;
 }
 
 const AccessesHeader: React.FC<AccessesHeaderProps> = ({
   viewMode,
-  setViewMode,
+  onViewModeChange,
   onAdd,
 }) => {
   return (
@@ -23,7 +24,7 @@ const AccessesHeader: React.FC<AccessesHeaderProps> = ({
           variant={viewMode === "table" ? "primary" : "outline-secondary"}
           size="sm"
           className="rounded-pill"
-          onClick={() => setViewMode("table")}
+          onClick={() => onViewModeChange("table")}
         >
           <i className="bi bi-list" />
         </Button>
@@ -31,7 +32,7 @@ const AccessesHeader: React.FC<AccessesHeaderProps> = ({
           variant={viewMode === "grid" ? "primary" : "outline-secondary"}
           size="sm"
           className="rounded-pill"
-          onClick={() => setViewMode("grid")}
+          onClick={() => onViewModeChange("grid")}
         >
           <i className="bi bi-grid" />
         </Button>
