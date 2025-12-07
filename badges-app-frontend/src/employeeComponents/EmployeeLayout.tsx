@@ -119,13 +119,15 @@ const EmployeeLayout: React.FC = () => {
                     <span className="fw-semibold" style={{ color: accentRed }}>
                       Notifications
                     </span>
-                    <span
-                      className="text-decoration-underline"
-                      style={{ cursor: "pointer" }}
+                    <button
+                      type="button"
                       onClick={handleNotificationClick}
+                      className="btn btn-link p-0 text-decoration-underline"
+                      aria-label="Voir toutes les notifications"
+                      style={{ color: accentRed }}
                     >
                       Voir tout
-                    </span>
+                    </button>
                   </div>
                   <Dropdown.Divider />
                   {notifications.length ? (

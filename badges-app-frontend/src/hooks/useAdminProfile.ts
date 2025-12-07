@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
-import type { UserDTO, CompanyDTO } from "../types";
+import type { UserDTO, CompanyDTO, CreateEmployeeDTO } from "../types";
 import {
   fetchMyProfile,
   changeMyPassword,
   updateEmployee,
+  createEmployee,
 } from "../api/ApiEmployee";
 import { fetchCompanyById, fetchCompanies } from "../api/apiCompany";
 
@@ -15,6 +16,7 @@ export const useAdminProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [passwordChanging, setPasswordChanging] = useState(false);
+  const [adminCreating, setAdminCreating] = useState(false);
 
   const [companies, setCompanies] = useState<CompanyDTO[]>([]);
   const [companiesLoading, setCompaniesLoading] = useState(false);
@@ -116,17 +118,40 @@ export const useAdminProfile = () => {
     }
   };
 
+  const handleCreateAdmin = async (adminData: CreateEmployeeDTO) => {
+    setAdminCreating(true);
+    try {
+      await createEmployee({
+        ...adminData,
+        role: "ADMIN",
+        userType: "ADMIN",
+      });
+      toast.success("Admin account created successfully.");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.error || error.message || "Failed to create admin");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+      throw error; // re-throw to be caught in component
+    } finally {
+      setAdminCreating(false);
+    }
+  };
+
   return {
     profile,
     companyName,
     loading,
     saving,
     passwordChanging,
+    adminCreating,
     companies,
     companiesLoading,
     companiesError,
     loadCompanies,
     handleUpdateProfile,
     handleChangePassword,
+    handleCreateAdmin,
   };
 };

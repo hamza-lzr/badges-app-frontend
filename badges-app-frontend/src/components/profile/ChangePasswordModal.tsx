@@ -45,12 +45,15 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               required
               className="shadow-sm rounded-4 pe-5"
             />
-            <div
+            <button
+              type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="password-toggle-icon"
+              className="password-toggle-icon btn btn-link p-0"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              style={{ color: "inherit" }}
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </div>
+            </button>
           </Form.Group>
 
           <Form.Group className="mb-3" style={{ position: "relative" }}>

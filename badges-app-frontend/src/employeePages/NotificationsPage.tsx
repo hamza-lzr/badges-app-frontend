@@ -77,13 +77,21 @@ const EmployeeNotificationsPage: React.FC = () => {
                 <div
                   key={notif.id}
                   className="p-3 rounded shadow-sm hover-shadow"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleMarkAsRead(notif.id)}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                    if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+                      e.preventDefault();
+                      handleMarkAsRead(notif.id);
+                    }
+                  }}
                   style={{
                     background: isUnread ? "#f8f9fa" : "#fff",
                     border: "1px solid #e9ecef",
                     transition: "0.2s ease-in-out",
                     cursor: "pointer",
                   }}
-                  onClick={() => handleMarkAsRead(notif.id)}
                 >
                   <div className="d-flex align-items-start">
                     {/* ✅ Icon for notification */}

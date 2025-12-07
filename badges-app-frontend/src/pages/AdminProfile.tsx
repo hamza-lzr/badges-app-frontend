@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Container, Spinner } from "react-bootstrap";
 import { useAdminProfile } from "../hooks/useAdminProfile";
-import type { UserDTO } from "../types";
+import type { UserDTO, CreateEmployeeDTO } from "../types";
 
 import ProfileCard from "../components/profile/ProfileCard";
 import EditProfileModal from "../components/profile/EditProfileModal";
 import ChangePasswordModal from "../components/profile/ChangePasswordModal";
+import CreateAdminModal from "../components/profile/CreateAdminModal";
 
 import "./AdminProfile.css";
 
@@ -16,16 +17,19 @@ const MyAdminProfilePage: React.FC = () => {
     loading,
     saving,
     passwordChanging,
+    adminCreating,
     companies,
     companiesLoading,
     companiesError,
     loadCompanies,
     handleUpdateProfile,
     handleChangePassword,
+    handleCreateAdmin,
   } = useAdminProfile();
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
 
   const handleEditSubmit = async (editData: Partial<UserDTO>) => {
     try {
@@ -40,6 +44,15 @@ const MyAdminProfilePage: React.FC = () => {
     try {
       await handleChangePassword(password);
       setShowPasswordModal(false);
+    } catch {
+      // Error is already toasted in the hook
+    }
+  };
+
+  const handleAdminSubmit = async (adminData: CreateEmployeeDTO) => {
+    try {
+      await handleCreateAdmin(adminData);
+      setShowCreateAdminModal(false);
     } catch {
       // Error is already toasted in the hook
     }
@@ -74,6 +87,7 @@ const MyAdminProfilePage: React.FC = () => {
         companyName={companyName}
         onEdit={() => setShowEditModal(true)}
         onChangePassword={() => setShowPasswordModal(true)}
+        onCreateAdmin={() => setShowCreateAdminModal(true)}
       />
 
       <EditProfileModal
@@ -93,6 +107,13 @@ const MyAdminProfilePage: React.FC = () => {
         onHide={() => setShowPasswordModal(false)}
         changing={passwordChanging}
         onSubmit={handlePasswordSubmit}
+      />
+
+      <CreateAdminModal
+        show={showCreateAdminModal}
+        onHide={() => setShowCreateAdminModal(false)}
+        onSave={handleAdminSubmit}
+        isLoading={adminCreating}
       />
     </Container>
   );

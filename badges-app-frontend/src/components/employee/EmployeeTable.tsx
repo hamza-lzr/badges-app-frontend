@@ -62,7 +62,15 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
             <th
               className="px-4 py-3 fw-semibold border-0 text-truncate"
               style={{ cursor: "pointer" }}
+              role="button"
+              tabIndex={0}
               onClick={() => onSort("matricule")}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+                  e.preventDefault();
+                  onSort("matricule");
+                }
+              }}
               title="Trier par matricule"
             >
               Matricule {sortKey === "matricule" && (sortAsc ? "▲" : "▼")}
@@ -70,7 +78,15 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
             <th
               className="px-4 py-3 fw-semibold border-0 text-truncate"
               style={{ cursor: "pointer" }}
+              role="button"
+              tabIndex={0}
               onClick={() => onSort("firstName")}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+                  e.preventDefault();
+                  onSort("firstName");
+                }
+              }}
               title="Trier par nom"
             >
               Nom Complet {sortKey === "firstName" && (sortAsc ? "▲" : "▼")}
@@ -80,7 +96,15 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
             <th
               className="px-4 py-3 fw-semibold border-0 text-truncate"
               style={{ cursor: "pointer" }}
+              role="button"
+              tabIndex={0}
               onClick={() => onSort("companyId")}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+                  e.preventDefault();
+                  onSort("companyId");
+                }
+              }}
               title="Trier par entreprise"
             >
               Entreprise {sortKey === "companyId" && (sortAsc ? "▲" : "▼")}
@@ -108,7 +132,15 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 key={emp.id}
                 className={`${idx % 2 === 0 ? "bg-white" : "bg-light"} border-0`}
                 style={{ cursor: "pointer", transition: "all 0.2s ease" }}
+                role="button"
+                tabIndex={0}
                 onClick={() => onSelect(emp)}
+                onKeyDown={(e: React.KeyboardEvent) => {
+                  if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+                    e.preventDefault();
+                    onSelect(emp);
+                  }
+                }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = "#f8f9fa";
                   e.currentTarget.style.transform = "translateY(-1px)";
@@ -158,14 +190,16 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                       gridTemplateColumns: "repeat(2, 1fr)",
                       gap: "8px",
                     }}
-                    onClick={(e) => e.stopPropagation()}
                   >
                     <Button
                       size="sm"
                       variant="success"
                       className="w-100 fw-semibold"
                       style={{ minHeight: 34 }}
-                      onClick={() => onStatusChange(emp, "ACTIVE")}
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        onStatusChange(emp, "ACTIVE");
+                      }}
                       disabled={emp.status === "ACTIVE"}
                     >
                       Activer
@@ -175,7 +209,10 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                       variant="outline-secondary"
                       className="w-100 fw-semibold"
                       style={{ minHeight: 34 }}
-                      onClick={() => onStatusChange(emp, "INACTIVE")}
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        onStatusChange(emp, "INACTIVE");
+                      }}
                       disabled={emp.status === "INACTIVE"}
                     >
                       Désactiver
@@ -185,7 +222,10 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                       variant="outline-danger"
                       className="w-100 fw-semibold"
                       style={{ minHeight: 34 }}
-                      onClick={() => onStatusChange(emp, "BLOCKED")}
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        onStatusChange(emp, "BLOCKED");
+                      }}
                       disabled={emp.status === "BLOCKED"}
                     >
                       Bloquer
@@ -195,7 +235,10 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                       variant="outline-primary"
                       className="w-100 fw-semibold"
                       style={{ minHeight: 34 }}
-                      onClick={() => onEdit(emp)}
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        onEdit(emp);
+                      }}
                     >
                       Modifier
                     </Button>

@@ -231,8 +231,11 @@ const MyProfilePage: React.FC = () => {
                     required
                     className="shadow-sm rounded-4 pe-5"
                   />
-                  <div
+                  <button
+                    type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="btn btn-link p-0"
                     style={{
                       position: "absolute",
                       top: "38px",
@@ -242,7 +245,7 @@ const MyProfilePage: React.FC = () => {
                     }}
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
-                  </div>
+                  </button>
                 </Form.Group>
 
                 <Form.Group className="mb-3" style={{ position: "relative" }}>

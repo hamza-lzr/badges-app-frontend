@@ -7,6 +7,7 @@ interface ProfileCardProps {
   companyName: string;
   onEdit: () => void;
   onChangePassword: () => void;
+  onCreateAdmin: () => void;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -14,6 +15,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   companyName,
   onEdit,
   onChangePassword,
+  onCreateAdmin,
 }) => {
   const { firstName, lastName, matricule, email, phone, role, status, badgesIds } = profile;
 
@@ -81,10 +83,17 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           </Button>
           <Button
             variant="outline-danger"
-            className="rounded-pill px-4 py-2 shadow-sm"
+            className="rounded-pill px-4 py-2 shadow-sm me-3"
             onClick={onChangePassword}
           >
             Change Password
+          </Button>
+          <Button
+            variant="outline-success"
+            className="rounded-pill px-4 py-2 shadow-sm"
+            onClick={onCreateAdmin}
+          >
+            Create Admin Account
           </Button>
         </div>
       </Card.Body>
