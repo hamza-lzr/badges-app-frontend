@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   fetchNotifications,
@@ -12,6 +11,53 @@ import { fetchCompanies } from "../api/apiCompany";
 import type { CompanyDTO, NotificationDTO, UserDTO } from "../types";
 
 const ITEMS_PER_PAGE = 10;
+
+// --- Helper Function: Extracts Complexity ---
+// Moving this outside the hook reduces the hook's complexity score immediately.
+const shouldIncludeNotification = (
+  n: NotificationDTO,
+  filters: {
+    user: string;
+    company: string;
+    status: "all" | "read" | "unread";
+    from: string;
+    to: string;
+  },
+  employees: UserDTO[],
+  companies: CompanyDTO[]
+): boolean => {
+  // 1. Check Status
+  if (filters.status === "read" && !n.read) return false;
+  if (filters.status === "unread" && n.read) return false;
+
+  // 2. Check Date
+  const date = new Date(n.createdAt).toISOString().slice(0, 10);
+  if (filters.from && date < filters.from) return false;
+  if (filters.to && date > filters.to) return false;
+
+  // 3. Resolve User (optimization: find once)
+  const user = employees.find((e) => e.id === n.userId);
+
+  // 4. Check User Filter
+  if (filters.user && user) {
+    const target =
+      `${user.firstName} ${user.lastName} ${user.matricule}`.toLowerCase();
+    if (!target.includes(filters.user.toLowerCase())) return false;
+  }
+
+  // 5. Check Company Filter
+  if (filters.company && user) {
+    const company = companies.find((c) => c.id === user.companyId);
+    if (
+      !company ||
+      !company.name.toLowerCase().includes(filters.company.toLowerCase())
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+};
 
 export const useNotificationsData = () => {
   const [notifications, setNotifications] = useState<NotificationDTO[]>([]);
@@ -66,34 +112,12 @@ export const useNotificationsData = () => {
     [employees, companies]
   );
 
+  // --- REFACTORED: Complexity drastically reduced here ---
   const filtered = useMemo(() => {
     return notifications
-      .filter((n) => {
-        if (filters.status === "read" && !n.read) return false;
-        if (filters.status === "unread" && n.read) return false;
-
-        const date = new Date(n.createdAt).toISOString().slice(0, 10);
-        if (filters.from && date < filters.from) return false;
-        if (filters.to && date > filters.to) return false;
-
-        const user = employees.find((e) => e.id === n.userId);
-        if (filters.user && user) {
-          const target =
-            `${user.firstName} ${user.lastName} ${user.matricule}`.toLowerCase();
-          if (!target.includes(filters.user.toLowerCase())) return false;
-        }
-
-        if (filters.company && user) {
-          const company = companies.find((c) => c.id === user.companyId);
-          if (
-            !company ||
-            !company.name.toLowerCase().includes(filters.company.toLowerCase())
-          )
-            return false;
-        }
-
-        return true;
-      })
+      .filter((n) =>
+        shouldIncludeNotification(n, filters, employees, companies)
+      )
       .sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -151,6 +175,6 @@ export const useNotificationsData = () => {
     handleCreate,
     handleDelete,
     handleMarkAsRead,
-    reloadNotifications: loadData, // Export loadData as reloadNotifications
+    reloadNotifications: loadData,
   };
 };
