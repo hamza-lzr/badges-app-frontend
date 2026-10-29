@@ -1,8 +1,20 @@
-# RAM E-Badges Frontend
+# Airport Badges — React Frontend
 
-A React and TypeScript portal for managing airport employee badges, access permissions, leave requests, companies, locations, and notifications. The application provides separate role-aware experiences for administrators and employees and integrates with Keycloak for authentication.
+![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?logo=bootstrap&logoColor=white)
 
-This project was built during a 2025 internship and has since been cleaned up as a portfolio project. Its Spring Boot API is available in the [badgesApp backend repository](https://github.com/hamza-lzr/badgesApp).
+Administrator and employee interfaces for the airport badge application I built during my 2025 internship at Royal Air Maroc.
+
+[Spring Boot backend](https://github.com/hamza-lzr/badgesApp) · [My portfolio](https://lazaar.netlify.app/)
+
+## Start with the code
+
+- [Routes and lazy-loaded screens](src/App.tsx)
+- [Shared API client and bearer-token handling](src/api/httpClient.ts)
+- [Sign-in and sign-out](src/auth/keycloak.ts)
+- [Administrator route guard](src/components/ProtectedRoute.tsx) and [employee route guard](src/employeeComponents/EmployeeProtectedRoute.tsx)
 
 ## Features
 
@@ -27,7 +39,7 @@ This project was built during a 2025 internship and has since been cleaned up as
 
 ### Prerequisites
 
-- Node.js 20.19 or newer
+- Node.js 22.12 or newer, or Node.js 20.19+ on the Node 20 release line
 - The backend API running locally
 - A Keycloak realm and public client configured for the application
 
@@ -41,7 +53,12 @@ cp .env.example .env
 npm run dev
 ```
 
-The development server is available at `http://localhost:5173` by default.
+The development server is available at `http://localhost:5173` by default. In PowerShell, use `Copy-Item .env.example .env` instead of `cp` if needed.
+
+| Interface | Entry point | Required realm role |
+| --- | --- | --- |
+| Administrator | `/login` → `/admin/dashboard` | `ADMIN` |
+| Employee | `/employee/login` → `/employee/home` | `EMPLOYEE` |
 
 ## Configuration
 
@@ -55,6 +72,15 @@ Copy `.env.example` to `.env` and adjust these values for your environment:
 | `VITE_KEYCLOAK_CLIENT_ID` | `ram-badges` | Public frontend client ID |
 
 Only public browser configuration belongs in `VITE_*` variables. Never place client secrets or other private credentials in frontend environment files.
+
+### Keycloak setup for this implementation
+
+- The realm must match the API issuer: `ram` by default.
+- The public frontend client is `ram-badges` by default. The current login form uses `grant_type=password`, so the client needs **Direct access grants** enabled for sign-in to work.
+- The frontend origin (`http://localhost:5173` locally) must be allowed by Keycloak and by the backend's `CORS_ALLOWED_ORIGINS`.
+- Assign `ADMIN` or `EMPLOYEE` as realm roles to local test users. The route guards read them from `realm_access.roles`.
+
+The backend's admin client is separate. Configure its secret only on the server.
 
 ## Quality checks
 
