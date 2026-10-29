@@ -45,7 +45,7 @@ const TYPE_LABELS: Record<ReqType, string> = {
   OTHER: "Autre",
 };
 
-const Dashboard: React.FC = () => {
+const Dashboard: React.FC<{ availablePaths?: string[] }> = ({ availablePaths }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
@@ -162,7 +162,7 @@ const Dashboard: React.FC = () => {
         {/* ==== Navigation Cards ==== */}
         <Container style={{ maxWidth: "1200px" }} className="mx-auto">
           <Row className="row-cols-3 row-cols-md-3 g-4 mb-5">
-            {adminLinks.map(({ to, label, icon }, i) => (
+            {adminLinks.filter(link => !availablePaths || availablePaths.includes(link.to)).map(({ to, label, icon }, i) => (
               <Col key={to}>
                 <motion.div
                   whileHover={{ scale: 1.05 }}

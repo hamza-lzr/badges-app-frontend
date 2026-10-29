@@ -58,8 +58,9 @@ export const useBadges = () => {
   const reloadEmployees = async () => {
     try {
         setLoading(true);
-        const data = await fetchEmployees();
+        const [data, badgeData] = await Promise.all([fetchEmployees(), fetchBadges()]);
         setEmployees(data);
+        setBadges(Object.fromEntries(badgeData.filter(badge => badge.id != null).map(badge => [badge.id!, badge])));
       } catch (err) {
         console.error("Error fetching employees:", err);
       } finally {

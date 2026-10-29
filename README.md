@@ -9,6 +9,32 @@ Administrator and employee interfaces for the airport badge application I built 
 
 [Spring Boot backend](https://github.com/hamza-lzr/badgesApp) · [My portfolio](https://lazaar.netlify.app/)
 
+## Visual demo
+
+[Try the demo](https://lazaar.netlify.app/demos/badges/demo.html) — badges, requests, airport access and dashboard. No sign-in required.
+
+The demo reuses the project’s React screens with separate navigation and fictitious data. Changes stay in memory and reset on reload. It does not contact a backend or identity provider.
+
+![Requests and approvals — fictitious data](docs/screenshots/badges-requests.jpg)
+
+<details>
+<summary>View the badge list and detail screen</summary>
+
+![Badge list — fictitious data](docs/screenshots/badges-table.jpg)
+
+![Badge detail — fictitious data](docs/screenshots/badges-details.jpg)
+
+</details>
+
+Run the demo locally:
+
+```bash
+npm ci
+npm run dev:demo
+```
+
+`npm run build:demo` creates `dist-demo/demo.html` and its assets for static hosting. The production entry, protected routes and Keycloak sign-in remain separate.
+
 ## Start with the code
 
 - [Routes and lazy-loaded screens](src/App.tsx)
